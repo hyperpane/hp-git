@@ -1,0 +1,151 @@
+{
+  "manifest": 1,
+  "id": "git",
+  "name": "Git",
+  "version": "0.1.5",
+  "publisher": "hyperpane",
+  "description": "Git, laid out like GitHub Desktop: changes staged by file, hunk or line, history with a graph, branches, stashes, tags, blame, conflicts, and sync.",
+  "icon": "icon.svg",
+  "category": "Code",
+  "engines": {
+    "hyperpane": ">=0.1.5",
+    "node": ">=22.15.0"
+  },
+  "client": {
+    "main": "main.tsx"
+  },
+  "server": {
+    "runtime": "node",
+    "main": "main.ts"
+  },
+  "events": {
+    "publish": [
+      "git.changed",
+      "git.committed",
+      "git.checkedOut"
+    ],
+    "subscribe": [
+      "git.status",
+      "git.open",
+      "git.changed",
+      "git.committed",
+      "git.checkedOut"
+    ],
+    "wake": true
+  },
+  "contributes": {
+    "nodes": [
+      {
+        "kind": "",
+        "title": "Git",
+        "icon": "icon.svg",
+        "size": [
+          1040,
+          680
+        ]
+      }
+    ],
+    "settings": [
+      {
+        "id": "gitPath",
+        "title": "Git executable",
+        "description": "The git to run. Empty: the one on PATH, else Git for Windows' or Homebrew's usual places.",
+        "type": "string",
+        "default": "",
+        "placeholderByOs": {
+          "macos": "/opt/homebrew/bin/git",
+          "linux": "/usr/bin/git",
+          "windows": "C:\\Program Files\\Git\\cmd\\git.exe"
+        },
+        "group": "Git"
+      },
+      {
+        "id": "defaultBranch",
+        "title": "Default branch for new repositories",
+        "description": "The first branch of a repository made with Initialize repository.",
+        "type": "string",
+        "default": "main",
+        "group": "Git"
+      },
+      {
+        "id": "commitGraph",
+        "title": "Speed up history in big repositories",
+        "description": "Write git's commit-graph cache when a repository with a long history has none (as git gc does), so history, the graph and branches stay fast.",
+        "type": "boolean",
+        "default": true,
+        "group": "Git"
+      },
+      {
+        "id": "autoFetch",
+        "title": "Fetch automatically",
+        "description": "While a Git window shows a repository, fetch its remote this often (quietly: a remote that asks for a password is skipped).",
+        "type": "enum",
+        "default": "off",
+        "options": [
+          {
+            "value": "off",
+            "label": "Never"
+          },
+          {
+            "value": "5",
+            "label": "Every 5 minutes"
+          },
+          {
+            "value": "15",
+            "label": "Every 15 minutes"
+          },
+          {
+            "value": "30",
+            "label": "Every 30 minutes"
+          }
+        ],
+        "group": "Sync"
+      },
+      {
+        "id": "diffView",
+        "title": "Diff view",
+        "description": "How diffs are shown at first. Each Git window can switch.",
+        "type": "enum",
+        "default": "unified",
+        "options": [
+          {
+            "value": "unified",
+            "label": "Unified"
+          },
+          {
+            "value": "split",
+            "label": "Side by side"
+          }
+        ],
+        "group": "Diffs"
+      },
+      {
+        "id": "ignoreWhitespace",
+        "title": "Ignore whitespace",
+        "description": "Leave changes of whitespace alone in diffs (lines can't be staged one by one then).",
+        "type": "boolean",
+        "default": false,
+        "group": "Diffs"
+      },
+      {
+        "id": "contextLines",
+        "title": "Context lines",
+        "description": "Unchanged lines shown around each change.",
+        "type": "number",
+        "default": 3,
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "group": "Diffs"
+      },
+      {
+        "id": "signoff",
+        "title": "Sign off commits",
+        "description": "Add a Signed-off-by line to every commit, unless the commit box says otherwise.",
+        "type": "boolean",
+        "default": false,
+        "group": "Commits"
+      }
+    ]
+  }
+}

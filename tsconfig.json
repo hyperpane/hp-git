@@ -1,0 +1,29 @@
+{
+  // The tests, and both parts through them: Node's types and a DOM
+  // (happy-dom) besides the frame's. src/server/tsconfig.json checks the
+  // server part as Node runs it, src/client/tsconfig.json the client part as
+  // the app runs it.
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "types": ["node"],
+    "paths": {
+      "@hyperpane/ui": ["./node_modules/@hyperpane/sdk/types/ui/index.d.ts"],
+      "@hyperpane/code": ["./node_modules/@hyperpane/sdk/types/code/index.d.ts"],
+      "@hyperpane/markdown": ["./node_modules/@hyperpane/sdk/types/markdown/index.d.ts"]
+    }
+  },
+  "include": ["test"]
+}

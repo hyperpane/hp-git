@@ -1,0 +1,91 @@
+// A commit's header: its subject and message (a long one folded), its SHA
+// to copy, who wrote it and who committed it (and when), its signature,
+// its parents to open, and its refs.
+
+import { useState } from 'react';
+import { ChevronDown, ChevronUp, Copy, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { cn } from '@hyperpane/ui';
+import type { CommitDetail } from '../../../shared/index.ts';
+import { useRepo } from '../../app/repo.ts';
+import { Avatar } from '../../components/Avatar.tsx';
+import { RefBadge } from '../../components/RefBadge.tsx';
+import { copy } from '../../lib/clipboard.ts';
+import { ago, longDate, shortSha } from '../../lib/format.ts';
+import { local } from '../../lib/local.ts';
+
+export function CommitHeader({ c }: { c: CommitDetail }) {
+  const repo = useRepo();
+  const [open, setOpen] = useState(() => local.get('commitBody', true));
+  const committed = c.committer && (c.committer !== c.author || Math.abs(c.committerDate - c.date) > 60_000);
+  const body = c.body.trim();
+  const lines = body.split('\n');
+  const long = lines.length > 6;
+  return (
+    <div className="flex max-h-[45%] flex-none flex-col gap-1.5 overflow-auto border-b border-[var(--node-border)] px-3 py-2">
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1 text-sm leading-snug font-semibold break-words select-text">{c.subject}</div>
+        <button
+          type="button"
+          title="Copy the SHA"
+          className="rounded-chip flex h-5 flex-none items-center gap-1 px-1 font-mono text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          onClick={() => copy(c.sha, repo.toast)}
+        >
+          {shortSha(c.sha)}
+          <Copy className="size-3" />
+        </button>
+      </div>
+      {body && (
+        <div className="relative">
+          <pre className={cn('font-sans text-xs leading-relaxed break-words whitespace-pre-wrap text-[var(--node-fg)] opacity-90 select-text', long && !open && 'max-h-[5.2em] overflow-hidden')}>{body}</pre>
+          {long && (
+            <button
+              type="button"
+              className="mt-0.5 flex items-center gap-0.5 text-2xs text-[var(--node-accent)] hover:underline"
+              onClick={() => {
+                setOpen(!open);
+                local.set('commitBody', !open);
+              }}
+            >
+              {open ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+              {open ? 'Less' : `${lines.length} lines`}
+            </button>
+          )}
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-[var(--node-muted)]">
+        <span className="flex items-center gap-1.5" title={`${c.author} <${c.email}>`}>
+          <Avatar name={c.author} email={c.email} size={16} />
+          <span className="text-[var(--node-fg)]">{c.author}</span>
+          <span title={longDate(c.date)}>authored {ago(c.date)}</span>
+        </span>
+        {committed && (
+          <span className="flex items-center gap-1.5" title={`${c.committer} <${c.committerEmail}>, ${longDate(c.committerDate)}`}>
+            <Avatar name={c.committer} email={c.committerEmail} size={16} />
+            <span className="text-[var(--node-fg)]">{c.committer}</span> committed {ago(c.committerDate)}
+          </span>
+        )}
+        {c.signature && (
+          <span className={cn('flex items-center gap-1', c.signature.status === 'good' ? 'text-[var(--ansi-2)]' : 'text-[var(--ansi-3)]')} title={`Signed by ${c.signature.signer}: ${c.signature.status}`}>
+            {c.signature.status === 'good' ? <ShieldCheck className="size-3" /> : <ShieldAlert className="size-3" />}
+            {c.signature.status === 'good' ? 'Verified' : c.signature.status}
+          </span>
+        )}
+        <span className="flex items-center gap-1">
+          {c.parents.length === 0 ? 'The first commit' : c.parents.length > 1 ? 'Merges' : 'Parent'}
+          {c.parents.map((p) => (
+            <button key={p} type="button" className="rounded-chip px-0.5 font-mono text-[var(--node-accent)] hover:bg-[var(--node-hover)]" title={`Open ${p}`} onClick={() => repo.open({ kind: 'commit', sha: p })}>
+              {shortSha(p)}
+            </button>
+          ))}
+        </span>
+        {c.refs.length > 0 && (
+          <span className="flex flex-wrap items-center gap-1">
+            {c.refs.map((r) => (
+              <RefBadge key={`${r.kind}:${r.name}`} refName={r} />
+            ))}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
