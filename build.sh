@@ -46,6 +46,7 @@ version=0.1.5
 sdk_tgz() {
   if [ -n "${HYPERPANE_SDK:-}" ]; then echo "$HYPERPANE_SDK"; return; fi
   for f in \
+    ../../../sdk/js/dist/pack/hyperpane-sdk-$version.tgz \
     ../../sdk/js/dist/pack/hyperpane-sdk-$version.tgz \
     /Applications/hyperpane.app/Contents/Resources/sdk/hyperpane-sdk-$version.tgz \
     "$HOME/Applications/hyperpane.app/Contents/Resources/sdk/hyperpane-sdk-$version.tgz" \
