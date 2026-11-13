@@ -4,9 +4,11 @@
   "name": "Git",
   "version": "0.1.5",
   "publisher": "hyperpane",
-  "description": "Git, laid out like GitHub Desktop: changes staged by file, hunk or line, history with a graph, branches, stashes, tags, blame, conflicts, and sync.",
+  "description": "Commit, branch and sync, laid out like GitHub Desktop: changes checked by file, hunk or line, history with a graph, branches, stashes, tags, blame, conflicts, and fetch, pull and push.",
   "icon": "icon.svg",
   "category": "Code",
+  "license": "MIT",
+  "homepage": "https://github.com/hyperpane/hp-git",
   "engines": {
     "hyperpane": ">=0.1.5",
     "node": ">=22.15.0"
@@ -62,7 +64,7 @@
       {
         "id": "defaultBranch",
         "title": "Default branch for new repositories",
-        "description": "The first branch of a repository made with Initialize repository.",
+        "description": "The first branch of a repository made with Initialize Repository.",
         "type": "string",
         "default": "main",
         "group": "Git"
@@ -172,7 +174,7 @@
   },
   "signature": {
     "key": "ed25519:5LgmP9NjLnpvz48igrFekSqi+4k6gzaO8sNwlsgNKFc=",
-    "sig": "8pKlEGMSq8VdwMgq3lz0xorBO1m/83dEW/HKZM/P023T4ulXZ3yz1/4fxo0I+ljvtYEESaaO63KYjaH+yrXxDA==",
-    "server": "GCaucDn946evPwbhP1vKvM/tWZKdFp7eWxWiMhubuO2kGvlBjhLObF3PRbGaOauW4hi7wEdNfO7KiB+9CYIBBA=="
+    "sig": "2ZSpRSQSHkpBiGyDUY5JLGVOf1VudNJ0MSNMtXPq2VelSTiOFXvdmuPg472DK3sCKkcV4sG4bgSbplfvtEJCCA==",
+    "server": "Op27hhwjYxn7TzZyKur7SDvNsqLmYVs3pd6zfQPr1h4aJq98v/znZvyCbcLG5lOCXuhw4xt3FrATaXHSwr6hDA=="
   }
 }

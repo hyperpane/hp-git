@@ -1,0 +1,7 @@
+{
+  "accent": "#f0883e",
+  "tagline": "Commit, branch and sync, laid out like GitHub Desktop.",
+  "chips": ["Line staging", "History", "Conflicts", "Sync"],
+  "window": "Git",
+  "illustration": "illustration.svg"
+}

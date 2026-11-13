@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-label="Git: Commit, branch and sync, laid out like GitHub Desktop.">
+  <defs>
+    <radialGradient id="glow" cx="0.18" cy="0.22" r="0.65">
+      <stop offset="0" stop-color="#f0883e" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#f0883e" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0.85" cy="0.9" r="0.5">
+      <stop offset="0" stop-color="#f0883e" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#f0883e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0883e"/>
+      <stop offset="1" stop-color="#f0883e" stop-opacity="0.65"/>
+    </linearGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.2" fill="#ffffff" fill-opacity="0.05"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+    <clipPath id="screen"><rect width="540" height="404" rx="0"/></clipPath>
+  </defs>
+  <rect width="1280" height="640" fill="#0c0f15"/>
+  <rect width="1280" height="640" fill="url(#dots)"/>
+  <rect width="1280" height="640" fill="url(#glow)"/>
+  <rect width="1280" height="640" fill="url(#glow2)"/>
+
+  <g transform="translate(88 82)">
+    <rect width="104" height="104" rx="26" fill="url(#tile)"/>
+    <rect width="104" height="104" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.18"/>
+    <g transform="translate(22 22)"><g transform="scale(2.5)" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></g></g>
+  </g>
+  <text x="84" y="266" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="76" font-weight="700" letter-spacing="-1.5" fill="#f4f6fb">Git</text>
+  <text x="88" y="326" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="29" fill="#9aa3b6">Commit, branch and sync, laid out</text>
+  <text x="88" y="366" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="29" fill="#9aa3b6">like GitHub Desktop.</text>
+  <g transform="translate(0 414)"><g transform="translate(88 0)"><rect width="147" height="38" rx="19" fill="#f0883e" fill-opacity="0.12" stroke="#f0883e" stroke-opacity="0.45"/><text x="73.5" y="25" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#f4f6fb">Line staging</text></g><g transform="translate(245 0)"><rect width="99" height="38" rx="19" fill="#f0883e" fill-opacity="0.12" stroke="#f0883e" stroke-opacity="0.45"/><text x="49.5" y="25" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#f4f6fb">History</text></g><g transform="translate(354 0)"><rect width="118" height="38" rx="19" fill="#f0883e" fill-opacity="0.12" stroke="#f0883e" stroke-opacity="0.45"/><text x="59" y="25" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#f4f6fb">Conflicts</text></g><g transform="translate(482 0)"><rect width="70" height="38" rx="19" fill="#f0883e" fill-opacity="0.12" stroke="#f0883e" stroke-opacity="0.45"/><text x="35" y="25" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#f4f6fb">Sync</text></g></g>
+  <g transform="translate(88 588)" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="17" fill="#5d6678">
+    <rect width="18" height="18" rx="5" fill="none" stroke="#5d6678" stroke-width="1.6"/>
+    <path d="M5 6.5h8M5 11.5h5" stroke="#5d6678" stroke-width="1.6" stroke-linecap="round"/>
+    <text x="28" y="14">a hyperpane plugin</text>
+  </g>
+
+  <g transform="translate(660 92)" filter="url(#shadow)">
+    <rect width="540" height="456" rx="16" fill="#121722" stroke="#262d3c"/>
+    <rect width="540" height="52" rx="16" fill="#171d2a"/>
+    <rect y="36" width="540" height="16" fill="#171d2a"/>
+    <line x1="0" y1="52" x2="540" y2="52" stroke="#262d3c"/>
+    <circle cx="24" cy="26" r="6" fill="#ff5f57"/><circle cx="44" cy="26" r="6" fill="#febc2e"/><circle cx="64" cy="26" r="6" fill="#28c840"/>
+    <g transform="translate(90 15)"><g transform="scale(0.9166666666666666)" fill="none" stroke="#f0883e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></g></g>
+    <text x="120" y="32" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#f4f6fb">Git</text>
+    <g transform="translate(0 52)" clip-path="url(#screen)"><g font-family="Inter, -apple-system, 'Segoe UI', sans-serif" font-size="12">
+  <!-- Toolbar: repository, branch, sync -->
+  <rect x="0" y="0" width="540" height="46" fill="#0f131c"/>
+  <line x1="0" y1="46" x2="540" y2="46" stroke="#232a38"/>
+  <line x1="168" y1="0" x2="168" y2="46" stroke="#232a38"/>
+  <line x1="372" y1="0" x2="372" y2="46" stroke="#232a38"/>
+  <g fill="none" stroke="#9aa3b6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 15h6l2 2h7v11H14z"/>
+    <g transform="translate(182 14)"><line x1="3" y1="1" x2="3" y2="13"/><circle cx="12" cy="4" r="2.4"/><circle cx="3" cy="15" r="2.4"/><path d="M12 6.5a7 7 0 0 1-7 7"/></g>
+    <g transform="translate(386 14)"><path d="M8 15V3M3 8l5-5 5 5"/></g>
+  </g>
+  <text x="38" y="19" fill="#5d6678" font-size="10">Current repository</text>
+  <text x="38" y="35" fill="#f4f6fb" font-weight="600" font-size="13">hyperpane</text>
+  <text x="208" y="19" fill="#5d6678" font-size="10">Current branch</text>
+  <text x="208" y="35" fill="#f4f6fb" font-weight="600" font-size="13">avatars</text>
+  <text x="410" y="19" fill="#5d6678" font-size="10">Fetched 2m ago</text>
+  <text x="410" y="35" fill="#f4f6fb" font-weight="600" font-size="13">Push origin</text>
+  <rect x="502" y="15" width="28" height="18" rx="9" fill="#f0883e" fill-opacity="0.18"/>
+  <text x="516" y="28" fill="#f0883e" font-weight="700" font-size="11" text-anchor="middle">↑2</text>
+
+  <!-- Sidebar: tabs, the changes, the commit box -->
+  <rect x="0" y="47" width="200" height="357" fill="#0f131c"/>
+  <line x1="200" y1="46" x2="200" y2="404" stroke="#232a38"/>
+  <text x="50" y="68" fill="#f4f6fb" font-weight="600" text-anchor="middle">Changes</text>
+  <rect x="80" y="57" width="18" height="15" rx="7.5" fill="#262d3c"/>
+  <text x="89" y="68" fill="#c9d1e0" font-size="10" font-weight="600" text-anchor="middle">5</text>
+  <text x="150" y="68" fill="#9aa3b6" text-anchor="middle">History</text>
+  <rect x="0" y="78" width="100" height="2" fill="#f0883e"/>
+  <line x1="0" y1="80" x2="200" y2="80" stroke="#232a38"/>
+
+  <!-- tri-state: some checked -->
+  <rect x="12" y="88" width="14" height="14" rx="3.5" fill="#f0883e"/>
+  <path d="M15.5 95h7" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="34" y="99" fill="#9aa3b6" font-size="11">5 changed files</text>
+  <line x1="0" y1="110" x2="200" y2="110" stroke="#232a38"/>
+
+  <rect x="0" y="111" width="200" height="27" fill="#f0883e" fill-opacity="0.13"/>
+  <rect x="0" y="111" width="2" height="27" fill="#f0883e"/>
+  <g>
+    <rect x="12" y="117" width="14" height="14" rx="3.5" fill="#f0883e"/><path d="M15.5 124l2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="34" y="128" fill="#f4f6fb">Avatars.tsx</text>
+    <rect x="174" y="117" width="15" height="15" rx="3.5" fill="none" stroke="#d29922" stroke-opacity="0.8"/><text x="181.5" y="128.5" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">M</text>
+  </g>
+  <g transform="translate(0 27)">
+    <rect x="12" y="117" width="14" height="14" rx="3.5" fill="#f0883e"/><path d="M15.5 124l2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="34" y="128" fill="#c9d1e0">people.ts</text>
+    <rect x="174" y="117" width="15" height="15" rx="3.5" fill="none" stroke="#d29922" stroke-opacity="0.8"/><text x="181.5" y="128.5" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">M</text>
+  </g>
+  <g transform="translate(0 54)">
+    <rect x="12" y="117" width="14" height="14" rx="3.5" fill="#f0883e"/><path d="M15.5 124l2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="34" y="128" fill="#c9d1e0">stack.css</text>
+    <rect x="174" y="117" width="15" height="15" rx="3.5" fill="none" stroke="#3fb950" stroke-opacity="0.8"/><text x="181.5" y="128.5" fill="#3fb950" font-size="10" font-weight="700" text-anchor="middle">A</text>
+  </g>
+  <g transform="translate(0 81)">
+    <rect x="12" y="117" width="14" height="14" rx="3.5" fill="#f0883e"/><path d="M15.5 124l2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="34" y="128" fill="#c9d1e0">OldAvatar.tsx</text>
+    <rect x="174" y="117" width="15" height="15" rx="3.5" fill="none" stroke="#f85149" stroke-opacity="0.8"/><text x="181.5" y="128.5" fill="#f85149" font-size="10" font-weight="700" text-anchor="middle">D</text>
+  </g>
+  <g transform="translate(0 108)">
+    <rect x="12.5" y="117.5" width="13" height="13" rx="3" fill="none" stroke="#5d6678" stroke-width="1.2"/>
+    <text x="34" y="128" fill="#9aa3b6">notes.md</text>
+    <rect x="174" y="117" width="15" height="15" rx="3.5" fill="none" stroke="#d29922" stroke-opacity="0.8"/><text x="181.5" y="128.5" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">M</text>
+  </g>
+
+  <!-- Commit box -->
+  <line x1="0" y1="262" x2="200" y2="262" stroke="#232a38"/>
+  <g stroke="#0f131c" stroke-width="2">
+    <circle cx="38" cy="286" r="8" fill="#bc8cff"/>
+    <circle cx="29" cy="286" r="8" fill="#3fb950"/>
+    <circle cx="20" cy="286" r="8" fill="#58a6ff"/>
+  </g>
+  <rect x="54" y="274" width="134" height="24" rx="6" fill="#0c0f15" stroke="#262d3c"/>
+  <text x="62" y="290" fill="#f4f6fb">Stack the avatars</text>
+  <rect x="12" y="306" width="176" height="44" rx="6" fill="#0c0f15" stroke="#262d3c"/>
+  <text x="20" y="324" fill="#9aa3b6" font-size="11">Up to three, newest on top.</text>
+  <text x="20" y="341" fill="#5d6678" font-size="10.5">Co-authored-by: Mia, Sam</text>
+  <rect x="12" y="360" width="176" height="30" rx="7" fill="#f0883e"/>
+  <text x="100" y="379" fill="#ffffff" font-weight="600" font-size="11.5" text-anchor="middle">Commit 4 files to <tspan font-weight="700">avatars</tspan></text>
+
+  <!-- Diff -->
+  <rect x="201" y="47" width="339" height="30" fill="#121722"/>
+  <line x1="201" y1="77" x2="540" y2="77" stroke="#232a38"/>
+  <text x="214" y="66" fill="#9aa3b6">src/client/components/<tspan fill="#f4f6fb" font-weight="600">Avatars.tsx</tspan></text>
+  <text x="526" y="66" font-size="11" text-anchor="end"><tspan fill="#3fb950" font-weight="600">+9</tspan><tspan fill="#f85149" font-weight="600" dx="6">−2</tspan></text>
+
+  <g font-family="'JetBrains Mono', Menlo, monospace" font-size="11">
+    <rect x="201" y="78" width="339" height="22" fill="#58a6ff" fill-opacity="0.08"/>
+    <text x="214" y="93" fill="#5d6678">@@ -12,4 +12,11 @@ Avatars</text>
+
+    <!-- context -->
+    <text x="222" y="116" fill="#5d6678" text-anchor="end">12</text><text x="246" y="116" fill="#5d6678" text-anchor="end">12</text>
+    <text x="270" y="116" fill="#c9d1e0">export function Avatars({ people }) {</text>
+
+    <!-- removed -->
+    <rect x="201" y="122" width="339" height="20" fill="#f85149" fill-opacity="0.13"/>
+    <rect x="201" y="122" width="52" height="20" fill="#f85149" fill-opacity="0.14"/>
+    <text x="222" y="136" fill="#f85149" fill-opacity="0.8" text-anchor="end">13</text>
+    <text x="258" y="136" fill="#f85149">−</text><text x="283.2" y="136" fill="#ffdcd7">const first = people[0];</text>
+    <rect x="201" y="142" width="339" height="20" fill="#f85149" fill-opacity="0.13"/>
+    <rect x="201" y="142" width="52" height="20" fill="#f85149" fill-opacity="0.14"/>
+    <text x="222" y="156" fill="#f85149" fill-opacity="0.8" text-anchor="end">14</text>
+    <text x="258" y="156" fill="#f85149">−</text><text x="283.2" y="156" fill="#ffdcd7">return &lt;Avatar person={first} /&gt;;</text>
+
+    <!-- added: gutter checked (included in the commit) -->
+    <g fill="#3fb950">
+      <rect x="201" y="162" width="339" height="180" fill-opacity="0.12"/>
+      <rect x="201" y="162" width="52" height="180" fill-opacity="0.16"/>
+      <rect x="201" y="162" width="3" height="180" fill="#f0883e" fill-opacity="1"/>
+    </g>
+    <g fill="#3fb950" fill-opacity="0.85" text-anchor="end">
+      <text x="246" y="176">13</text><text x="246" y="196">14</text><text x="246" y="216">15</text><text x="246" y="236">16</text><text x="246" y="256">17</text><text x="246" y="276">18</text><text x="246" y="296">19</text><text x="246" y="316">20</text><text x="246" y="336">21</text>
+    </g>
+    <g fill="#3fb950"><text x="258" y="176">+</text><text x="258" y="196">+</text><text x="258" y="216">+</text><text x="258" y="236">+</text><text x="258" y="256">+</text><text x="258" y="276">+</text><text x="258" y="296">+</text><text x="258" y="316">+</text><text x="258" y="336">+</text></g>
+    <g fill="#d2f5d9">
+      <text x="283.2" y="176">const shown = people.<tspan fill="#ffffff" style="font-weight:600">slice(0, 3)</tspan>;</text>
+      <text x="283.2" y="196">return (</text>
+      <text x="296.4" y="216">&lt;div className="stack"&gt;</text>
+      <text x="309.6" y="236">{shown.map((p, i) =&gt; (</text>
+      <text x="322.8" y="256">&lt;Avatar key={p.email}</text>
+      <text x="336.0" y="276">person={p} z={3 - i} /&gt;</text>
+      <text x="309.6" y="296">))}</text>
+      <text x="296.4" y="316">&lt;/div&gt;</text>
+      <text x="283.2" y="336">);</text>
+    </g>
+    <rect x="420.8" y="165" width="73" height="15" rx="2" fill="#3fb950" fill-opacity="0.3"/>
+
+    <!-- context -->
+    <text x="222" y="358" fill="#5d6678" text-anchor="end">15</text><text x="246" y="358" fill="#5d6678" text-anchor="end">22</text>
+    <text x="270" y="358" fill="#c9d1e0">}</text>
+    <rect x="201" y="372" width="339" height="22" fill="#58a6ff" fill-opacity="0.06"/>
+    <text x="370" y="387" fill="#5d6678" text-anchor="middle" font-family="Inter, -apple-system, 'Segoe UI', sans-serif">⋯ Show 18 more lines</text>
+  </g>
+</g>
+</g>
+  </g>
+</svg>
