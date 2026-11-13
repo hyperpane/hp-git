@@ -142,6 +142,7 @@ remote that needs a password fails and `fetchError` says so).
 { op: 'diff', repo, path,
   oldPath?: string,       // a rename's old path (status's `from`)
   staged?: boolean,       // the index against HEAD (default: the working tree against the index)
+  head?: boolean,         // the working tree against HEAD (before the first commit, against nothing): what a commit of it takes
   untracked?: boolean,    // a new file: all of it, added
   commit?: string,        // that commit against its first parent (a root commit: against nothing); 'stash@{0}' works, 'stash@{0}^3' is a stash's untracked files
   from?: string, to?: string,   // between two revisions; `from` alone: `from` against the working tree
@@ -220,10 +221,18 @@ const patch = discardPatch(diff, selected);       // → { op: 'apply', repo, pa
   (macOS, freedesktop) or the Recycle Bin first, so it can be put back.
 - `ignore {repo, pattern}` → `null`: adds a line to the root's `.gitignore`
   (once). Already-tracked files stay tracked.
-- `commit {repo, summary, description?, amend?, signoff?, coAuthors?, all?, allowEmpty?, noVerify?}` →
+- `commit {repo, summary, description?, amend?, signoff?, coAuthors?, all?, allowEmpty?, noVerify?, only?}` →
   `{sha, summary}`. `coAuthors`: `[{name, email}]`, added as
   `Co-authored-by:` trailers. `amend` with an empty summary keeps the
-  message. Publishes `git.committed`.
+  message. `only: {paths, patches?}` commits exactly that, whatever's
+  staged: HEAD (amended: HEAD's tree too) plus `paths` whole as the working
+  tree has them (a path gone from it is deleted) plus `patches`, each some
+  lines of one file built with `stagePatch` from its `diff {head: true}`
+  (or `untracked`). It's built in an index of its own, as
+  `git commit -- paths` does: git's index isn't touched on the way, a
+  commit that fails leaves it as it was, and after the commit the committed
+  paths' entries in it are the new HEAD's (the others stay as they were).
+  Publishes `git.committed`.
 - `undoCommit {repo}` → `{summary, description}`: takes the last commit
   back, its changes staged, and gives its message back.
 - `authors {repo, limit?}` → `[{name, email, commits}]`: the people in the
@@ -258,6 +267,7 @@ interface Commit {
   committer: string; committerEmail: string; committerDate: number;
   subject: string;
   refs: Ref[];            // decorations, HEAD's branch marked current
+  coAuthors?: Person[];   // its `Co-authored-by:` trailers ({name, email}), each once, the author left out
   unpushed?: true;        // on HEAD but not its upstream (or on no remote branch)
 }
 interface Ref { name: string; kind: 'head' | 'branch' | 'remote' | 'tag' | 'stash'; current?: true }
@@ -404,6 +414,46 @@ gets a `prompt` event. The UI shows a dialog and answers:
 Git's credential helper (the keychain) keeps what worked, as it always does.
 Automatic fetches never prompt.
 
+## Explorer decorations (Explorer's extension points)
+
+Git contributes to two of Explorer's points (plugin.json
+`contributes["explorer.decorations"]` and `contributes["explorer.menus"]`).
+The app makes these calls for Explorer, so `ctx.from` is null, and they take
+**whole paths** (the app's form: forward slashes, `C:/…` on Windows), not a
+`repo`: each path's repository is found from the folder it's in, so the rows
+in a submodule or a nested repository get that one's status. Paths outside
+any repository are left out; neither call fails for them.
+
+### `explorerDecorations {server, folder, paths}` → `{[path]: Decoration}`
+```ts
+interface Decoration {
+  badge?: string;      // 'U' untracked, 'A' added, 'M' modified (or type changed),
+                       // 'D' deleted, 'R' renamed or copied, '!' conflict, '•' a folder with changes
+  color?: 'added' | 'modified' | 'deleted' | 'renamed' | 'untracked' | 'ignored' | 'conflict';
+  title?: string;      // “Modified, staged, with more changes not staged”, “Renamed from a.txt, staged”,
+                       // “Conflict: changed on both sides”, “3 changed files inside”, “Ignored by Git”
+  faded?: boolean;     // ignored files and folders: {color: 'ignored', faded: true}
+}
+```
+At most 2000 `paths` are looked at. A path with nothing to say (unchanged,
+not ignored) isn't in the answer. A file's letter: a conflict is `!`; else
+untracked `U`; else a deletion on either side `D`, a new file `A`, a rename
+or copy `R`, any other change `M`. A folder with changed files inside (and
+no change of its own) is `{badge: '•', color, faded: false}`: `conflict` if
+one of them is, `untracked` if they all are, else `modified`. Ignored paths
+come from `git check-ignore` (tracked files never are). Each repository's
+status is one `git status --porcelain=v2 -z`, kept for a second (many
+Explorers ask, every 10 s); folders outside any repository are remembered
+for 5 s.
+
+### `explorerStage {server, folder, paths}` → `{message, error?}`
+Explorer's **Stage with Git** (any files or folders): `git add -A` of each,
+in its own repository, queued like `stage`; then the watches look again.
+`{message: 'Staged 2 files.'}` (one: `Staged a.txt.`; paths outside a
+repository are counted: `… 1 wasn't in a Git repository.`); none in a
+repository: `{message: 'That isn't in a Git repository.', error: true}`.
+Git's own errors (an ignored file) reject the call, as `stage`'s do.
+
 ## Bus (plugin.json `events`)
 
 - Published (to the projects whose folder holds the repository, or that it
@@ -425,7 +475,9 @@ Automatic fetches never prompt.
 `gitPath` (string, empty: find it), `defaultBranch` (string, `main`),
 `commitGraph` (boolean, on), `autoFetch` (`off` | `5` | `15` | `30`
 minutes), `diffView` (`unified` | `split`), `ignoreWhitespace` (boolean),
-`contextLines` (number, 3), `signoff` (boolean). The server reads `gitPath`,
+`contextLines` (number, 3), `includeChanges` (boolean, on: every change
+checked for the next commit as GitHub Desktop has it, kept by the window,
+committed with `commit {only}`; off: what's staged is committed), `signoff` (boolean). The server reads `gitPath`,
 `defaultBranch`, `commitGraph` and `autoFetch`; the rest are the UI's (read
 them with `useSetting`, pass them in calls: `ignoreWhitespace` and
 `context` to `diff`, `signoff` to `commit`). Build line patches only from

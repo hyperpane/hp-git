@@ -10,6 +10,12 @@ export interface Ref {
   current?: true;
 }
 
+/** Someone named in a commit: a co-author. */
+export interface Person {
+  name: string;
+  email: string;
+}
+
 export interface Commit {
   sha: string;
   parents: string[];
@@ -21,6 +27,8 @@ export interface Commit {
   committerDate: number;
   subject: string;
   refs: Ref[];
+  /** The people in its `Co-authored-by:` trailers, the author left out. */
+  coAuthors?: Person[];
   unpushed?: true;
 }
 

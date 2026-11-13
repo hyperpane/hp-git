@@ -26,6 +26,7 @@ import { branchAction, branches, checkout } from './ops/branches.ts';
 import { authors, commit, undoCommit } from './ops/commit.ts';
 import { config } from './ops/config.ts';
 import { blob, diff } from './ops/diff.ts';
+import { explorerOps } from './ops/explorer.ts';
 import { compare, fileLog, log } from './ops/history.ts';
 import { cherryPick, merge, operationAction, rebase, reset, revert } from './ops/merge.ts';
 import { remoteAction, remotes } from './ops/remotes.ts';
@@ -117,6 +118,9 @@ export function makeGit(options: Options = {}) {
 
     const outcome = (o: Outcome) => o;
 
+    // For Explorer (its extension points): the app calls these, with whole paths.
+    const explorer = explorerOps({ repos, locked, changed });
+
     const spec: JsonSpec = {
       calls: {
         version: async () => (await git.which()) ?? { path: null, version: null },
@@ -193,6 +197,9 @@ export function makeGit(options: Options = {}) {
         tag: change((repo, req) => tagAction(repo, req)),
         remotes: read((repo) => remotes(repo)),
         remote: change((repo, req) => remoteAction(repo, req)),
+
+        explorerDecorations: (req) => explorer.decorations(req),
+        explorerStage: (req, ctx) => explorer.stage(req, ctx.project),
 
         answer: async ({ id, value }) => {
           const p = pending.get(String(id));

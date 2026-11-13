@@ -10,7 +10,7 @@ import { NodeInput, ToolButton, cn, menuItems, type MenuEntry } from '@hyperpane
 import { commitMenu } from '../../app/actions/commits.ts';
 import type { LogRequest } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
-import { Avatar } from '../../components/Avatar.tsx';
+import { Authors } from '../../components/Avatar.tsx';
 import { Blank } from '../../components/Blank.tsx';
 import { GraphCell } from '../../components/GraphCell.tsx';
 import { RefBadge } from '../../components/RefBadge.tsx';
@@ -21,6 +21,7 @@ import { longDate, shortAgo } from '../../lib/format.ts';
 import { LANE_WIDTH, MAX_LANES } from '../../lib/graph.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { MODES, type SearchMode } from '../../lib/logSearch.ts';
+import { authorNames } from '../../lib/people.ts';
 
 const ROW = 26;
 
@@ -122,7 +123,7 @@ export function HistoryList({
             onSelect(c.sha);
             commitMenu(repo, c, e);
           }}
-          title={`${c.subject}\n${c.author} · ${longDate(c.date)}\n${c.sha}`}
+          title={`${c.subject}\n${authorNames(c)} · ${longDate(c.date)}\n${c.sha}`}
         >
           {showGraph && g ? <GraphCell row={g} head={isHead} height={ROW} width={graphWidth} /> : <span className="w-1" />}
           <span className="flex min-w-0 flex-1 items-center gap-1">
@@ -137,7 +138,7 @@ export function HistoryList({
             <span className={cn('min-w-12 flex-1 truncate', isHead && 'font-semibold')}>{c.subject}</span>
           </span>
           {c.unpushed && <ArrowUpFromLine className="size-3 flex-none text-[var(--node-muted)]" aria-label="Not pushed" />}
-          <Avatar name={c.author} email={c.email} size={16} />
+          <Authors commit={c} size={16} />
           <span className="w-7 flex-none text-right text-2xs whitespace-nowrap text-[var(--node-muted)] tabular-nums" title={longDate(c.date)}>
             {shortAgo(c.date)}
           </span>

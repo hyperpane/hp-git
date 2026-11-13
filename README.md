@@ -4,14 +4,23 @@ Git for a project, laid out like GitHub Desktop, in a window on the canvas:
 
 - **Changes:** staged, unstaged, untracked and conflicted files; stage or
   discard a whole file, a hunk or single lines (discarded work goes to the
-  Trash, or the Recycle Bin, first); ignore a file or a pattern.
+  Trash, or the Recycle Bin, first); ignore a file or a pattern. As in
+  GitHub Desktop, every changed file is listed once and checked for the
+  next commit as it comes; uncheck a file, or a hunk or lines in its diff
+  (its gutter), to leave them out. That's the window's own, kept on this
+  machine: git's index isn't touched until Commit, which commits exactly
+  what's checked (and leaves what you staged elsewhere as it was). The
+  **Check every change** setting off: stage files, hunks and lines by hand,
+  and commit what's staged.
 - **Commit** with a summary and description, amend, sign-off and
   co-authors, as the identity the repository's config says (and can change).
 - **Diffs:** unified or side by side, word highlights, whitespace ignored or
   not, more context on demand, images before and after, renames, and a
-  summary for binary and huge files with “show anyway”.
+  summary for binary and huge files with “show anyway”; the code selected
+  with the mouse copies as text (lines are picked in the gutter).
 - **History** with a commit graph, searched by message, author, SHA, path
-  or content (`-S`/`-G`); every commit's message, files and diffs; checkout,
+  or content (`-S`/`-G`); every commit's message (folded away for more of
+  the diff), files and diffs, its author and co-authors stacked; checkout,
   branch or tag from it, cherry-pick, revert, reset.
 - **Branches** local and remote with ahead/behind; merge, rebase, compare;
   **stashes**; **tags**; a file's **history** and **blame**.
@@ -20,6 +29,9 @@ Git for a project, laid out like GitHub Desktop, in a window on the canvas:
 - **Sync:** fetch, pull, push, publish, force with lease, with progress and
   cancel; passwords and passphrases are asked in a dialog.
 - **Clone** and **initialize** repositories.
+- **In Explorer:** each file's status as a colored letter (U, A, M, D, R, !),
+  a dot on folders with changes inside, ignored files faded; and **Stage
+  with Git** in its right-click menu (API.md, “Explorer decorations”).
 
 It runs the system's `git` (2.23 or newer): the one on `PATH`, or Git for
 Windows' and Homebrew's usual places, or the one the **Git executable**
@@ -29,10 +41,10 @@ setting names. Nothing is built: the app runs the TypeScript as it is.
 
 | File | What it is |
 |---|---|
-| `plugin.json` | The manifest: the Git window, its settings, its bus topics. |
+| `plugin.json` | The manifest: the Git window, its settings, its bus topics, what it adds to Explorer. |
 | `API.md` | Every op of the server part: what it takes, what it gives, its errors. |
 | `src/server/main.ts`, `plugin.ts` | The server part: a Node process that runs git. `main.ts` serves it; `plugin.ts` wires each op to its handler, queues the changes to a repository and tells the bus. |
-| `src/server/ops/` | The ops, a file per group: `status.ts`, `diff.ts`, `stage.ts`, `apply.ts`, `commit.ts`, `history.ts`, `show.ts`, `blame.ts`, `branches.ts`, `merge.ts`, `resolve.ts`, `stash.ts`, `tags.ts`, `remotes.ts`, `config.ts`, `sync.ts`, `repos.ts`. |
+| `src/server/ops/` | The ops, a file per group: `status.ts`, `diff.ts`, `stage.ts`, `apply.ts`, `commit.ts`, `history.ts`, `show.ts`, `blame.ts`, `branches.ts`, `merge.ts`, `resolve.ts`, `stash.ts`, `tags.ts`, `remotes.ts`, `config.ts`, `sync.ts`, `repos.ts`, and `explorer.ts` (Explorer's decorations and Stage with Git; the mapping is `lib/decorations.ts`). |
 | `src/server/lib/` | What the ops share: finding and running git (`find-git.ts`, `git.ts`, `process.ts`; a cancel kills the process tree), parsing what it prints (`parse-status.ts`, `parse-diff.ts`, `commits.ts`), `askpass.ts` (git's and ssh's prompts through the app), `watches.ts` (following a repository's changes), the Trash, and the rest. |
 | `src/shared/` | What both parts use: the reply and event types by area (`status.ts`, `diff.ts`, `history.ts`, `refs.ts`, `sync.ts`, `repos.ts`, `topics.ts`, all from `index.ts`) and the patch builder for line and hunk staging (`patch.ts`). |
 | `src/client/main.tsx` | The client part's entry: a Git window, or one of its dialogs. |

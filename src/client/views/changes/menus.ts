@@ -1,6 +1,7 @@
-// The Changes list's menus: a file's or a folder's (stage, discard, stash,
-// ignore, its history, copy, open), and the list's own ⋯ (stash all,
-// ignore a pattern, stage or unstage everything, discard everything).
+// The Changes list's menus: a file's or a folder's (check or stage it,
+// discard, stash, ignore, its history, copy, open), and the list's own ⋯
+// (stash all, ignore a pattern, check or stage everything or nothing,
+// discard everything).
 
 import type { MenuEntry } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
@@ -16,13 +17,17 @@ import type { Side } from '../../lib/picks.ts';
 /** The menu of a file (or the files picked with it) or a folder. */
 export function fileMenu(repo: Repo, it: Exclude<Item, { t: 'section' }>, chosen: { side: Side; file: FileStatus }[], actions: FileActions): (MenuEntry | null)[] {
   const { api } = repo;
-  const { stage, unstage, discard, stashFiles } = actions;
+  const { stage, unstage, check, allChecked, discard, stashFiles } = actions;
   const files = chosen.map((c) => c.file);
   const one = it.t === 'file' && chosen.length === 1 ? chosen[0].file : null;
-  const unstaged = chosen.filter((c) => c.side !== 'staged').map((c) => c.file);
+  const changes = chosen.filter((c) => c.side === 'changes').map((c) => c.file);
+  const unstaged = chosen.filter((c) => c.side !== 'staged' && c.side !== 'changes').map((c) => c.file);
   const staged = chosen.filter((c) => c.side === 'staged').map((c) => c.file);
   const ext = one ? extOf(one.path) : '';
+  const n = (what: string) => (changes.length > 1 ? `${what} ${plural(changes.length, 'File')}` : what);
   return [
+    ...(changes.length && !changes.every((f) => allChecked([f])) ? [{ label: n('Include'), run: () => check(changes, true) }] : []),
+    ...(changes.length && changes.some((f) => repo.choices[f.path] !== 'out') ? [{ label: n('Leave Out'), run: () => check(changes, false) }] : []),
     ...(unstaged.length ? [{ label: unstaged.length > 1 ? `Stage ${plural(unstaged.length, 'File')}` : chosen[0].side === 'conflict' ? 'Mark as Resolved' : 'Stage', run: () => stage(unstaged) }] : []),
     ...(staged.length ? [{ label: staged.length > 1 ? `Unstage ${plural(staged.length, 'File')}` : 'Unstage', run: () => unstage(staged) }] : []),
     { label: files.length > 1 ? `Discard Changes to ${plural(files.length, 'File')}…` : 'Discard Changes…', danger: true, run: () => discard(files) },
@@ -53,8 +58,10 @@ export function fileMenu(repo: Repo, it: Exclude<Item, { t: 'section' }>, chosen
 }
 
 /** The list's ⋯ menu. */
-export function changesMenu(repo: Repo, groups: Record<Side, FileStatus[]>, discard: FileActions['discard']): (MenuEntry | null)[] {
+export function changesMenu(repo: Repo, groups: Record<Side, FileStatus[]>, actions: FileActions): (MenuEntry | null)[] {
   const { status, api } = repo;
+  const { discard, allIn, allOut } = actions;
+  const none = repo.including ? status.files.every((f) => repo.choices[f.path] === 'out') : !groups.staged.length;
   return [
     { label: 'Stash All Changes…', disabled: !status.files.length, run: () => stashNow(repo) },
     {
@@ -65,8 +72,8 @@ export function changesMenu(repo: Repo, groups: Record<Side, FileStatus[]>, disc
       },
     },
     null,
-    { label: 'Stage Everything', disabled: !status.files.length, run: () => repo.run(() => api.stage('all')) },
-    { label: 'Unstage Everything', disabled: !groups.staged.length, run: () => repo.run(() => api.unstage('all')) },
+    { label: repo.including ? 'Check Everything' : 'Stage Everything', disabled: !status.files.length, run: allIn },
+    { label: repo.including ? 'Uncheck Everything' : 'Unstage Everything', disabled: none, run: allOut },
     null,
     { label: 'Discard All Changes…', danger: true, disabled: !status.files.length, run: () => discard(status.files.filter((f) => !f.conflict)) },
   ];

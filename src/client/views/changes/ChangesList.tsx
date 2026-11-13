@@ -1,6 +1,8 @@
-// The Changes tab's list: the files that changed, in four sections
-// (conflicts, staged, changes, untracked), flat or by folder, each with a
-// checkbox (checked: in the next commit); and the commit box under them.
+// The Changes tab's list: the files that changed, flat or by folder, each
+// with a checkbox (checked: in the next commit): every file once, all
+// checked as they come, as GitHub Desktop has it; or, with that setting
+// off, in four sections (conflicts, staged, changes, untracked), checked
+// when staged. The commit box is under them.
 // The rows are ChangeRows.tsx, their menus menus.ts.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
@@ -18,6 +20,7 @@ import { plural } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { local } from '../../lib/local.ts';
 import { type Pick, type Side, pickOf, sideFiles, splitPick } from '../../lib/picks.ts';
+import { stateOf } from '../../lib/include.ts';
 import { DirRow, FileRow, SectionRow } from './ChangeRows.tsx';
 import { CommitBox } from './CommitBox.tsx';
 import { changesMenu, fileMenu } from './menus.ts';
@@ -32,7 +35,7 @@ export function ChangesList({
   filterRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const repo = useRepo();
-  const { status, api, host } = repo;
+  const { status, host } = repo;
   const [filter, setFilter] = useState('');
   const [tree, setTreeState] = useState(() => local.get('tree', false));
   const setTree = (t: boolean) => {
@@ -45,8 +48,8 @@ export function ChangesList({
 
   const groups = useMemo(() => {
     const q = filter.trim().toLowerCase();
-    return sideFiles(q ? status.files.filter((f) => f.path.toLowerCase().includes(q) || f.from?.toLowerCase().includes(q)) : status.files);
-  }, [status.files, filter]);
+    return sideFiles(q ? status.files.filter((f) => f.path.toLowerCase().includes(q) || f.from?.toLowerCase().includes(q)) : status.files, repo.including);
+  }, [status.files, filter, repo.including]);
   const rows = useMemo(() => items(groups, tree, closed), [groups, tree, closed]);
   const pickedSet = useMemo(() => new Set<string>(picked), [picked]);
 
@@ -80,7 +83,7 @@ export function ChangesList({
   };
 
   const actions = fileActions(repo);
-  const { stage, unstage, toggle, discard } = actions;
+  const { stage, unstage, allIn, allOut, toggle, discard } = actions;
 
   const click = (it: Item, e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }) => {
     const k = itemKey(it);
@@ -175,7 +178,7 @@ export function ChangesList({
 
   const moreMenu = (e: ReactMouseEvent) => {
     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const items = changesMenu(repo, groups, discard);
+    const items = changesMenu(repo, groups, actions);
     host.ui.menu({ x: r.left, y: r.bottom + 2 }, menuItems(items)).then((id) => {
       const item = id !== null && /^\d+$/.test(id) ? items[Number(id)] : null;
       if (item && !item.disabled) item.run();
@@ -184,19 +187,27 @@ export function ChangesList({
 
   const total = status.files.length;
   const stagedCount = groups.staged.length;
-  const allChecked: boolean | 'mixed' = total === 0 ? false : stagedCount === 0 ? false : groups.unstaged.length + groups.untracked.length + groups.conflict.length === 0 ? true : 'mixed';
+  const allChecked: boolean | 'mixed' = repo.including ? checkedAll(status.files.filter((f) => !f.conflict).map((f) => stateOf(repo.choices, f.path))) : total === 0 ? false : stagedCount === 0 ? false : groups.unstaged.length + groups.untracked.length + groups.conflict.length === 0 ? true : 'mixed';
+  /** A file's or a folder's checkbox. */
+  const checked = (side: Side, files: FileStatus[]): boolean | 'mixed' => (side === 'changes' ? checkedAll(files.map((f) => stateOf(repo.choices, f.path))) : side === 'staged');
 
   const row = (n: number) => {
     const it = rows[n];
     if (it.t === 'section') return <SectionRow it={it} files={groups[it.side]} open={!closed.has(`section:${it.side}`)} click={click} stage={stage} unstage={unstage} />;
-    if (it.t === 'dir') return <DirRow it={it} open={!closed.has(`${it.side}:${it.path}`)} click={click} menu={menu} toggle={toggle} setClosed={setClosed} />;
-    return <FileRow it={it} isPicked={pickedSet.has(itemKey(it))} tree={tree} click={click} menu={menu} toggle={toggle} />;
+    if (it.t === 'dir') return <DirRow it={it} checked={checked(it.side, it.files)} open={!closed.has(`${it.side}:${it.path}`)} click={click} menu={menu} toggle={toggle} setClosed={setClosed} />;
+    return <FileRow it={it} checked={checked(it.side, [it.file])} isPicked={pickedSet.has(itemKey(it))} tree={tree} click={click} menu={menu} toggle={toggle} />;
   };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
-        <Checkbox checked={allChecked} label={allChecked === true ? 'Unstage everything' : 'Stage everything'} onChange={(on) => repo.run(() => (on ? api.stage('all') : api.unstage('all')))} disabled={!total} className="mx-1" />
+        <Checkbox
+          checked={allChecked}
+          label={repo.including ? (allChecked === true ? 'Uncheck everything' : 'Check everything') : allChecked === true ? 'Unstage everything' : 'Stage everything'}
+          onChange={() => (allChecked === true ? allOut() : allIn())}
+          disabled={!total}
+          className="mx-1"
+        />
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput
@@ -243,4 +254,12 @@ export function ChangesList({
       <CommitBox />
     </div>
   );
+}
+
+/** Several checkboxes as one: all on, all off, or some of each. */
+function checkedAll(states: (boolean | 'mixed')[]): boolean | 'mixed' {
+  if (!states.length) return false;
+  if (states.every((x) => x === true)) return true;
+  if (states.every((x) => x === false)) return false;
+  return 'mixed';
 }

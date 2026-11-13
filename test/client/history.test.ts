@@ -65,6 +65,36 @@ test('History: commits with the graph and their refs; a commit’s details, file
   await until(() => !w.root.querySelector('[data-view]') && w.root.querySelector('[data-tab="history"][aria-selected="true"]'));
 });
 
+test('History: a commit’s co-authors stacked with its author, everyone named; its message folds away for the diff, and stays folded', async (t) => {
+  const dir = repo(t, { 'a.txt': 'one\n' }, 'm1');
+  write(dir, { 'a.txt': 'one\ntwo\n' });
+  sh(dir, 'commit', '-q', '-am', 'Pair on a\n\nWhy.\n\nCo-authored-by: Grace Hopper <grace@example.com>\nCo-authored-by: Alan Turing <alan@example.com>');
+  const w = await window(t, dir);
+  tab(w.root, 'history');
+  const pair = await until(() => commitRow(w.root, 'Pair on a'), 10000, 'the commits');
+  const stack = pair.querySelector<HTMLElement>('[data-authors]')!;
+  assert.equal(stack.dataset.authors, '3');
+  assert.equal(stack.textContent, 'ALGHAT');
+  assert.equal(stack.title, 'Ada Lovelace <ada@example.com>\nGrace Hopper <grace@example.com>\nAlan Turing <alan@example.com>');
+  assert.match(pair.title, /Ada Lovelace and 2 others/);
+  // A commit of one author: one circle.
+  assert.equal(commitRow(w.root, 'm1')!.querySelector('[data-authors]'), null);
+  // The details name them all.
+  const details = await until(() => w.root.querySelector<HTMLElement>('[data-commit] [data-commit-header="open"]'), 10000, 'the details');
+  await until(() => details.textContent!.includes('Ada Lovelace, Grace Hopper and Alan Turing'), 10000, 'every author');
+  assert.match(details.textContent!, /Why\./);
+  // Folded: one line, the message and the rest gone; the diff has the room. Remembered.
+  click(button(details, 'Hide the message')!);
+  const folded = await until(() => w.root.querySelector<HTMLElement>('[data-commit-header="folded"]'), 10000, 'folded');
+  assert.match(folded.textContent!, /Pair on a/);
+  assert.doesNotMatch(folded.textContent!, /Why\./);
+  assert.ok(folded.querySelector('[data-authors="3"]'));
+  click(commitRow(w.root, 'm1')!);
+  await until(() => w.root.querySelector('[data-commit-header="folded"]')?.textContent?.includes('m1'), 10000, 'still folded for m1');
+  click(button(w.root.querySelector('[data-commit-header="folded"]')!, 'Show the message')!);
+  await until(() => w.root.querySelector('[data-commit-header="open"]'), 10000, 'open again');
+});
+
 test('History pages in as it scrolls, and searches by message, author, SHA and path', async (t) => {
   const dir = repo(t, { 'a.txt': '0\n' }, 'c0');
   for (let i = 1; i <= 340; i++) {
@@ -74,7 +104,8 @@ test('History pages in as it scrolls, and searches by message, author, SHA and p
   }
   const w = await window(t, dir);
   tab(w.root, 'history');
-  await until(() => w.root.textContent!.includes('300+ commits'), 10000, 'the first page');
+  // (Slow while the whole suite runs at once: the first watch writes git's commit-graph.)
+  await until(() => w.root.textContent!.includes('300+ commits'), 20000, 'the first page');
   // The end of the list in view: the next page.
   const list = w.root.querySelector<HTMLElement>('[aria-label="Commits"]')!;
   list.scrollTop = 300 * 26;
@@ -193,6 +224,14 @@ test('the branch dropdown finds a branch as you type and switches with Enter', a
   await until(() => sh(dir, 'branch', '--show-current').trim() === 'zebra', 10000, 'switched');
 });
 
+const stashList = (dir: string) => {
+  try {
+    return sh(dir, 'stash', 'list');
+  } catch {
+    return 'busy';
+  }
+};
+
 test('Stashes: stash with the dialog, see its files, pop it', async (t) => {
   const dir = repo(t, { 'a.txt': 'a\n' });
   write(dir, { 'a.txt': 'changed\n', 'new.txt': 'new\n' });
@@ -205,7 +244,8 @@ test('Stashes: stash with the dialog, see its files, pop it', async (t) => {
   assert.match(row.textContent!, /wip things/);
   await until(() => w.root.querySelector('[data-commit-files]')?.textContent?.includes('a.txt') && w.root.querySelector('[data-commit-files]')?.textContent?.includes('new.txt'), 10000, 'its files');
   click(button(w.root, 'Pop')!);
-  await until(() => !sh(dir, 'stash', 'list').trim(), 10000, 'popped');
+  // (Read while pop drops refs/stash, git can say it's a bad revision: not yet.)
+  await until(() => !stashList(dir).trim(), 10000, 'popped');
   assert.equal(sh(dir, 'status', '--porcelain').trim().split('\n').length, 2);
 });
 

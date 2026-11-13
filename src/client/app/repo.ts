@@ -2,12 +2,13 @@
 // status, kept current by the server's watch; what every view needs to act
 // on it (the calls, a way to run a change and say how it went, the app's
 // dialogs); the sync under way, with its progress; and where the window is
-// (the tab, the views opened over it, back and forward). The state behind
-// it is app/useRepoState.ts.
+// (the tab, the views opened over it, back and forward); and what's checked
+// for the next commit. The state behind it is app/useRepoState.ts.
 
 import { createContext, useContext } from 'react';
 import type { Host } from '@hyperpane/sdk/client';
 import type { Outcome, Status, SyncAction } from '../../shared/index.ts';
+import type { Choices } from '../lib/include.ts';
 import type { GitApi } from './api.ts';
 
 export type Tab = 'changes' | 'history' | 'branches' | 'stashes' | 'tags';
@@ -35,6 +36,13 @@ export interface Repo {
   root: string;
   server?: string;
   status: Status;
+  /** Every change is checked for the next commit, as GitHub Desktop has
+   * it, and the index is left alone until Commit (the includeChanges
+   * setting); else what's staged is what's committed. */
+  including: boolean;
+  /** What's left out of the next commit (lib/include.ts). */
+  choices: Choices;
+  choose(update: (c: Choices) => Choices): void;
   /** Bumped by every change: lists that aren't in the status (branches,
    * stashes, tags, history) load again. */
   version: number;

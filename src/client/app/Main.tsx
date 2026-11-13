@@ -26,7 +26,7 @@ import { useWindowMenu } from '../hooks/useWindowMenu.ts';
 import { shortSha } from '../lib/format.ts';
 import { local } from '../lib/local.ts';
 import { basenameOf, relativeTo } from '../lib/paths.ts';
-import type { Pick } from '../lib/picks.ts';
+import { type Pick, pickOf, sideOf } from '../lib/picks.ts';
 import { BranchDetail } from '../views/branches/BranchDetail.tsx';
 import { BranchList } from '../views/branches/BranchList.tsx';
 import { ChangesDetail } from '../views/changes/ChangesDetail.tsx';
@@ -79,7 +79,7 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
     else {
       setTab('changes');
       const f = status.files.find((x) => x.path === rel);
-      if (f) setPicked([`${f.staged && !f.worktree ? 'staged' : f.untracked ? 'untracked' : f.conflict ? 'conflict' : 'unstaged'}:${rel}` as Pick]);
+      if (f) setPicked([pickOf(sideOf(f, repo.including), rel)]);
     }
     if (host.window) host.app.focusWindow(host.window.id);
   });

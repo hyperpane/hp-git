@@ -13,6 +13,7 @@ import type { Diff } from '../../../shared/index.ts';
 import type { DiffRequest } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
 import { useDiffMode } from '../../hooks/useDiffMode.ts';
+import type { LineChecks } from '../../hooks/useLineChecks.ts';
 import { copy } from '../../lib/clipboard.ts';
 import type { Expansion, Gap, LineKey } from '../../lib/diff/model.ts';
 import { Blank } from '../Blank.tsx';
@@ -29,6 +30,9 @@ export interface DiffPaneProps {
   newRev?: string;
   /** Picked lines' actions, from the diff as it is. */
   actions?(diff: Diff): LineActions | undefined;
+  /** Its lines checked for the next commit, from the diff as it is (none
+   * while whitespace is ignored: lines would be missing). */
+  checks?(diff: Diff): LineChecks | undefined;
   /** Buttons at the bar's end (stage, discard the file). */
   tools?: ReactNode;
   /** More in the ⋯ menu. */
@@ -41,7 +45,7 @@ export interface DiffPaneProps {
 
 type State = { diff?: Diff; error?: string; for: string };
 
-export function DiffPane({ request, stamp, newRev, actions, tools, menu, banner, empty, onSelection }: DiffPaneProps) {
+export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu, banner, empty, onSelection }: DiffPaneProps) {
   const repo = useRepo();
   const { api, host } = repo;
   const [mode, setMode] = useDiffMode();
@@ -90,6 +94,7 @@ export function DiffPane({ request, stamp, newRev, actions, tools, menu, banner,
   const diff = state.for === key ? state.diff : undefined;
   const error = state.for === key ? state.error : undefined;
   const lineActions = useMemo(() => (diff && actions ? actions(diff) : undefined), [diff, actions]);
+  const lineChecks = useMemo(() => (diff && checks ? checks(diff) : undefined), [diff, checks]);
 
   // Unchanged lines between hunks: 20 at a time, or all of them.
   const expand = async (gap: Gap, how: 'up' | 'down' | 'all') => {
@@ -195,6 +200,7 @@ export function DiffPane({ request, stamp, newRev, actions, tools, menu, banner,
         diff={diff}
         mode={shownMode}
         actions={ignoreWs ? undefined : lineActions}
+        checks={ignoreWs ? undefined : lineChecks}
         expansions={expansions}
         onExpand={expand}
         onLineMenu={onLineMenu}

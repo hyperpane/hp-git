@@ -6,7 +6,7 @@ import { PluginError } from '@hyperpane/sdk/server';
 import type { ChangedFile, CommitDetail } from '../../shared/index.ts';
 import { rev } from '../lib/args.ts';
 import { changes } from '../lib/changes.ts';
-import { FIELDS, RS, US, baseOf, parseCommit } from '../lib/commits.ts';
+import { FIELDS, FIELD_COUNT, RS, US, baseOf, parseCommit } from '../lib/commits.ts';
 import type { Repo } from '../lib/repo.ts';
 
 const FILES_MAX = 5000;
@@ -17,14 +17,14 @@ export async function show(repo: Repo, sha: string, signal?: AbortSignal): Promi
   if (out.code !== 0) throw new PluginError(`There's no commit ${commit} here.`);
   const record = out.stdout.toString('utf8').split(RS)[1] ?? '';
   const f = record.split(US);
-  const c = parseCommit(f.slice(0, 10).join(US));
+  const c = parseCommit(f.slice(0, FIELD_COUNT).join(US));
   if (!c) throw new PluginError(`There's no commit ${commit} here.`);
-  const message = f.slice(12).join(US).replace(/\n+$/, '');
+  const message = f.slice(FIELD_COUNT + 2).join(US).replace(/\n+$/, '');
   const nl = message.indexOf('\n');
   const body = nl < 0 ? '' : message.slice(nl + 1).replace(/^\n+/, '');
   const detail: CommitDetail = { ...c, body, files: [], truncated: false };
-  const sig = SIGNATURES[f[10]];
-  if (sig) detail.signature = { status: sig, signer: f[11] ?? '' };
+  const sig = SIGNATURES[f[FIELD_COUNT]];
+  if (sig) detail.signature = { status: sig, signer: f[FIELD_COUNT + 1] ?? '' };
   const base = await baseOf(repo, c.sha);
   const changed = await changes(repo, base, c.sha, signal);
   // A stash: its untracked files are a third parent.

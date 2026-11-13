@@ -1,17 +1,20 @@
 // The commit box under the changes: who commits (shown, and set for this
 // repository), a summary and a description, amend (with what it amends),
 // sign-off, co-authors from the history, and the button that says what it
-// commits where (⌘↵). It keeps the draft while you look elsewhere, and
-// offers to undo the last commit.
+// commits where (⌘↵): exactly the files and lines checked (lib/include.ts;
+// git's index is left alone), or, staging by hand, what's staged. It keeps
+// the draft while you look elsewhere, and offers to undo the last commit.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import { keys, mod } from '@hyperpane/sdk/client';
 import { Button, cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
 import type { Author } from '../../../shared/index.ts';
+import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
 import { EMPTY, useCommitDraft } from '../../hooks/useCommitDraft.ts';
 import { plural, shortSha } from '../../lib/format.ts';
+import { afterCommit, checkedFiles, selection } from '../../lib/include.ts';
 import { local } from '../../lib/local.ts';
 import { sideFiles } from '../../lib/picks.ts';
 import { Chip, CoAuthorList, IdentityButton, LastCommit, SummaryField } from './CommitBoxParts.tsx';
@@ -27,9 +30,12 @@ export function CommitBox() {
   const summaryRef = useRef<HTMLInputElement>(null);
   const signoffDefault = host.settings.get<boolean>('signoff') === true;
   const signoff = draft.signoff ?? signoffDefault;
+  const { including, choices, choose } = repo;
 
   const groups = useMemo(() => sideFiles(status.files), [status.files]);
-  const staged = groups.staged.length;
+  /** What the commit takes: the files checked, or staged. */
+  const checked = useMemo(() => checkedFiles(status.files, choices), [status.files, choices]);
+  const staged = including ? checked.length : groups.staged.length;
   const conflicts = groups.conflict.length;
   const op = status.operation;
   const merging = op?.kind === 'merge';
@@ -100,8 +106,9 @@ export function CommitBox() {
   };
 
   const nothing = staged === 0 && !draft.amend && !merging;
-  /** Nothing staged but there are changes: commit them all. */
-  const commitAll = nothing && status.files.length > 0;
+  /** Nothing staged but there are changes: commit them all. (Not when every
+   * change is checked by itself: then nothing checked was left out.) */
+  const commitAll = !including && nothing && status.files.length > 0;
   const ready = !busy && !conflicts && (!!draft.summary.trim() || draft.amend || (merging && !!prepared)) && (commitAll || !nothing);
 
   const commit = async () => {
@@ -112,7 +119,7 @@ export function CommitBox() {
       return;
     }
     setBusy(true);
-    const done = await repo.run(() =>
+    const done = await repo.run(async () =>
       api.commit({
         summary: draft.summary.trim(),
         description: draft.description.trim() || undefined,
@@ -120,10 +127,13 @@ export function CommitBox() {
         signoff: signoff || undefined,
         coAuthors: draft.coAuthors.length ? draft.coAuthors : undefined,
         all: all || undefined,
+        only: including ? await selection(status.files, choices, (f) => api.diff({ path: f.path, ...(f.untracked ? { untracked: true } : { head: true }), full: true }).promise) : undefined,
       }),
     );
     setBusy(false);
     if (done) {
+      // What's left of a file committed in part is out now.
+      choose(afterCommit);
       setLast(done);
       setDraftState(() => {
         const next = { ...EMPTY, signoff: draft.signoff };
@@ -200,10 +210,19 @@ export function CommitBox() {
         </div>
       )}
       {conflicts > 0 && <div className="text-2xs text-[var(--ansi-9)]">Resolve {plural(conflicts, 'conflict')} before committing.</div>}
-      {nothing && !conflicts && status.files.length > 0 && (
+      {nothing && !conflicts && status.files.length > 0 && including && (
+        <div className="text-2xs text-[var(--node-muted)]">
+          No file is checked.{' '}
+          <button type="button" className="text-[var(--node-accent)] hover:underline" onClick={() => fileActions(repo).allIn()}>
+            Check all {plural(status.files.length, 'change')}
+          </button>
+          .
+        </div>
+      )}
+      {nothing && !conflicts && status.files.length > 0 && !including && (
         <div className="text-2xs text-[var(--node-muted)]">
           Nothing is staged.{' '}
-          <button type="button" className="text-[var(--node-accent)] hover:underline" onClick={() => repo.run(() => api.stage('all'))}>
+          <button type="button" className="text-[var(--node-accent)] hover:underline" onClick={() => fileActions(repo).allIn()}>
             Stage all {plural(status.files.length, 'change')}
           </button>
           , or commit them all ({keys('⌘↵')}).

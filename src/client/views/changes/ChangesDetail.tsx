@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { keys } from '@hyperpane/sdk/client';
 import { NodeButton } from '@hyperpane/ui';
+import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import type { LineKey } from '../../lib/diff/model.ts';
@@ -17,20 +18,40 @@ import { NoChanges } from './NoChanges.tsx';
  * what to do with several). */
 export function ChangesDetail({ picked }: { picked: Pick[] }) {
   const repo = useRepo();
-  const { status, api } = repo;
+  const { status } = repo;
   const [lines, setLines] = useState<LineKey[]>([]);
   void lines;
   if (picked.length > 1) {
+    const { stage, unstage, check } = fileActions(repo);
     const chosen = picked.map(splitPick);
-    const unstaged = chosen.filter(([s]) => s !== 'staged').map(([, p]) => p);
-    const staged = chosen.filter(([s]) => s === 'staged').map(([, p]) => p);
+    const filesOf = (paths: string[]) => status.files.filter((f) => paths.includes(f.path));
+    const unstaged = filesOf(chosen.filter(([s]) => s !== 'staged').map(([, p]) => p));
+    const staged = filesOf(chosen.filter(([s]) => s === 'staged').map(([, p]) => p));
+    if (repo.including) {
+      const changes = filesOf(chosen.filter(([s]) => s === 'changes').map(([, p]) => p));
+      return (
+        <Blank
+          title={plural(picked.length, 'file') + ' picked'}
+          actions={
+            changes.length > 0 && (
+              <>
+                <NodeButton onClick={() => check(changes, true)}>Include {changes.length}</NodeButton>
+                <NodeButton onClick={() => check(changes, false)}>Leave Out {changes.length}</NodeButton>
+              </>
+            )
+          }
+        >
+          Space checks or unchecks them for the commit; {keys('⌘⌫')} discards them.
+        </Blank>
+      );
+    }
     return (
       <Blank
         title={plural(picked.length, 'file') + ' picked'}
         actions={
           <>
-            {unstaged.length > 0 && <NodeButton onClick={() => repo.run(() => api.stage(unstaged))}>Stage {unstaged.length}</NodeButton>}
-            {staged.length > 0 && <NodeButton onClick={() => repo.run(() => api.unstage(staged))}>Unstage {staged.length}</NodeButton>}
+            {unstaged.length > 0 && <NodeButton onClick={() => stage(unstaged)}>Stage {unstaged.length}</NodeButton>}
+            {staged.length > 0 && <NodeButton onClick={() => unstage(staged)}>Unstage {staged.length}</NodeButton>}
           </>
         }
       >
@@ -40,7 +61,7 @@ export function ChangesDetail({ picked }: { picked: Pick[] }) {
   }
   // Nothing picked (the list is folded away): the first file, as the list would.
   const first = (): [Side, string] => {
-    const g = sideFiles(status.files);
+    const g = sideFiles(status.files, repo.including);
     const side = SIDES.find((x) => g[x].length);
     return side ? [side, g[side][0].path] : ['unstaged', ''];
   };

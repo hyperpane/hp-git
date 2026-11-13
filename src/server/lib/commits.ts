@@ -3,19 +3,21 @@
 // them read as git writes it (git is stopped once the page is full), and
 // what a commit is compared with.
 
-import type { Commit, LogPage, Ref } from '../../shared/index.ts';
+import type { Commit, LogPage, Person, Ref } from '../../shared/index.ts';
 import type { Repo } from './repo.ts';
 
 export const RS = '\x1e';
 export const US = '\x1f';
-/** sha, parents, author, email, time, committer, email, time, subject, refs. */
-export const FIELDS = ['%H', '%P', '%an', '%ae', '%at', '%cn', '%ce', '%ct', '%s', '%D'].join('%x1f');
+/** sha, parents, author, email, time, committer, email, time, subject,
+ * refs, and the co-authors' trailers (one a line). */
+export const FIELDS = ['%H', '%P', '%an', '%ae', '%at', '%cn', '%ce', '%ct', '%s', '%D', '%(trailers:key=Co-authored-by,valueonly,unfold)'].join('%x1f');
+export const FIELD_COUNT = 11;
 export const FORMAT = `--format=%x1e${FIELDS}`;
 
 export function parseCommit(record: string): Commit | null {
   const f = record.split(US);
   if (f.length < 10) return null;
-  return {
+  const c: Commit = {
     sha: f[0],
     parents: f[1] ? f[1].split(' ') : [],
     author: f[2],
@@ -27,6 +29,28 @@ export function parseCommit(record: string): Commit | null {
     subject: f[8],
     refs: parseRefs(f[9]),
   };
+  const coAuthors = parseCoAuthors(f[10] ?? '').filter((p) => p.email.toLowerCase() !== c.email.toLowerCase());
+  if (coAuthors.length) c.coAuthors = coAuthors;
+  return c;
+}
+
+/**
+ * The people in `Co-authored-by:` trailers' values (`Name <email>`, one a
+ * line, as `%(trailers:valueonly)` gives them), each once: a value that
+ * isn't a name and an email is someone's typo, not a person.
+ */
+export function parseCoAuthors(text: string): Person[] {
+  const out: Person[] = [];
+  const seen = new Set<string>();
+  for (const value of text.split(/[\n\x1d]/)) {
+    const m = /^(.*?)\s*<([^<>\s]+)>\s*$/.exec(value.trim());
+    if (!m || !m[1].trim()) continue;
+    const key = m[2].toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ name: m[1].trim(), email: m[2] });
+  }
+  return out;
 }
 
 /** `%D` with `--decorate=full`: `HEAD -> refs/heads/main, tag: refs/tags/v1, refs/remotes/origin/main`. */

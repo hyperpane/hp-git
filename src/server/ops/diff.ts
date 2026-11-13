@@ -37,6 +37,9 @@ export interface DiffRequest {
   path: string;
   oldPath?: string;
   staged?: boolean;
+  /** The working tree against HEAD (before the first commit, against
+   * nothing): what a commit of the file would take. */
+  head?: boolean;
   untracked?: boolean;
   commit?: string;
   from?: string;
@@ -85,6 +88,10 @@ export async function diff(repo: Repo, r: DiffRequest, signal?: AbortSignal): Pr
         args.push(to);
         after = { spec: `${to}:${file}` };
       } else after = { worktree: file };
+    } else if (r.head) {
+      args.push(hasHead ? 'HEAD' : await repo.emptyTree());
+      before = hasHead ? { spec: `HEAD:${old}` } : null;
+      after = { worktree: file };
     } else if (r.staged) {
       args.push('--cached', hasHead ? 'HEAD' : await repo.emptyTree());
       before = hasHead ? { spec: `HEAD:${old}` } : null;
@@ -102,7 +109,7 @@ export async function diff(repo: Repo, r: DiffRequest, signal?: AbortSignal): Pr
   let out = await repo.run(args, { ok, limit: limit + 1, signal });
   // A conflicted file's diff is a combined one: show it against HEAD (ours)
   // instead, conflict markers and all.
-  if (!r.staged && !r.commit && !r.from && !r.untracked && out.stdout.subarray(0, 10).toString() === 'diff --cc ') {
+  if (!r.staged && !r.head && !r.commit && !r.from && !r.untracked && out.stdout.subarray(0, 10).toString() === 'diff --cc ') {
     out = await repo.run(['diff', '--no-ext-diff', '--no-textconv', '--no-color', '--no-relative', '--src-prefix=a/', '--dst-prefix=b/', `-U${context}`, '--no-renames', ...(r.ignoreWhitespace ? ['-w'] : []), hasHead ? 'HEAD' : await repo.emptyTree(), '--', literal(file)], { limit: limit + 1, signal });
     before = hasHead ? { spec: `HEAD:${file}` } : null;
   }

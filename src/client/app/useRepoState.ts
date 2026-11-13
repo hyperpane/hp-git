@@ -2,11 +2,13 @@
 // watch (started again when it ends); the lists loaded again on a change
 // (here, in another window, in a terminal); changes run, with a toast when
 // one fails; the sync under way, with its progress and questions; the tab
-// and the views opened over it.
+// and the views opened over it; what's checked for the next commit, kept
+// on this machine, the same in every window (lib/include.ts).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type Host, useEvent, useSetting } from '@hyperpane/sdk/client';
 import type { Outcome, Status, SyncAction } from '../../shared/index.ts';
+import { type Choices, inclusion, pruned } from '../lib/include.ts';
 import { local } from '../lib/local.ts';
 import { dirnameOf, inRepo } from '../lib/paths.ts';
 import { gitApi } from './api.ts';
@@ -24,6 +26,9 @@ export function useRepoState(host: Host, root: string, server: string | undefine
   const [stack, setStack] = useState<{ views: View[]; at: number }>({ views: [], at: -1 });
   const [autoFetch] = useSetting<string>('autoFetch');
   void autoFetch;
+  const [includeChanges] = useSetting<boolean>('includeChanges');
+  const including = includeChanges !== false;
+  const [choices, setChoices] = useState<Choices>(() => inclusion.get(root));
 
   // The status, live; the watch starts again if it ends (the server went away).
   useEffect(() => {
@@ -50,6 +55,29 @@ export function useRepoState(host: Host, root: string, server: string | undefine
       clearTimeout(retry);
     };
   }, [api]);
+
+  // What's checked: this repository's, as another window changes it too;
+  // a file gone from the changes loses its choice.
+  useEffect(() => {
+    setChoices(inclusion.get(root));
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === `git.${inclusion.key(root)}`) setChoices(inclusion.get(root));
+    };
+    addEventListener('storage', onStorage);
+    return () => removeEventListener('storage', onStorage);
+  }, [root]);
+  const choose = useCallback(
+    (update: (c: Choices) => Choices) =>
+      setChoices((was) => {
+        const next = update(was);
+        if (next !== was) inclusion.set(root, next);
+        return next;
+      }),
+    [root],
+  );
+  useEffect(() => {
+    if (status) choose((c) => pruned(c, status.files, status.truncated));
+  }, [status, choose]);
 
   // Another window (or a terminal) changed it: the lists load again.
   const rootRef = useRef(root);
@@ -167,6 +195,9 @@ export function useRepoState(host: Host, root: string, server: string | undefine
         root,
         server,
         status,
+        including,
+        choices,
+        choose,
         version,
         bump,
         run,
@@ -194,7 +225,7 @@ export function useRepoState(host: Host, root: string, server: string | undefine
         },
         toast,
       },
-    [host, api, root, server, status, version, bump, run, outcome, sync, startSync, tab, setTab, stack, open, back, forward, toast],
+    [host, api, root, server, status, including, choices, choose, version, bump, run, outcome, sync, startSync, tab, setTab, stack, open, back, forward, toast],
   );
 
   return { repo, error, api };

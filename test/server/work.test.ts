@@ -1,11 +1,13 @@
-// Staging, discarding (to the Trash), ignoring, committing, undoing a
+// Staging, discarding (to the Trash), ignoring, committing (what's staged,
+// or exactly the files and lines checked, the index left alone), undoing a
 // commit, authors and config.
 
 import assert from 'node:assert/strict';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, readdir, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { test } from 'node:test';
-import type { Author, Status } from '../../src/shared/index.ts';
+import { allLines, stagePatch } from '../../src/shared/patch.ts';
+import type { Author, Diff, Status } from '../../src/shared/index.ts';
 import { WIN, as, commitAll, folder, plugin, repo, sh, trashed, write } from './support.ts';
 
 const g = await plugin();
@@ -124,6 +126,43 @@ test('commits: summary and description, sign-off, co-authors, amend, all; and th
   await assert.rejects(p.call({ op: 'commit', repo: dir, summary: '' }), { message: 'A commit needs a summary.' });
   await assert.rejects(p.call({ op: 'commit', repo: dir, summary: 'Nothing' }), { message: "There's nothing to commit." });
   await assert.rejects(p.call({ op: 'commit', repo: dir, summary: 'x', coAuthors: ['nobody'] }), { message: "“nobody” isn't a co-author: a name and an email are needed." });
+});
+
+test('commits exactly what’s checked: whole files and some lines, git’s index untouched but for what was committed', async () => {
+  const lines = Array.from({ length: 20 }, (_, i) => `line ${i + 1}\n`);
+  const dir = await repo({ 'a.txt': 'a\n', 'b.txt': 'b\n', 'p.txt': lines.join(''), 'gone.txt': 'g\n' });
+  await write(dir, { 'a.txt': 'a2\n', 'b.txt': 'b2\n', 'new.txt': 'new\n', 'staged.txt': 'staged by hand\n', 'p.txt': lines.map((l, i) => (i === 1 || i === 17 ? l.toUpperCase() : l)).join('') });
+  await rm(path.join(dir, 'gone.txt'));
+  sh(dir, 'add', 'staged.txt');
+  // p.txt: only its first change, from its diff against HEAD.
+  const d = await g.call<Diff>({ op: 'diff', repo: dir, path: 'p.txt', head: true });
+  assert.equal(d.hunks.length, 2);
+  const patch = stagePatch(d, new Set(allLines({ hunks: [d.hunks[0]] })));
+  const indexBefore = sh(dir, 'diff', '--cached', '--name-status');
+  await g.call({ op: 'commit', repo: dir, summary: 'Checked', only: { paths: ['a.txt', 'new.txt', 'gone.txt'], patches: [patch] } });
+  assert.equal(sh(dir, 'show', '--name-status', '--format=', 'HEAD').trim().split('\n').sort().join(' '), 'A\tnew.txt D\tgone.txt M\ta.txt M\tp.txt'.split(' ').sort().join(' '));
+  assert.equal(sh(dir, 'show', 'HEAD:p.txt'), lines.map((l, i) => (i === 1 ? l.toUpperCase() : l)).join(''));
+  // The index: what was staged by hand still is; nothing committed shows staged.
+  assert.equal(indexBefore, 'A\tstaged.txt\n');
+  assert.equal(sh(dir, 'diff', '--cached', '--name-status'), 'A\tstaged.txt\n');
+  assert.equal(sh(dir, 'diff', '--name-only').trim().split('\n').sort().join(' '), 'b.txt p.txt');
+  assert.match(sh(dir, 'diff', 'p.txt'), /\+LINE 18/);
+  assert.equal((await readdir(path.join(dir, '.git'))).filter((f) => f.startsWith('hyperpane-commit-')).length, 0);
+  // A commit that fails leaves the index as it was.
+  await assert.rejects(g.call({ op: 'commit', repo: dir, summary: 'Bad', only: { paths: ['b.txt'], patches: ['diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1 +1 @@\n-no\n+yes\n'] } }));
+  assert.equal(sh(dir, 'log', '-1', '--format=%s').trim(), 'Checked');
+  assert.equal(sh(dir, 'diff', '--cached', '--name-status'), 'A\tstaged.txt\n');
+  assert.equal((await readdir(path.join(dir, '.git'))).filter((f) => f.startsWith('hyperpane-commit-')).length, 0);
+  // Before the first commit, and amending.
+  const fresh = await repo();
+  await write(fresh, { 'x.txt': 'x\n', 'y.txt': 'y\n' });
+  await g.call({ op: 'commit', repo: fresh, summary: 'First', only: { paths: ['x.txt'] } });
+  assert.equal(sh(fresh, 'ls-tree', '--name-only', 'HEAD').trim(), 'x.txt');
+  assert.equal(sh(fresh, 'status', '--porcelain'), '?? y.txt\n');
+  await g.call({ op: 'commit', repo: fresh, amend: true, only: { paths: ['y.txt'] } });
+  assert.equal(sh(fresh, 'ls-tree', '--name-only', 'HEAD').trim(), 'x.txt\ny.txt');
+  assert.equal(sh(fresh, 'rev-list', '--count', 'HEAD').trim(), '1');
+  assert.equal(sh(fresh, 'status', '--porcelain'), '');
 });
 
 test('undoes the last commit, its changes staged and its message back; the first one too', async () => {

@@ -7,7 +7,7 @@ import { NodeMessage, SegmentedControl } from '@hyperpane/ui';
 import type { Commit, Compare } from '../../../shared/index.ts';
 import { commitMenu } from '../../app/actions/commits.ts';
 import { useRepo } from '../../app/repo.ts';
-import { Avatar } from '../../components/Avatar.tsx';
+import { Authors } from '../../components/Avatar.tsx';
 import { Blank } from '../../components/Blank.tsx';
 import { Split } from '../../components/Split.tsx';
 import { VirtualList } from '../../components/VirtualList.tsx';
@@ -97,7 +97,7 @@ function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string
                 >
                   <span className="font-mono text-2xs text-[var(--node-muted)]">{shortSha(c.sha)}</span>
                   <span className="min-w-0 flex-1 truncate">{c.subject}</span>
-                  <Avatar name={c.author} email={c.email} size={16} />
+                  <Authors commit={c} size={16} />
                   <span className="w-7 flex-none text-right text-2xs whitespace-nowrap text-[var(--node-muted)] tabular-nums" title={longDate(c.date)}>
                     {shortAgo(c.date)}
                   </span>

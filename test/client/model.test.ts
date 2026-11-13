@@ -1,11 +1,13 @@
 // The window's logic without a DOM: what changed inside a line, a diff as
 // rows (unified and side by side, folded stretches between hunks), the
-// branch graph as it pages in, and conflicts parsed and merged.
+// branch graph as it pages in, conflicts parsed and merged, what's checked
+// for the next commit (files and lines) and what Commit sends for it, and
+// who wrote a commit.
 
 import './support/hooks.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Diff } from '../../src/shared/index.ts';
+import type { Diff, FileStatus } from '../../src/shared/index.ts';
 
 const { wordDiff, lcs } = await import('../../src/client/lib/diff/words.ts');
 const { gaps, keyOf, linesBetween, model } = await import('../../src/client/lib/diff/model.ts');
@@ -13,7 +15,8 @@ const { Graph, segmentPath } = await import('../../src/client/lib/graph.ts');
 const { merged, parseConflicts } = await import('../../src/client/lib/conflicts.ts');
 const { branchName, branchProblem } = await import('../../src/client/lib/branchNames.ts');
 const { ignoreExact, relativeTo } = await import('../../src/client/lib/paths.ts');
-const { initials } = await import('../../src/client/lib/people.ts');
+const { authorNames, authorsOf, initials } = await import('../../src/client/lib/people.ts');
+const { afterCommit, checkedFiles, includedLines, lineIds, pruned, selection, stateOf, withFiles, withLines } = await import('../../src/client/lib/include.ts');
 
 function diff(hunks: Diff['hunks'], o: Partial<Diff> = {}): Diff {
   return { path: 'src/a.ts', status: 'M', binary: false, truncated: false, size: 100, additions: 0, deletions: 0, hunks, ...o };
@@ -175,4 +178,58 @@ test('names and paths', () => {
   assert.equal(initials('ada'), 'AD');
   assert.equal(relativeTo('/r/app', '/r/app/src/a.ts'), 'src/a.ts');
   assert.equal(relativeTo('/r/app', '/r/apps/a.ts'), null);
+});
+
+const file = (path: string, o: Partial<FileStatus> = {}): FileStatus => ({ path, staged: null, worktree: null, untracked: false, conflict: null, mtime: 1, ...o });
+
+test('every change is checked for the next commit until it’s left out: files whole, or some of their lines', () => {
+  const files = [file('a.txt', { worktree: 'M' }), file('new.txt', { untracked: true }), file('staged.txt', { staged: 'A' }), file('both.txt', { conflict: 'bothModified' })];
+  // Nothing chosen: everything's in (a file staged in a terminal too); a conflict isn't to be chosen.
+  assert.deepEqual(files.map((f) => stateOf({}, f.path)), [true, true, true, true]);
+  assert.deepEqual(checkedFiles(files, {}).map((f) => f.path), ['a.txt', 'new.txt', 'staged.txt']);
+  let c = withFiles({}, ['a.txt', 'new.txt'], false);
+  assert.deepEqual(c, { 'a.txt': 'out', 'new.txt': 'out' });
+  assert.deepEqual(checkedFiles(files, c).map((f) => f.path), ['staged.txt']);
+  c = withFiles(c, ['new.txt'], true);
+  assert.deepEqual(c, { 'a.txt': 'out' });
+  // Lines: named by what they are, so they stay out as the lines around them move.
+  assert.deepEqual([...lineIds(sample).values()], ['-0:let x = 1;', '+0:let x = 2;', '+0:let y = 3;', '-0:gone']);
+  c = withLines({}, 'src/a.ts', sample, ['0:2'], false);
+  assert.deepEqual(c, { 'src/a.ts': { out: ['+0:let x = 2;'] } });
+  assert.equal(stateOf(c, 'src/a.ts'), 'mixed');
+  assert.deepEqual([...includedLines(sample, c['src/a.ts'])], ['0:1', '0:3', '1:0']);
+  const moved = diff([{ ...sample.hunks[0], oldStart: 40, newStart: 41, lines: sample.hunks[0].lines.map((l) => ({ ...l, old: l.old && l.old + 30, new: l.new && l.new + 31 })) }]);
+  assert.deepEqual([...includedLines(moved, c['src/a.ts'])], ['0:1', '0:3']);
+  // Every line out is the file out; every line back in, no choice at all.
+  assert.equal(withLines({}, 'src/a.ts', sample, ['0:1', '0:2', '0:3', '1:0'], false)['src/a.ts'], 'out');
+  assert.deepEqual(withLines(c, 'src/a.ts', sample, ['0:2'], true), {});
+  assert.deepEqual(withLines({ 'src/a.ts': 'out' }, 'src/a.ts', sample, ['1:0'], true), { 'src/a.ts': { out: ['-0:let x = 1;', '+0:let x = 2;', '+0:let y = 3;'] } });
+  // A file gone from the changes loses its choice (not from a cut list); after a commit, what's left of a file in part is out.
+  assert.deepEqual(pruned({ 'a.txt': 'out', 'gone.txt': 'out' }, files), { 'a.txt': 'out' });
+  assert.deepEqual(pruned({ 'gone.txt': 'out' }, files, true), { 'gone.txt': 'out' });
+  assert.deepEqual(afterCommit({ 'a.txt': 'out', 'src/a.ts': { out: ['+0:x'] } }), { 'a.txt': 'out', 'src/a.ts': 'out' });
+});
+
+test('Commit sends the files checked whole, a renamed one’s old path too, and a patch of a file’s lines checked', async () => {
+  const files = [file('a.txt', { worktree: 'M' }), file('out.txt', { worktree: 'M' }), file('b.txt', { staged: 'R', from: 'old-b.txt' }), file('src/a.ts', { worktree: 'M' }), file('c.txt', { conflict: 'bothModified' })];
+  const choices = { 'out.txt': 'out' as const, 'src/a.ts': { out: ['+0:let y = 3;', '-0:gone'] } };
+  const asked: string[] = [];
+  const sent = await selection(files, choices, async (f) => (asked.push(f.path), sample));
+  assert.deepEqual(asked, ['src/a.ts']);
+  assert.deepEqual(sent.paths, ['a.txt', 'b.txt', 'old-b.txt']);
+  assert.equal(sent.patches.length, 1);
+  assert.match(sent.patches[0], /^diff --git a\/src\/a\.ts b\/src\/a\.ts\n/);
+  assert.match(sent.patches[0], /\n-let x = 1;\n\+let x = 2;\n b\n/);
+  assert.doesNotMatch(sent.patches[0], /let y = 3/);
+  assert.doesNotMatch(sent.patches[0], /^-gone$/m);
+});
+
+test('a commit’s authors: its author, then its co-authors', () => {
+  const c = { author: 'Ada Lovelace', email: 'ada@example.com' };
+  assert.deepEqual(authorsOf(c), [{ name: 'Ada Lovelace', email: 'ada@example.com' }]);
+  assert.equal(authorNames(c), 'Ada Lovelace');
+  const grace = { name: 'Grace Hopper', email: 'grace@example.com' };
+  assert.equal(authorNames({ ...c, coAuthors: [grace] }), 'Ada Lovelace and Grace Hopper');
+  assert.equal(authorNames({ ...c, coAuthors: [grace, { name: 'Alan Turing', email: 'alan@example.com' }] }), 'Ada Lovelace and 2 others');
+  assert.equal(authorsOf({ ...c, coAuthors: [grace] })[1], grace);
 });

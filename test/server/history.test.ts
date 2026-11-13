@@ -4,7 +4,7 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseRefs } from '../../src/server/lib/commits.ts';
+import { parseCoAuthors, parseRefs } from '../../src/server/lib/commits.ts';
 import type { Blame, ChangedFile, Commit, CommitDetail, Compare, FileCommit, LogPage } from '../../src/shared/index.ts';
 import { commitAll, plugin, repo, sh, write } from './support.ts';
 
@@ -30,6 +30,42 @@ test('refs as git decorates them', () => {
   ]);
   assert.deepEqual(parseRefs('HEAD'), [{ name: 'HEAD', kind: 'head' }]);
   assert.deepEqual(parseRefs(''), []);
+});
+
+test('co-authors from trailers: each once, odd values left out', () => {
+  assert.deepEqual(parseCoAuthors('Grace Hopper <grace@example.com>\nAlan Turing  <alan@example.com> \n\ngrace hopper <GRACE@example.com>\nnobody\n<x@example.com>\nEve <>\n'), [
+    { name: 'Grace Hopper', email: 'grace@example.com' },
+    { name: 'Alan Turing', email: 'alan@example.com' },
+  ]);
+  // authors' separator too.
+  assert.deepEqual(parseCoAuthors('A <a@x>\x1dB <b@x>'), [
+    { name: 'A', email: 'a@x' },
+    { name: 'B', email: 'b@x' },
+  ]);
+  assert.deepEqual(parseCoAuthors(''), []);
+});
+
+test('log and show name a commit’s co-authors, the author left out; a commit without them has none', async () => {
+  const dir = await history(2);
+  await write(dir, { 'b.txt': 'pair\n' });
+  sh(dir, 'add', '-A');
+  sh(dir, 'commit', '-q', '-m', 'Pair on b\n\nWhy we paired.\n\nCo-authored-by: Grace Hopper <grace@example.com>\nco-authored-by: Alan Turing <alan@example.com>\nCo-authored-by: Ada Lovelace <ada@example.com>');
+  const { commits } = await g.call<LogPage>({ op: 'log', repo: dir, skip: 0, limit: 5 });
+  const people = [
+    { name: 'Grace Hopper', email: 'grace@example.com' },
+    { name: 'Alan Turing', email: 'alan@example.com' },
+  ];
+  assert.equal(commits[0].email, 'ada@example.com');
+  assert.deepEqual(commits[0].coAuthors, people);
+  assert.equal(commits[0].subject, 'Pair on b');
+  assert.equal(commits[1].coAuthors, undefined);
+  const c = await g.call<CommitDetail>({ op: 'show', repo: dir, sha: commits[0].sha });
+  assert.deepEqual(c.coAuthors, people);
+  assert.match(c.body, /^Why we paired\.\n\nCo-authored-by: Grace Hopper/);
+  assert.deepEqual(c.files.map((f) => f.path), ['b.txt']);
+  const files = await g.call<LogPage<FileCommit>>({ op: 'fileLog', repo: dir, path: 'b.txt', skip: 0, limit: 5 });
+  assert.deepEqual(files.commits[0].coAuthors, people);
+  assert.equal(files.commits[0].path, 'b.txt');
 });
 
 test('pages of history: limit, skip, more; parents and refs', async () => {

@@ -1,14 +1,19 @@
 // `commit`, `undoCommit` and `authors`: a commit with its summary,
 // description and trailers (sign-off, co-authors) written as Desktop
-// writes them; the last commit taken back, its changes staged; and the
-// people in the history, to pick co-authors from.
+// writes them, of what's staged or (`only`) of exactly the files and lines
+// checked, git's index left alone; the last commit taken back, its changes
+// staged; and the people in the history, to pick co-authors from.
 
+import { lstat, rm } from 'node:fs/promises';
+import path from 'node:path';
 import { PluginError } from '@hyperpane/sdk/server';
 import type { Author } from '../../shared/index.ts';
-import { count } from '../lib/args.ts';
-import { RS, US } from '../lib/commits.ts';
+import { asList, count } from '../lib/args.ts';
+import { RS, US, parseCoAuthors } from '../lib/commits.ts';
+import { checkPaths, literal, nulList } from '../lib/pathspec.ts';
 import type { RunOptions } from '../lib/process.ts';
 import type { Repo } from '../lib/repo.ts';
+import { applyArgs, isPatch, patchPath } from './apply.ts';
 import { stage } from './stage.ts';
 
 export interface CommitRequest {
@@ -20,6 +25,10 @@ export interface CommitRequest {
   all?: boolean;
   allowEmpty?: boolean;
   noVerify?: boolean;
+  /** Commit exactly these, whatever's staged: whole files as the working
+   * tree has them, and patches of some of a file's lines (src/shared/patch.ts,
+   * from its diff against HEAD). */
+  only?: { paths?: unknown; patches?: unknown };
 }
 
 export async function commit(repo: Repo, r: CommitRequest, signal?: AbortSignal): Promise<{ sha: string; summary: string }> {
@@ -58,10 +67,56 @@ export async function commit(repo: Repo, r: CommitRequest, signal?: AbortSignal)
     for (const t of trailers) args.push('--trailer', t);
     args.push('--no-edit');
   }
-  await repo.run(args, o);
+  if (r.only) await commitOnly(repo, r.only, (env) => repo.run(args, { ...o, env }));
+  else await repo.run(args, o);
   const out = await repo.text(['log', '-1', '--format=%H%x1f%s', 'HEAD', '--']);
   const [sha, subject] = out.trim().split('\x1f');
   return { sha, summary: subject ?? summary };
+}
+
+/**
+ * A commit of exactly what's checked, made from an index of its own (HEAD,
+ * then the files and the patches), as `git commit -- paths` does: git's
+ * index isn't touched on the way, and a commit that fails leaves it as it
+ * was. After the commit, the committed files' entries in it are the new
+ * HEAD's, so they don't show as staged back to what they were.
+ */
+async function commitOnly(repo: Repo, only: NonNullable<CommitRequest['only']>, commit: (env: Record<string, string>) => Promise<unknown>) {
+  const paths = checkPaths(asList(only.paths));
+  const patches = asList(only.patches);
+  if (!patches.every(isPatch)) throw new PluginError("That isn't a patch.");
+  const patched = checkPaths(patches.map((p) => patchPath(p) ?? ''));
+  const index = path.join(repo.gitDir, `hyperpane-commit-${process.pid}-${Date.now()}.index`);
+  const env = { GIT_INDEX_FILE: index };
+  try {
+    await repo.run(['read-tree', ...((await repo.hasHead()) ? ['HEAD'] : ['--empty'])], { env });
+    const there = await present(repo, paths, env);
+    if (there.length) await repo.run(['add', '-A', '--pathspec-from-file=-', '--pathspec-file-nul'], { env, input: nulList(there) });
+    for (const patch of patches) await repo.run(applyArgs(patch, true, false), { env, input: patch });
+    await commit(env);
+  } finally {
+    await rm(index, { force: true });
+    await rm(`${index}.lock`, { force: true });
+  }
+  const committed = [...new Set([...paths, ...patched])];
+  if (committed.length) await repo.run(['reset', '-q', '--pathspec-from-file=-', '--pathspec-file-nul'], { input: nulList(committed) });
+}
+
+/** The paths there's something of to commit: in the working tree, or in
+ * HEAD (to delete). One added and then deleted has neither. */
+async function present(repo: Repo, paths: string[], env: Record<string, string>): Promise<string[]> {
+  const gone: string[] = [];
+  const out: string[] = [];
+  for (const p of paths) {
+    if (await lstat(repo.file(p)).then(() => true, () => false)) out.push(p);
+    else gone.push(p);
+  }
+  if (gone.length) {
+    const listed = await repo.text(['ls-files', '-z', '--', ...gone.map(literal)], { env });
+    const known = new Set(listed.split('\0'));
+    out.push(...gone.filter((p) => known.has(p)));
+  }
+  return out;
 }
 
 /** Takes the last commit back, its changes staged; gives its message back. */
@@ -95,10 +150,7 @@ export async function authors(repo: Repo, limit = 2000, signal?: AbortSignal): P
     const [name, email, trailers] = record.replace(/^\n/, '').split(US);
     if (name === undefined || email === undefined) continue;
     add(name, email);
-    for (const t of (trailers ?? '').split('\x1d')) {
-      const m = /^(.*?)\s*<([^>]+)>/.exec(t.trim());
-      if (m) add(m[1], m[2]);
-    }
+    for (const p of parseCoAuthors(trailers ?? '')) add(p.name, p.email);
   }
   return [...people.values()].sort((a, b) => b.commits - a.commits || a.name.localeCompare(b.name));
 }

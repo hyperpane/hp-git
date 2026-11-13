@@ -8,7 +8,7 @@ import { NodeMessage } from '@hyperpane/ui';
 import type { FileCommit } from '../../shared/index.ts';
 import { commitMenu } from '../app/actions/commits.ts';
 import { useRepo } from '../app/repo.ts';
-import { Avatar } from '../components/Avatar.tsx';
+import { Authors } from '../components/Avatar.tsx';
 import { Blank } from '../components/Blank.tsx';
 import { DiffPane } from '../components/diff/DiffPane.tsx';
 import { Split } from '../components/Split.tsx';
@@ -16,6 +16,7 @@ import { StatusLetter } from '../components/StatusLetter.tsx';
 import { type VirtualHandle, VirtualList } from '../components/VirtualList.tsx';
 import { ago, longDate, shortSha } from '../lib/format.ts';
 import { listKey } from '../lib/listKey.ts';
+import { authorNames } from '../lib/people.ts';
 import { rowClass } from '../lib/rows.ts';
 
 const PAGE = 200;
@@ -109,15 +110,15 @@ export function FileHistory({ path }: { path: string }) {
                       setPicked(x.sha);
                       commitMenu(repo, x, e);
                     }}
-                    title={`${x.subject}\n${x.author} · ${longDate(x.date)}\n${x.path}`}
+                    title={`${x.subject}\n${authorNames(x)} · ${longDate(x.date)}\n${x.path}`}
                   >
-                    <Avatar name={x.author} email={x.email} size={20} />
+                    <Authors commit={x} size={20} max={2} />
                     <div className="flex min-w-0 flex-1 flex-col leading-tight">
                       <span className="truncate">{x.subject}</span>
                       <span className="flex min-w-0 items-center gap-1 text-[10px] text-[var(--node-muted)]">
                         <span className="font-mono">{shortSha(x.sha)}</span>
                         <span className="truncate">
-                          {x.author} · {ago(x.date)}
+                          {authorNames(x)} · {ago(x.date)}
                           {x.from ? ` · renamed from ${x.from}` : x.path !== path ? ` · as ${x.path}` : ''}
                         </span>
                       </span>

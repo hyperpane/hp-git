@@ -1,7 +1,8 @@
 // The pieces of a diff's rows: a hunk's header (pick all of it, stage,
 // unstage or discard it), the unchanged lines folded between hunks (to
-// open), a line's numbers (press them to pick the line, drag for more) and
-// its code.
+// open), a line's numbers (press them to pick the line, or to check it for
+// the next commit; drag for more) and its code (select it with the mouse
+// and copy it).
 
 import { ArrowDownToLine, ArrowUpToLine, Ellipsis, UnfoldVertical } from 'lucide-react';
 import { cn } from '@hyperpane/ui';
@@ -20,7 +21,9 @@ export function HunkRow({
   hunk,
   keys,
   all,
+  some,
   canPick,
+  checking,
   withActions,
   actions,
   busy,
@@ -30,7 +33,11 @@ export function HunkRow({
   hunk: Hunk;
   keys: LineKey[];
   all: boolean;
+  /** Some of its lines, not all. */
+  some?: boolean;
   canPick: boolean;
+  /** Its box checks it for the next commit rather than picking it. */
+  checking?: boolean;
   withActions: boolean;
   actions?: LineActions;
   busy: boolean;
@@ -44,11 +51,12 @@ export function HunkRow({
           <button
             type="button"
             tabIndex={-1}
-            title={all ? 'Unpick this hunk' : 'Pick every changed line of this hunk'}
-            className={cn('h-4 rounded-chip px-1 font-mono text-[10px] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]', all && 'text-[var(--node-accent)]')}
+            title={checking ? (all ? 'Leave this hunk out of the commit' : 'Commit all of this hunk') : all ? 'Unpick this hunk' : 'Pick every changed line of this hunk'}
+            aria-label={checking ? (all ? 'Leave this hunk out' : 'Commit this hunk') : undefined}
+            className={cn('h-4 rounded-chip px-1 font-mono text-[10px] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]', (all || some) && 'text-[var(--node-accent)]')}
             onClick={onPick}
           >
-            {all ? '■' : '□'}
+            {all ? '■' : some ? '▣' : '□'}
           </button>
         )}
         <span className="truncate font-mono">
@@ -98,6 +106,8 @@ export function Gutter({
   kind,
   lineKey,
   selected,
+  out,
+  checking,
   both = true,
   width,
   canPick,
@@ -109,13 +119,17 @@ export function Gutter({
   kind: Line['kind'] | 'ctx';
   lineKey: LineKey | null;
   selected: boolean;
+  /** Left out of the next commit. */
+  out?: boolean;
+  /** The press checks the line for the next commit rather than picking it. */
+  checking?: boolean;
   both?: boolean;
   width: number;
   canPick: boolean;
   onPress(key: LineKey, e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }): void;
   onEnter(key: LineKey): void;
 }) {
-  const bg = selected ? SELECTED : kind === '+' ? ADDED_GUTTER : kind === '-' ? REMOVED_GUTTER : 'var(--node-bg)';
+  const bg = selected ? SELECTED : out ? 'var(--node-bg)' : kind === '+' ? ADDED_GUTTER : kind === '-' ? REMOVED_GUTTER : 'var(--node-bg)';
   return (
     <div
       className={cn('sticky left-0 z-[1] flex h-full flex-none select-none', lineKey && canPick && 'cursor-pointer')}
@@ -126,7 +140,8 @@ export function Gutter({
         onPress(lineKey, e);
       }}
       onPointerEnter={() => lineKey && onEnter(lineKey)}
-      title={lineKey && canPick ? 'Pick this line (⇧ for a range, drag for several)' : undefined}
+      title={lineKey && canPick ? (checking ? `${out ? 'Commit' : 'Leave out'} this line (⇧ for a range, drag for several)` : 'Pick this line (⇧ for a range, drag for several)') : undefined}
+      data-out={checking && lineKey ? String(!!out) : undefined}
     >
       <span className="pe-1.5 text-right text-[var(--node-muted)] tabular-nums" style={{ width }}>
         {old ?? ''}
@@ -136,19 +151,23 @@ export function Gutter({
           {now ?? ''}
         </span>
       )}
-      <span className="w-4 text-center" style={{ color: kind === '+' ? 'var(--ansi-2)' : kind === '-' ? 'var(--ansi-1)' : undefined }}>
+      <span className="w-4 text-center" style={{ color: out ? 'var(--node-muted)' : kind === '+' ? 'var(--ansi-2)' : kind === '-' ? 'var(--ansi-1)' : undefined }}>
         {selected ? '●' : kind === '+' || kind === '-' ? kind : ''}
       </span>
     </div>
   );
 }
 
-/** A line's code: its syntax colors and the words that changed. */
+/** A line's code: its syntax colors and the words that changed. Its text
+ * can be selected and copied (the window's text can't, but this is what
+ * people want out of a diff); the gutter beside it picks lines. */
 export function CodeCell({ text, spans, words, kind, noNewline }: { text: string; spans: Span[] | undefined; words: ReturnType<Model['words']>; kind: Line['kind'] | 'ctx'; noNewline?: boolean }) {
   return (
-    <div className="flex-none ps-1 pe-6 whitespace-pre">
-      {paint(text, spans, words, kind === '+' ? 'git-word-added' : 'git-word-removed')}
-      {noNewline && <span className="ms-2 text-[10px] text-[var(--node-muted)] italic" title="No newline at end of file">⏎̸</span>}
+    <div className="flex-none cursor-text ps-1 pe-6 whitespace-pre select-text">
+      <span data-code>
+        {paint(text, spans, words, kind === '+' ? 'git-word-added' : 'git-word-removed')}
+      </span>
+      {noNewline && <span className="ms-2 text-[10px] text-[var(--node-muted)] italic select-none" title="No newline at end of file">⏎̸</span>}
     </div>
   );
 }

@@ -12,25 +12,38 @@ import { type Trash, copyToTrash } from '../lib/trash.ts';
 /** Applies a patch made by src/shared/patch.ts: to the index (`cached`) or
  * the working tree, where what's there now goes to the Trash first. */
 export async function apply(repo: Repo, patch: unknown, cached: boolean, reverse: boolean, trash: Trash) {
-  if (typeof patch !== 'string' || !patch.startsWith('diff --git ')) throw new PluginError("That isn't a patch.");
-  const args = ['apply', '--whitespace=nowarn', '--recount'];
-  if (cached) args.push('--cached');
-  if (reverse) args.push('--reverse');
-  // A hunk without context (a diff asked with no context lines).
-  if (hasHunkWithoutContext(patch)) args.push('--unidiff-zero');
-  args.push('-');
+  if (!isPatch(patch)) throw new PluginError("That isn't a patch.");
+  const args = applyArgs(patch, cached, reverse);
   if (!cached) {
     // Checked first, so nothing goes to the Trash for a patch that won't apply.
     const check = await repo.exec([...args.slice(0, -1), '--check', '-'], { input: patch });
     if (check.code !== 0) throw new PluginError(explain(check.stderr));
-    const m = /^\+\+\+ (?:"b\/(.*)"|b\/(.*?))\t?$/m.exec(patch) ?? /^--- (?:"a\/(.*)"|a\/(.*?))\t?$/m.exec(patch);
-    const name = m ? (m[1] !== undefined ? unquote(m[1]) : m[2]) : null;
+    const name = patchPath(patch);
     if (name) {
       const file = repo.file(checkPaths([name])[0]);
       if (await lstat(file).then((s) => s.isFile(), () => false)) await copyToTrash(repo, file, trash);
     }
   }
   await repo.run(args, { input: patch });
+}
+
+export const isPatch = (patch: unknown): patch is string => typeof patch === 'string' && patch.startsWith('diff --git ');
+
+/** `git apply` for a patch of src/shared/patch.ts, read from stdin. */
+export function applyArgs(patch: string, cached: boolean, reverse: boolean): string[] {
+  const args = ['apply', '--whitespace=nowarn', '--recount'];
+  if (cached) args.push('--cached');
+  if (reverse) args.push('--reverse');
+  // A hunk without context (a diff asked with no context lines).
+  if (hasHunkWithoutContext(patch)) args.push('--unidiff-zero');
+  args.push('-');
+  return args;
+}
+
+/** The file a patch changes (its new name, or its old one if it goes). */
+export function patchPath(patch: string): string | null {
+  const m = /^\+\+\+ (?:"b\/(.*)"|b\/(.*?))\t?$/m.exec(patch) ?? /^--- (?:"a\/(.*)"|a\/(.*?))\t?$/m.exec(patch);
+  return m ? (m[1] !== undefined ? unquote(m[1]) : m[2]) : null;
 }
 
 function unquote(text: string): string {

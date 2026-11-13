@@ -30,6 +30,7 @@ export interface DiffRequest {
   path: string;
   oldPath?: string;
   staged?: boolean;
+  head?: boolean;
   untracked?: boolean;
   commit?: string;
   from?: string;
@@ -134,7 +135,17 @@ export function gitApi(host: Host, root: string, server?: string) {
     unstage: (paths: string[] | 'all') => call<null>('unstage', paths === 'all' ? { all: true } : { paths }),
     discard: (paths: string[]) => call<null>('discard', { paths }),
     ignore: (pattern: string) => call<null>('ignore', { pattern }),
-    commit: (m: { summary: string; description?: string; amend?: boolean; signoff?: boolean; coAuthors?: { name: string; email: string }[]; all?: boolean; allowEmpty?: boolean }) =>
+    commit: (m: {
+      summary: string;
+      description?: string;
+      amend?: boolean;
+      signoff?: boolean;
+      coAuthors?: { name: string; email: string }[];
+      all?: boolean;
+      allowEmpty?: boolean;
+      /** Exactly these, whatever's staged (lib/include.ts's selection). */
+      only?: { paths: string[]; patches: string[] };
+    }) =>
       call<{ sha: string; summary: string }>('commit', m),
     undoCommit: () => call<{ summary: string; description: string }>('undoCommit'),
     authors: (limit?: number) => call<Author[]>('authors', { limit }),
