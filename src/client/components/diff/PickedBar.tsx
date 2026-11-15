@@ -11,12 +11,12 @@ export function PickedBar({ n, actions, busy, onRun, onClear }: { n: number; act
     <div className="rounded-surface shadow-popover absolute bottom-3 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-2 border border-[var(--node-border)] bg-[var(--node-bg)] py-1 ps-3 pe-1 text-xs whitespace-nowrap motion-safe:animate-[ax-fade-in_150ms_ease-out]">
       <span className="text-[var(--node-muted)]">{plural(n, 'line')} picked</span>
       {actions.primary && (
-        <NodeButton disabled={busy} className="border-transparent bg-[var(--node-accent)] text-[var(--node-bg)] hover:bg-[color-mix(in_srgb,var(--node-accent)_85%,var(--node-fg))]" onClick={() => onRun(actions.primary)}>
+        <NodeButton disabled={busy} variant="primary" onClick={() => onRun(actions.primary)}>
           {actions.primary.label} {plural(n, 'line')} <kbd className="font-sans opacity-70">Space</kbd>
         </NodeButton>
       )}
       {actions.discard && (
-        <NodeButton disabled={busy} className="text-[var(--ansi-1)]" onClick={() => onRun(actions.discard)}>
+        <NodeButton disabled={busy} variant="danger" onClick={() => onRun(actions.discard)}>
           {actions.discard.label}…
         </NodeButton>
       )}

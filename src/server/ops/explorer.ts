@@ -9,7 +9,7 @@
 // Many Explorers ask, every few seconds: a repository's status is kept for
 // a second, and folders that aren't in one are remembered a few seconds.
 
-import { realpath } from 'node:fs/promises';
+import { realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileStatus } from '../../shared/index.ts';
 import { type Decoration, decorate } from '../lib/decorations.ts';
@@ -22,6 +22,8 @@ export const PATHS_MAX = 2000;
 /** How long a repository's status is kept, and a folder outside any. */
 const STATUS_KEPT = 1000;
 const OUTSIDE_KEPT = 5000;
+/** The most folders looked at for a `.git` in one call. */
+const REPO_ROOTS_MAX = 400;
 
 interface Deps {
   repos: Repos;
@@ -121,6 +123,29 @@ export function explorerOps({ repos, locked, changed }: Deps) {
         // A repository git can't read now: its rows stay plain.
       }
     }
+    // Folders that are a repository (a `.git` in them): marked, with their branch.
+    await Promise.all(
+      (Array.isArray(req?.paths) ? req.paths : [])
+        .filter((p): p is string => typeof p === 'string' && !!p.trim())
+        .slice(0, REPO_ROOTS_MAX)
+        .map(async (p) => {
+          let full: string;
+          try {
+            full = whole(p);
+            await stat(path.join(full, '.git'));
+          } catch {
+            return;
+          }
+          try {
+            const repo = await repos.open(full);
+            if (path.resolve(repo.root) !== path.resolve(await realpath(full))) return;
+            const branch = await repo.currentBranch().catch(() => null);
+            out[p] = { ...out[p], repo: { branch } };
+          } catch {
+            // Not one git can open: a folder like any other.
+          }
+        }),
+    );
     return out;
   }
 

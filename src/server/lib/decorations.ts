@@ -14,6 +14,9 @@ export interface Decoration {
   color?: DecorationColor;
   title?: string;
   faded?: boolean;
+  /** The row is a repository's folder: its branch (or null when its HEAD
+   * isn't on one). */
+  repo?: { branch: string | null };
 }
 
 /** A path Explorer asked about: as it gave it, and from the repository's

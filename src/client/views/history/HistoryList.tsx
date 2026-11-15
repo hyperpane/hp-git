@@ -113,7 +113,7 @@ export function HistoryList({
       <div className="h-full px-1" data-sha={c.sha}>
         <div
           className={cn(
-            'rounded-chip flex h-full cursor-default items-center gap-1.5 pe-1.5',
+            'rounded-chip flex h-full cursor-default items-center gap-1.5 ps-1.5 pe-1.5',
             isSel ? 'bg-[var(--node-selection-inactive)] group-focus-within/list:bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]',
           )}
           onClick={() => onSelect(c.sha)}

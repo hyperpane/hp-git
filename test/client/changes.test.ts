@@ -35,7 +35,7 @@ test('Changes lists changed, staged and untracked files; the title says where', 
   const name = dir.slice(dir.lastIndexOf('/') + 1);
   await until(() => w.app.last('window.setTitle')?.title === `${name} · main`);
   // The tab counts them; the toolbar names the branch.
-  assert.match(w.root.querySelector('[data-tab="changes"]')!.textContent!, /3/);
+  assert.match(w.root.querySelector('[role="tab"][data-value="changes"]')!.textContent!, /3/);
   assert.match(w.root.textContent!, /Current branch\s*main/);
   // The status came from the watch, with line counts.
   await until(() => w.app.ops('watch').some((r) => r.stats === true), 15000);

@@ -24,7 +24,7 @@ export function NoChanges() {
       actions={
         <>
           {next && (
-            <NodeButton className="border-transparent bg-[var(--node-accent)] text-[var(--node-bg)] hover:opacity-90" disabled={!!repo.sync} onClick={next.run}>
+            <NodeButton variant="primary" disabled={!!repo.sync} onClick={next.run}>
               {next.label}
             </NodeButton>
           )}

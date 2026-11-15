@@ -21,7 +21,7 @@ export async function find(git: Git, p: unknown): Promise<Found> {
   const folder = st.isDirectory() ? full : path.dirname(full);
   const out = await git.exec(folder, ['rev-parse', '--is-bare-repository', '--absolute-git-dir', '--show-toplevel']);
   const lines = out.stdout.toString('utf8').split('\n');
-  const found: Found = { root: null, gitDir: null, bare: false, repos: [] };
+  const found: Found = { folder: shown(folder), root: null, gitDir: null, bare: false, repos: [] };
   let root: string | null = null;
   if (out.code === 0 || (lines[0] === 'true' && lines[1])) {
     found.bare = lines[0] === 'true';

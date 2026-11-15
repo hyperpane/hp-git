@@ -3,9 +3,8 @@
 
 import type { ReactNode } from 'react';
 import { ChevronDown, X, type LucideIcon } from 'lucide-react';
-import { cn, styles } from '@hyperpane/ui';
+import { Progress, cn, styles } from '@hyperpane/ui';
 import { useRepo } from '../../app/repo.ts';
-import { Progress } from '../../components/Progress.tsx';
 
 export function SyncSegment({ icon: Icon, label, sub, badge, onClick, onMenu }: { icon: LucideIcon; label: string; sub: string; badge: ReactNode; onClick(): void; onMenu(el: HTMLElement): void }) {
   const repo = useRepo();
@@ -42,7 +41,7 @@ export function SyncSegment({ icon: Icon, label, sub, badge, onClick, onMenu }: 
           <ChevronDown className="size-3.5" />
         </button>
       )}
-      {sync && <Progress percent={sync.percent} className="absolute inset-x-0 bottom-0 rounded-none" />}
+      {sync && <Progress value={sync.percent} size="xs" label={sync.label} className="absolute inset-x-0 bottom-0 rounded-none" />}
     </div>
   );
 }

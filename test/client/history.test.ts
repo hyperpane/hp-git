@@ -17,7 +17,7 @@ async function window(t: { after(fn: () => void): void }, dir: string) {
   return f;
 }
 
-const tab = (root: HTMLElement, id: string) => click(root.querySelector(`[data-tab="${id}"]`)!);
+const tab = (root: HTMLElement, id: string) => click(root.querySelector(`[role="tab"][data-value="${id}"]`)!);
 const commitRow = (root: HTMLElement, subject: string) => [...root.querySelectorAll<HTMLElement>('[data-sha] > div')].find((r) => r.textContent!.includes(subject));
 /** Answers the next menu with the item labelled so. */
 const choose = (app: { answers: Record<string, (a: any) => unknown> }, label: string | RegExp) =>
@@ -62,7 +62,7 @@ test('History: commits with the graph and their refs; a commit’s details, file
   click(parent);
   await until(() => w.root.querySelector('[data-view="commit"]')?.textContent?.includes('m1'), 10000, 'the parent');
   key(globalThis.window as unknown as Window, '[', { code: 'BracketLeft', metaKey: true });
-  await until(() => !w.root.querySelector('[data-view]') && w.root.querySelector('[data-tab="history"][aria-selected="true"]'));
+  await until(() => !w.root.querySelector('[data-view]') && w.root.querySelector('[role="tab"][data-value="history"][aria-selected="true"]'));
 });
 
 test('History: a commit’s co-authors stacked with its author, everyone named; its message folds away for the diff, and stays folded', async (t) => {

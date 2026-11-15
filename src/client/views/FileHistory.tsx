@@ -4,14 +4,13 @@
 
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { FileClock } from 'lucide-react';
-import { NodeMessage } from '@hyperpane/ui';
+import { NodeMessage, SplitPane } from '@hyperpane/ui';
 import type { FileCommit } from '../../shared/index.ts';
 import { commitMenu } from '../app/actions/commits.ts';
 import { useRepo } from '../app/repo.ts';
 import { Authors } from '../components/Avatar.tsx';
 import { Blank } from '../components/Blank.tsx';
 import { DiffPane } from '../components/diff/DiffPane.tsx';
-import { Split } from '../components/Split.tsx';
 import { StatusLetter } from '../components/StatusLetter.tsx';
 import { type VirtualHandle, VirtualList } from '../components/VirtualList.tsx';
 import { ago, longDate, shortSha } from '../lib/format.ts';
@@ -75,7 +74,7 @@ export function FileHistory({ path }: { path: string }) {
   if (error && !commits.length) return <NodeMessage error>{error}</NodeMessage>;
   if (!commits.length) return loading ? <NodeMessage>Loading the history of {path}…</NodeMessage> : <Blank icon={FileClock}>No commit has touched {path}.</Blank>;
   return (
-    <Split
+    <SplitPane
       id="fileHistory"
       initial={300}
       min={200}

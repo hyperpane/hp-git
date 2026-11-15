@@ -5,11 +5,10 @@
 import { useMemo, useState } from 'react';
 import { FolderGit2, GitBranch, X } from 'lucide-react';
 import { type Host, useHost, useWindow } from '@hyperpane/sdk/client';
-import { Button, NodeButton } from '@hyperpane/ui';
+import { Button, NodeButton, Progress } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { gitTools } from '../app/api.ts';
 import { askCredentials } from '../app/credentials.ts';
-import { Progress } from '../components/Progress.tsx';
 import { basenameOf } from '../lib/paths.ts';
 
 type Cloning = { phase: string; percent: number | null; text: string; cancel(): void };
@@ -94,7 +93,7 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
               Cancel
             </NodeButton>
           </div>
-          <Progress percent={cloning.percent} className="h-1" />
+          <Progress value={cloning.percent} size="sm" label="Cloning" />
           {cloning.text && <div className="truncate text-left font-mono text-2xs text-[var(--node-muted)]">{cloning.text}</div>}
         </div>
       ) : (

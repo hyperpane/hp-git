@@ -3,13 +3,12 @@
 
 import { type ReactNode, useEffect, useState } from 'react';
 import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
-import { NodeMessage, SegmentedControl } from '@hyperpane/ui';
+import { NodeMessage, SegmentedControl, SplitPane } from '@hyperpane/ui';
 import type { Commit, Compare } from '../../../shared/index.ts';
 import { commitMenu } from '../../app/actions/commits.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Authors } from '../../components/Avatar.tsx';
 import { Blank } from '../../components/Blank.tsx';
-import { Split } from '../../components/Split.tsx';
 import { VirtualList } from '../../components/VirtualList.tsx';
 import { longDate, plural, shortAgo, shortSha } from '../../lib/format.ts';
 import { rowClass } from '../../lib/rows.ts';
@@ -22,6 +21,8 @@ export function CompareView({ base, head }: { base: string; head: string }) {
   const repo = useRepo();
   const [state, setState] = useState<{ c?: Compare; error?: string }>({});
   const [show, setShow] = useState<'commits' | 'files'>('commits');
+  // Measured once there, so the two lists start with half each.
+  const [box, setBox] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     const p = repo.api.compare(base, head, 500);
     p.promise.then(
@@ -34,7 +35,7 @@ export function CompareView({ base, head }: { base: string; head: string }) {
   if (!state.c) return <NodeMessage>Comparing…</NodeMessage>;
   const c = state.c;
   return (
-    <div className="flex min-h-0 flex-1 flex-col" data-compare={`${base}...${head}`}>
+    <div ref={setBox} className="flex min-h-0 flex-1 flex-col" data-compare={`${base}...${head}`}>
       <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
         <SegmentedControl
           size="xs"
@@ -53,11 +54,11 @@ export function CompareView({ base, head }: { base: string; head: string }) {
       </div>
       {show === 'files' && c.mergeBase ? (
         <FilesBetween from={c.mergeBase} to={head} place="compare" />
-      ) : (
-        <Split
+      ) : !box ? null : (
+        <SplitPane
           id="compare"
           direction="column"
-          initial={0.5}
+          initial={box.clientHeight ? Math.max(80, Math.round((box.clientHeight - 32) / 2)) : 200}
           min={80}
           minOther={80}
           first={<CommitColumn icon={<ArrowUpRight className="size-3.5 text-[var(--ansi-2)]" />} title={`${plural(c.aheadCount, 'commit')} on ${head} not on ${base}`} commits={c.ahead} />}

@@ -5,7 +5,7 @@
 // (lib/listKey.ts moves through it).
 
 import { type CSSProperties, type KeyboardEvent, type ReactNode, type Ref, forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
-import { cn } from '@hyperpane/ui';
+import { cn, styles } from '@hyperpane/ui';
 
 export interface VirtualHandle {
   scrollToIndex(index: number, align?: 'nearest' | 'center' | 'start'): void;
@@ -150,7 +150,7 @@ export const VirtualList = forwardRef(function VirtualList(p: VirtualProps, ref:
     >
       <div className={cn('relative', p.innerClassName)} style={{ height: headerHeight + p.count * p.rowHeight, minWidth: '100%', width: p.width }}>
         {p.header && (
-          <div className="sticky top-0 z-[2]" style={{ height: headerHeight }}>
+          <div className={cn(styles.stickyTop, 'z-[2]')} style={{ height: headerHeight }}>
             {p.header}
           </div>
         )}

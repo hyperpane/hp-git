@@ -2,12 +2,11 @@
 // and the picked one's diff beside them.
 
 import { useEffect, useState } from 'react';
-import { NodeMessage } from '@hyperpane/ui';
+import { NodeMessage, SplitPane } from '@hyperpane/ui';
 import type { ChangedFile } from '../../../shared/index.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { DiffPane } from '../../components/diff/DiffPane.tsx';
-import { Split } from '../../components/Split.tsx';
 import { FileList } from './FileList.tsx';
 
 /** The files changed from one revision to another (or to the working tree,
@@ -34,7 +33,7 @@ export function FilesBetween({ from, to, place = 'between' }: { from: string; to
   if (!files.length) return <Blank>No files differ.</Blank>;
   const picked = files.find((f) => f.path === file) ?? null;
   return (
-    <Split
+    <SplitPane
       id={`${place}.files`}
       initial={240}
       min={140}

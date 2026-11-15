@@ -31,7 +31,7 @@ export function StashDetail({ stash }: { stash: Stash | null }) {
             {stash.branch ? ` on ${stash.branch}` : ''} · {ago(stash.date)}
           </span>
           {actions.map((a) => (
-            <NodeButton key={a.label} onClick={a.run} className={a.danger ? 'text-[var(--ansi-1)]' : undefined}>
+            <NodeButton key={a.label} onClick={a.run} variant={a.danger ? 'danger' : 'default'}>
               {a.label.replace(/…$/, '')}
             </NodeButton>
           ))}

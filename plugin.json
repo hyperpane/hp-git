@@ -10,7 +10,7 @@
   "license": "MIT",
   "homepage": "https://github.com/hyperpane/hp-git",
   "engines": {
-    "hyperpane": ">=0.1.5",
+    "hyperpane": ">=0.2.2",
     "node": ">=22.15.0"
   },
   "client": {
@@ -44,6 +44,20 @@
         "size": [
           1040,
           680
+        ],
+        "ports": [
+          {
+            "id": "path",
+            "label": "Folder",
+            "direction": "in",
+            "type": "path"
+          },
+          {
+            "id": "file",
+            "label": "File",
+            "direction": "out",
+            "type": "path"
+          }
         ]
       }
     ],
@@ -174,7 +188,7 @@
   },
   "signature": {
     "key": "ed25519:5LgmP9NjLnpvz48igrFekSqi+4k6gzaO8sNwlsgNKFc=",
-    "sig": "2ZSpRSQSHkpBiGyDUY5JLGVOf1VudNJ0MSNMtXPq2VelSTiOFXvdmuPg472DK3sCKkcV4sG4bgSbplfvtEJCCA==",
-    "server": "Op27hhwjYxn7TzZyKur7SDvNsqLmYVs3pd6zfQPr1h4aJq98v/znZvyCbcLG5lOCXuhw4xt3FrATaXHSwr6hDA=="
+    "sig": "8pynvXyF/UILC4tRZvWRArNnoL98j3J5gKo7xt1GGf2VXaDYPVui3nw2pH7KD2xrPKbMkT30o6u821IzsSUdCA==",
+    "server": "MsA3s1aWBJEk0b0cfutbnw+QztPQjaJ0LaWqUA1/Q8WwhK07B5YeJk2GR+YQsU7w7htrsRuttpWsRsJfNRa/CQ=="
   }
 }

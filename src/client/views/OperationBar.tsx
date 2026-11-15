@@ -3,6 +3,7 @@
 
 import { useRepo } from '../app/repo.ts';
 import { plural, shortSha } from '../lib/format.ts';
+import { NodeButton } from '@hyperpane/ui';
 
 /** The branch a merge's prepared message names (“Merge branch 'x'”). */
 const mergedName = (message?: string) => /^Merge (?:remote-tracking )?branch '([^']+)'/.exec(message ?? '')?.[1] ?? null;
@@ -48,9 +49,9 @@ export function OperationBar() {
       <span className="font-medium">{what}</span>
       <span className="min-w-0 flex-1 truncate text-[var(--node-muted)]">{next}</span>
       {op.kind !== 'bisect' && (
-        <button type="button" disabled={conflicts > 0} className="rounded-control h-6 bg-[var(--node-accent)] px-2.5 text-xs font-medium text-[var(--node-bg)] transition-opacity duration-100 hover:opacity-90 disabled:opacity-40" onClick={() => go('continue')}>
+        <NodeButton variant="primary" disabled={conflicts > 0} onClick={() => go('continue')}>
           Continue
-        </button>
+        </NodeButton>
       )}
       {op.kind === 'rebase' && (
         <button type="button" className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]" onClick={() => go('skip')}>

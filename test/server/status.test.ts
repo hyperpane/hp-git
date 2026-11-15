@@ -117,6 +117,7 @@ test('finds the repository, its submodules and nested ones; inits one', async ()
   await mkdir(path.join(outer, 'node_modules', 'pkg'), { recursive: true });
   sh(path.join(outer, 'node_modules', 'pkg'), 'init', '-q');
   const found = await g.call<Found>({ op: 'find', path: path.join(outer, 'a.txt') });
+  assert.equal(found.folder, as(outer));
   assert.equal(found.root, as(outer));
   assert.equal(found.gitDir, as(path.join(outer, '.git')));
   assert.deepEqual(

@@ -2,7 +2,8 @@
 // on the project's server), the repository that folder is in (looked for
 // again while the server part is being installed or restarts), or what to
 // do when there's none (views/Welcome.tsx). The repository opens in
-// RepoWindow.tsx.
+// RepoWindow.tsx. Linked in nodes mode, a path sent to its Folder port
+// picks the folder.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type Host, useData, useProject, useServerPart, useWindow } from '@hyperpane/sdk/client';
@@ -40,7 +41,16 @@ export function GitWindow({ host }: { host: Host }) {
   /** A repository picked in this window: nested, a submodule. */
   const chosen = data.repo || null;
 
+  /** What was found for a path sent to the Folder port, so it isn't looked for twice. */
+  const sent = useRef<{ f: Found; for: string } | null>(null);
+
   useEffect(() => {
+    if (sent.current?.for === folder) {
+      setFound(sent.current);
+      sent.current = null;
+      return;
+    }
+    sent.current = null;
     let live = true;
     tools.find(folder).then(
       (f) => live && setFound({ f, for: folder }),
@@ -50,6 +60,32 @@ export function GitWindow({ host }: { host: Host }) {
       live = false;
     };
   }, [tools, folder, attempt, part?.version, part?.status]);
+
+  // Its input (linked in nodes mode): a folder, or a file (its folder). The
+  // newest path wins. One that isn't there is shown as it is, as an error.
+  const asks = useRef(0);
+  const shown = useRef(folder);
+  shown.current = folder;
+  useEffect(
+    () =>
+      host.ports.onInput<unknown>('path', (value) => {
+        if (typeof value !== 'string' || !value.trim()) return;
+        const path = value.trim();
+        const ask = ++asks.current;
+        const open = (next: string, f?: Found) => {
+          if (ask !== asks.current) return;
+          // The same folder again: nothing changes, nothing to keep.
+          sent.current = f && next !== shown.current ? { f, for: next } : null;
+          host.win.setData('folder', next);
+          host.win.setData('repo', null);
+        };
+        tools.find(path).then(
+          (f) => open(f.folder ?? path, f),
+          () => open(path),
+        );
+      }),
+    [host, tools],
+  );
 
   // Couldn't look (the server part is still being installed, the server
   // restarts): again in a moment, then less often.

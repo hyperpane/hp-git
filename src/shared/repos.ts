@@ -2,6 +2,8 @@
 // others nested below it) and the git that runs (`version`).
 
 export interface Found {
+  /** The folder looked in: the path's own, or a file's. */
+  folder?: string;
   root: string | null;
   gitDir: string | null;
   bare: boolean;

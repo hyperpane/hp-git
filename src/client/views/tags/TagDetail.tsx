@@ -30,7 +30,7 @@ export function TagDetail({ tag }: { tag: Tag | null }) {
                 {a.label.replace(/…$/, '')}
               </NodeButton>
             ))}
-            <NodeButton className="text-[var(--ansi-1)]" onClick={actions[3].run}>
+            <NodeButton variant="danger" onClick={actions[3].run}>
               Delete
             </NodeButton>
           </div>

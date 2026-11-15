@@ -5,9 +5,8 @@
 
 import type { Dispatch, MouseEvent as ReactMouseEvent, SetStateAction } from 'react';
 import { FolderTree, TriangleAlert } from 'lucide-react';
-import { fileIcon } from '@hyperpane/ui';
+import { Checkbox, fileIcon } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
-import { Checkbox } from '../../components/Checkbox.tsx';
 import { PathLabel } from '../../components/PathLabel.tsx';
 import { SectionHeader } from '../../components/SectionHeader.tsx';
 import { StatusLetter } from '../../components/StatusLetter.tsx';
@@ -19,6 +18,11 @@ import { rowClass } from '../../lib/rows.ts';
 type Click = (it: Item, e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }) => void;
 type Menu = (e: ReactMouseEvent, it: Item) => void;
 type Toggle = (side: Side, files: FileStatus[]) => unknown;
+
+const stop = (e: { stopPropagation(): void }) => e.stopPropagation();
+/** A checkbox in a row: out of the tab order (the list has the keys), and
+ * its presses and double-clicks don't pick or open the row. */
+export const inRow = { hideLabel: true, tabIndex: -1, onPointerDown: stop, onDoubleClick: stop } as const;
 
 export function SectionRow({
   it,
@@ -81,7 +85,7 @@ export function DirRow({
         onDoubleClick={() => setClosed((c) => (open ? new Set([...c, `${it.side}:${it.path}`]) : new Set([...c].filter((x) => x !== `${it.side}:${it.path}`))))}
         onContextMenu={(e) => menu(e, it)}
       >
-        {it.side !== 'conflict' && <Checkbox checked={checked} label={folderLabel(it.side, checked)} onChange={() => toggle(it.side, it.files)} />}
+        {it.side !== 'conflict' && <Checkbox {...inRow} checked={checked} label={folderLabel(it.side, checked)} onCheckedChange={() => toggle(it.side, it.files)} />}
         <button
           type="button"
           tabIndex={-1}
@@ -122,7 +126,7 @@ export function FileRow({
   return (
     <div className="h-full px-1" data-file={f.path} data-side={it.side}>
       <div className={rowClass(isPicked)} style={{ paddingLeft: 6 + it.depth * 12 }} onClick={(e) => click(it, e)} onContextMenu={(e) => menu(e, it)}>
-        <Checkbox checked={checked} label={fileLabel(it.side, checked, f.path)} onChange={() => toggle(it.side, [f])} />
+        <Checkbox {...inRow} checked={checked} label={fileLabel(it.side, checked, f.path)} onCheckedChange={() => toggle(it.side, [f])} />
         {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
         {tree ? <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span> : <PathLabel path={f.path} from={it.side === 'unstaged' || it.side === 'untracked' ? undefined : f.from} />}
         {(f.additions || f.deletions) && it.side !== 'conflict' ? (

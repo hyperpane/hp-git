@@ -8,12 +8,11 @@
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCheck, FolderTree, List, MoreHorizontal, Search } from 'lucide-react';
 import { keys, mod, shortcutKey } from '@hyperpane/sdk/client';
-import { NodeInput, ToolButton, menuItems } from '@hyperpane/ui';
+import { Checkbox, NodeInput, ToolButton, menuItems } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
-import { Checkbox } from '../../components/Checkbox.tsx';
 import { type VirtualHandle, VirtualList } from '../../components/VirtualList.tsx';
 import { type Item, itemKey, items } from '../../lib/changeRows.ts';
 import { plural } from '../../lib/format.ts';
@@ -21,7 +20,7 @@ import { listKey } from '../../lib/listKey.ts';
 import { local } from '../../lib/local.ts';
 import { type Pick, type Side, pickOf, sideFiles, splitPick } from '../../lib/picks.ts';
 import { stateOf } from '../../lib/include.ts';
-import { DirRow, FileRow, SectionRow } from './ChangeRows.tsx';
+import { DirRow, FileRow, SectionRow, inRow } from './ChangeRows.tsx';
 import { CommitBox } from './CommitBox.tsx';
 import { changesMenu, fileMenu } from './menus.ts';
 
@@ -202,9 +201,10 @@ export function ChangesList({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <Checkbox
+          {...inRow}
           checked={allChecked}
           label={repo.including ? (allChecked === true ? 'Uncheck everything' : 'Check everything') : allChecked === true ? 'Unstage everything' : 'Stage everything'}
-          onChange={() => (allChecked === true ? allOut() : allIn())}
+          onCheckedChange={() => (allChecked === true ? allOut() : allIn())}
           disabled={!total}
           className="mx-1"
         />

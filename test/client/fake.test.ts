@@ -225,7 +225,7 @@ test('keys: Ctrl+2 (by its place) is History, the list folds away and back', asy
   // slow machine (CI) runs after the first press.
   await until(() => {
     key(globalThis.window as unknown as Window, '2', { code: 'Digit2', ctrlKey: true });
-    return w.root.querySelector('[data-tab="history"][aria-selected="true"]');
+    return w.root.querySelector('[role="tab"][data-value="history"][aria-selected="true"]');
   });
   // History asks for its log from an effect, a moment after the tab shows.
   await until(() => w.app.ops('log').length, 15000, 'the log');
@@ -234,7 +234,7 @@ test('keys: Ctrl+2 (by its place) is History, the list folds away and back', asy
   // The rail keeps the tabs.
   click(button(w.root, /^Changes \(/)!);
   click(button(w.root, 'Show the list')!);
-  await until(() => w.root.querySelector('[data-tab="changes"][aria-selected="true"]'));
+  await until(() => w.root.querySelector('[role="tab"][data-value="changes"][aria-selected="true"]'));
 });
 
 test('other plugins open a file’s blame here (git.open), in this window', async (t) => {
@@ -302,7 +302,7 @@ test('10 000 changed files and 5 000 commits: only the rows on screen are drawn'
   click(button(w.root, 'Group by folder')!);
   await until(() => list.isConnected && w.root.querySelector('[aria-label="Changed files"]')!.querySelectorAll('[data-row]').length < 80);
   // History: a page of 300, then the next when the end shows.
-  click(w.root.querySelector('[data-tab="history"]')!);
+  click(w.root.querySelector('[role="tab"][data-value="history"]')!);
   const commitsList = await until(() => w.root.querySelector<HTMLElement>('[aria-label="Commits"]'), 20_000, 'commits');
   await until(() => commitsList.querySelectorAll('[data-sha]').length > 10);
   assert.ok(commitsList.querySelectorAll('[data-sha]').length < 80);
@@ -314,7 +314,7 @@ test('10 000 changed files and 5 000 commits: only the rows on screen are drawn'
 test('git.changed from another window loads the lists again', async (t) => {
   const w = await window(t, server(() => status()));
   await until(() => w.root.querySelector('[data-git]'));
-  click(w.root.querySelector('[data-tab="history"]')!);
+  click(w.root.querySelector('[role="tab"][data-value="history"]')!);
   await until(() => w.app.ops('log').length === 1);
   await wait(50);
   w.app.publish('git.changed', { repo: '/elsewhere', branch: 'main', head: 'x' });

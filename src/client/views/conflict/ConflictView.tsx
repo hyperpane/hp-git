@@ -109,7 +109,7 @@ export function ConflictView({ file }: { file: FileStatus }) {
             </NodeButton>
             <NodeButton
               disabled={saving || chosen < conflicts.length}
-              className="border-transparent bg-[var(--node-accent)] text-[var(--node-bg)] hover:opacity-90"
+              variant="primary"
               onClick={() => (conflicts.length ? save(true) : repo.run(() => api.resolve(file.path, 'mark')))}
             >
               <Check />

@@ -5,13 +5,12 @@
 // commits this way.
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { NodeMessage } from '@hyperpane/ui';
+import { NodeMessage, SplitPane } from '@hyperpane/ui';
 import type { ChangedFile, CommitDetail } from '../../../shared/index.ts';
 import type { DiffRequest, Pending } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { DiffPane } from '../../components/diff/DiffPane.tsx';
-import { Split } from '../../components/Split.tsx';
 import { CommitHeader } from './CommitHeader.tsx';
 import { FileList } from './FileList.tsx';
 
@@ -57,7 +56,7 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
     <div className="flex min-h-0 min-w-0 flex-1 flex-col" data-commit={c.sha}>
       {top?.(c)}
       <CommitHeader c={c} />
-      <Split
+      <SplitPane
         id={`${place}.files`}
         initial={240}
         min={140}

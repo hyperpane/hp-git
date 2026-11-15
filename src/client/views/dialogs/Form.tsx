@@ -4,7 +4,7 @@
 
 import { type FormEvent, type ReactNode, useEffect, useRef } from 'react';
 import { useHost } from '@hyperpane/sdk/client';
-import { Button, DialogFooter } from '@hyperpane/ui';
+import { Button, Checkbox, DialogFooter } from '@hyperpane/ui';
 
 export function Form({ children, onSubmit, ok, disabled, danger }: { children: ReactNode; onSubmit(): void; ok: string; disabled?: boolean; danger?: boolean }) {
   const host = useHost();
@@ -42,7 +42,7 @@ export function Form({ children, onSubmit, ok, disabled, danger }: { children: R
 export function Check({ checked, onChange, children, hint }: { checked: boolean; onChange(v: boolean): void; children: ReactNode; hint?: ReactNode }) {
   return (
     <label className="flex cursor-default items-start gap-2 select-none">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="accent-primary mt-0.5 size-4" />
+      <Checkbox checked={checked} onCheckedChange={onChange} size="default" className="mt-0.5" />
       <span className="flex flex-col gap-0.5">
         <span>{children}</span>
         {hint && <span className="text-muted-foreground text-xs">{hint}</span>}

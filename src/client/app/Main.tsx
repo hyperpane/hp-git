@@ -10,14 +10,12 @@
 // Its keys and menu are hooks/useWindowKeys.ts and hooks/useWindowMenu.ts;
 // the views over the tabs, views/Overlay.tsx.
 
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Archive, FileDiff, GitBranch, GitCommitHorizontal, History, Tag as TagIcon } from 'lucide-react';
 import { keys, useEvent } from '@hyperpane/sdk/client';
-import { ToolButton } from '@hyperpane/ui';
+import { SplitPane, type TabItem, Tabs, ToolButton } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
-import { Split } from '../components/Split.tsx';
-import { type TabSpec, Tabs } from '../components/Tabs.tsx';
 import { useBranches } from '../hooks/useBranches.ts';
 import { useStashes } from '../hooks/useStashes.ts';
 import { useTags } from '../hooks/useTags.ts';
@@ -25,8 +23,8 @@ import { useWindowKeys } from '../hooks/useWindowKeys.ts';
 import { useWindowMenu } from '../hooks/useWindowMenu.ts';
 import { shortSha } from '../lib/format.ts';
 import { local } from '../lib/local.ts';
-import { basenameOf, relativeTo } from '../lib/paths.ts';
-import { type Pick, pickOf, sideOf } from '../lib/picks.ts';
+import { basenameOf, inRepo, relativeTo } from '../lib/paths.ts';
+import { type Pick, pickOf, sideOf, splitPick } from '../lib/picks.ts';
 import { BranchDetail } from '../views/branches/BranchDetail.tsx';
 import { BranchList } from '../views/branches/BranchList.tsx';
 import { ChangesDetail } from '../views/changes/ChangesDetail.tsx';
@@ -70,6 +68,15 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
 
   useWindowMenu(host, repo, onChooseFolder);
 
+  // Its output (linked in nodes mode): the one changed file picked, once
+  // the pick rests (not every row arrowed past).
+  const one = picked.length === 1 ? inRepo(repo.root, splitPick(picked[0])[1]) : null;
+  useEffect(() => {
+    if (!one) return;
+    const t = setTimeout(() => host.ports.emit('file', one), 250);
+    return () => clearTimeout(t);
+  }, [host, one]);
+
   // Other plugins ask for a file's history, blame or diff (git.open).
   useEvent<{ path: string; view: 'history' | 'blame' | 'diff'; line?: number }>('git.open', (e) => {
     const rel = relativeTo(repo.root, e.data.path);
@@ -86,13 +93,17 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
 
   useWindowKeys(repo, sidebar, setSidebar, filters);
 
+  // Narrow, the tabs other than the picked one show as icons.
+  const [side, setSide] = useState<HTMLDivElement | null>(null);
+  const narrow = useNarrow(side, 380);
+
   const conflicts = status.files.filter((f) => f.conflict).length;
-  const tabs: TabSpec<Tab>[] = [
-    { id: 'changes', label: 'Changes', icon: TAB_ICONS.changes, count: status.files.length, alert: conflicts > 0 },
-    { id: 'history', label: 'History', icon: TAB_ICONS.history },
-    { id: 'branches', label: 'Branches', icon: TAB_ICONS.branches },
-    { id: 'stashes', label: 'Stashes', icon: TAB_ICONS.stashes, count: status.stashes },
-    { id: 'tags', label: 'Tags', icon: TAB_ICONS.tags },
+  const tabs: TabItem<Tab>[] = [
+    { value: 'changes', label: 'Changes', icon: TAB_ICONS.changes, count: status.files.length, alert: conflicts > 0 },
+    { value: 'history', label: 'History', icon: TAB_ICONS.history },
+    { value: 'branches', label: 'Branches', icon: TAB_ICONS.branches },
+    { value: 'stashes', label: 'Stashes', icon: TAB_ICONS.stashes, count: status.stashes },
+    { value: 'tags', label: 'Tags', icon: TAB_ICONS.tags },
   ];
 
   let left: ReactNode;
@@ -125,20 +136,19 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
           {!sidebar && (
             <div className="flex w-9 flex-none flex-col items-center gap-0.5 border-e border-[var(--node-border)] py-1">
               {tabs.map((t) => (
-                <ToolButton key={t.id} label={`${t.label} (${keys(`⌃${TABS_ORDER.indexOf(t.id) + 1}`)})`} icon={t.icon!} active={tab === t.id} onClick={() => setTab(t.id)} />
+                <ToolButton key={t.value} label={`${t.label} (${keys(`⌃${TABS_ORDER.indexOf(t.value) + 1}`)})`} icon={t.icon!} active={tab === t.value} onClick={() => setTab(t.value)} />
               ))}
             </div>
           )}
-          <Split
+          <SplitPane
             id="side"
             initial={320}
             min={220}
             minOther={320}
             collapsed={!sidebar}
-            className="@container/side"
             first={
-              <div className="@container/side flex min-h-0 flex-1 flex-col">
-                <Tabs tabs={tabs} value={tab} onChange={setTab} />
+              <div ref={setSide} className="flex min-h-0 flex-1 flex-col">
+                <Tabs items={tabs} value={tab} onValueChange={setTab} fill compact={narrow} label="Views" />
                 {left}
               </div>
             }
@@ -151,3 +161,17 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
 }
 
 const TABS_ORDER: Tab[] = ['changes', 'history', 'branches', 'stashes', 'tags'];
+
+/** Whether the element is narrower than `width` px, followed as it resizes. */
+function useNarrow(el: HTMLElement | null, width: number): boolean {
+  const [narrow, setNarrow] = useState(false);
+  useLayoutEffect(() => {
+    if (!el) return;
+    const measure = () => setNarrow(el.clientWidth > 0 && el.clientWidth < width);
+    measure();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [el, width]);
+  return narrow;
+}

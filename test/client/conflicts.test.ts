@@ -44,7 +44,7 @@ test('a merge stopped at conflicts: the bar, the file first, its blocks chosen a
   assert.match(bar.textContent!, /1 file with conflicts/);
   assert.ok(button(bar, 'Continue')!.disabled);
   // The tab says so; the conflict is picked and shown three ways.
-  assert.ok(w.root.querySelector('[data-tab="changes"]')!.textContent!.includes('1'));
+  assert.ok(w.root.querySelector('[role="tab"][data-value="changes"]')!.textContent!.includes('1'));
   const view = await until(() => w.root.querySelector<HTMLElement>('[data-conflict="a.txt"]'), 10000, 'the conflict');
   await until(() => view.querySelectorAll('[data-block]').length === 2, 10000, 'two blocks');
   assert.match(view.textContent!, /0 of 2 conflicts chosen/);
