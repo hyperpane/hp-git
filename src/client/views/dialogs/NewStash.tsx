@@ -21,7 +21,7 @@ export function NewStash({ data }: { data: { count: number; untracked: number } 
         <Check checked={untracked} onChange={setUntracked} hint={data.untracked ? `${data.untracked} new file${data.untracked === 1 ? '' : 's'}` : undefined}>
           Include untracked files
         </Check>
-        <Check checked={keepIndex} onChange={setKeepIndex} hint="Stashed, and left staged too.">
+        <Check checked={keepIndex} onChange={setKeepIndex} hint="Stashed, and left staged too">
           Keep staged changes
         </Check>
       </div>

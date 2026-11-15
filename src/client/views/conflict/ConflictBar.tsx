@@ -26,7 +26,7 @@ export function ConflictBar({ file, kind, ours, theirs, side }: { file: FileStat
       <NodeButton onClick={() => repo.openInEditor(file.path)} disabled={kind === 'deletedByUs' || kind === 'bothDeleted'}>
         Open in Editor
       </NodeButton>
-      <NodeButton onClick={() => repo.run(() => api.resolve(file.path, 'mark'), { done: `${basenameOf(file.path)} is resolved.` })}>Mark Resolved</NodeButton>
+      <NodeButton onClick={() => repo.run(() => api.resolve(file.path, 'mark'), { done: `${basenameOf(file.path)} is resolved` })}>Mark Resolved</NodeButton>
     </div>
   );
 }

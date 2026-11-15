@@ -110,7 +110,7 @@ export function useRepoState(host: Host, root: string, server: string | undefine
     (o: Outcome | undefined | null, what: string) => {
       if (!o) return;
       if (o.conflicts) {
-        toast(`${what} stopped at conflicts.`, { description: 'Resolve them in Changes, then continue.' });
+        toast(`${what} stopped at conflicts`, { description: 'Resolve them in Changes, then continue' });
         setTab('changes');
       } else if (o.message) toast(o.message);
     },

@@ -105,7 +105,7 @@ export function gitApi(host: Host, root: string, server?: string) {
               return void plain();
             }
             done = true;
-            reject(new Error(error ?? 'Git ended without an answer.'));
+            reject(new Error(error ?? 'Git ended without an answer'));
           },
         },
       );

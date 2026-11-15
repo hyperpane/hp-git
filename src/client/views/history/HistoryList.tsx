@@ -192,7 +192,7 @@ export function HistoryList({
           <span className="text-[var(--ansi-1)]">{log.error}</span>
         </Blank>
       ) : !commits.length ? (
-        <Blank>{log.loading ? 'Loading the history…' : searching ? 'No commit matches.' : status.unborn ? 'No commits yet: make the first one in Changes.' : 'No commits.'}</Blank>
+        <Blank>{log.loading ? 'Loading the history' : searching ? 'No commit matches' : status.unborn ? 'No commits yet: make the first one in Changes' : 'No commits'}</Blank>
       ) : (
         <VirtualList
           ref={list}
@@ -212,7 +212,7 @@ export function HistoryList({
         <div className="flex h-6 flex-none items-center gap-2 border-t border-[var(--node-border)] px-2 text-2xs text-[var(--node-muted)] tabular-nums">
           {commits.length.toLocaleString('en-US')}
           {log.more ? '+' : ''} commits
-          {log.loading && <span>· loading…</span>}
+          {log.loading && <span>· loading</span>}
         </div>
       )}
     </div>

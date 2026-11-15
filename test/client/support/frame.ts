@@ -168,7 +168,7 @@ export class FakeApp {
   }
 
   #server(id: number, subscribing: boolean, a: { plugin: string; request: any }) {
-    if (a.plugin !== 'git') return this.#post({ t: 'res', id, ok: false, error: `${a.plugin} isn't installed here.` });
+    if (a.plugin !== 'git') return this.#post({ t: 'res', id, ok: false, error: `${a.plugin} isn't installed here` });
     const controller = new AbortController();
     let ended = false;
     if (subscribing) {

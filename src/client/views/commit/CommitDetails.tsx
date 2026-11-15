@@ -49,7 +49,7 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
   }, [c]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (state.id === id && state.error) return <NodeMessage error>{state.error}</NodeMessage>;
-  if (!c) return <NodeMessage>Loading the commit…</NodeMessage>;
+  if (!c) return <NodeMessage>Loading the commit</NodeMessage>;
   const picked = c.files.find((f) => f.path === file) ?? null;
   const request = picked ? (diffOf ? diffOf(picked, c) : { path: picked.path, oldPath: picked.from, commit: c.sha }) : null;
   return (
@@ -62,7 +62,7 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
         min={140}
         minOther={240}
         first={<FileList files={c.files} truncated={c.truncated} picked={file} onPick={setFile} sha={c.sha} />}
-        second={request ? <DiffPane key={`${c.sha}:${picked!.path}`} request={request} newRev={rev ? rev(c) : c.sha} /> : <Blank>{c.files.length ? 'Pick a file.' : 'This commit changes no files.'}</Blank>}
+        second={request ? <DiffPane key={`${c.sha}:${picked!.path}`} request={request} newRev={rev ? rev(c) : c.sha} /> : <Blank>{c.files.length ? 'Pick a file' : 'This commit changes no files'}</Blank>}
       />
     </div>
   );

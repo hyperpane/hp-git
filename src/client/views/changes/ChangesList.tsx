@@ -250,7 +250,7 @@ export function ChangesList({
           onKeyDown={onKey}
         />
       )}
-      {status.truncated && <div className="flex-none border-t border-[var(--node-border)] px-2 py-1 text-2xs text-[var(--ansi-3)]">More than 10 000 files changed: some aren’t listed.</div>}
+      {status.truncated && <div className="flex-none border-t border-[var(--node-border)] px-2 py-1 text-2xs text-[var(--ansi-3)]">More than 10 000 files changed: some aren’t listed</div>}
       <CommitBox />
     </div>
   );

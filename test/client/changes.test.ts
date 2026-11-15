@@ -118,7 +118,7 @@ test('staging by hand, nothing staged: the button commits every change; amend sh
   const dir = repo(t, { 'a.txt': 'a\n' }, 'the first one');
   write(dir, { 'a.txt': 'a2\n' });
   const w = await window(t, dir, byHand);
-  await until(() => w.root.textContent!.includes('Nothing is staged.'));
+  await until(() => w.root.textContent!.includes('Nothing is staged'));
   type(await until(() => w.root.querySelector<HTMLInputElement>('input[aria-label="Summary"]')), 'All of it');
   click(await until(() => button(w.root, /Commit all 1 change/)));
   await until(() => sh(dir, 'log', '-1', '--format=%s').trim() === 'All of it', 10000, 'commit all');
@@ -208,7 +208,7 @@ test('nothing checked: the commit box says so, commits nothing, and checks every
   write(dir, { 'a.txt': 'a2\n', 'n.txt': 'n\n' });
   const w = await window(t, dir);
   click(await until(() => w.root.querySelector<HTMLElement>('[role="checkbox"][aria-label="Uncheck everything"]'), 10000, 'the list’s checkbox'));
-  await until(() => w.root.textContent!.includes('No file is checked.') && state(w.root, 'a.txt') === 'false' && state(w.root, 'n.txt') === 'false', 10000, 'nothing checked');
+  await until(() => w.root.textContent!.includes('No file is checked') && state(w.root, 'a.txt') === 'false' && state(w.root, 'n.txt') === 'false', 10000, 'nothing checked');
   type(summaryOf(w.root)!, 'Nothing');
   await wait(200);
   assert.ok(button(w.root, /Commit to main/)!.disabled);

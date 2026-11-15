@@ -4,7 +4,7 @@ export async function copy(text: string, toast?: (m: string, o?: { error?: boole
   try {
     await navigator.clipboard.writeText(text);
   } catch (e) {
-    toast?.('Couldn’t copy.', { error: true });
+    toast?.('Couldn’t copy', { error: true });
     void e;
   }
 }

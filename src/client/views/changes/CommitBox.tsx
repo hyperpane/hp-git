@@ -78,7 +78,7 @@ export function CommitBox() {
       ? choices.map((a) => ({ label: `${a.name} <${a.email}>`, run: () => setDraft({ coAuthors: [...draft.coAuthors, { name: a.name, email: a.email }] }) }))
       : [{ label: 'Nobody else has committed here', disabled: true, run: () => {} }];
     items.push(null, {
-      label: 'Someone Else…',
+      label: 'Someone Else',
       run: async () => {
         const text = await repo.prompt('Add a co-author', 'Name and email', '', 'Ada Lovelace <ada@example.com>');
         const m = text && /^(.*?)\s*<([^>]+)>\s*$/.exec(text.trim());
@@ -101,7 +101,7 @@ export function CommitBox() {
     });
     if (!result) return;
     repo.run(() => api.config({ set: { 'user.name': result.name, 'user.email': result.email }, global: result.global }), {
-      done: result.global ? 'Saved for every repository.' : 'Saved for this repository.',
+      done: result.global ? 'Saved for every repository' : 'Saved for this repository',
     });
   };
 
@@ -235,7 +235,7 @@ export function CommitBox() {
         onClick={() => commit()}
         title={`${label} (${keys('⌘↵')})`}
       >
-        <span className="truncate">{busy ? 'Committing…' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label}</span>
+        <span className="truncate">{busy ? 'Committing' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label}</span>
       </Button>
     </div>
   );

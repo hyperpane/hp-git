@@ -65,10 +65,10 @@ export function ConflictView({ file }: { file: FileStatus }) {
     if (!state.lines) return;
     setSaving(true);
     const text = merged(blocks, choices, state.eol ?? '\n') + (state.lines.length ? state.eol ?? '\n' : '');
-    await repo.run(() => api.resolveText(file.path, text, mark), { done: mark ? `${basenameOf(file.path)} is resolved.` : undefined });
+    await repo.run(() => api.resolveText(file.path, text, mark), { done: mark ? `${basenameOf(file.path)} is resolved` : undefined });
     setSaving(false);
   };
-  const side = (s: 'ours' | 'theirs') => repo.run(() => api.resolve(file.path, s), { done: `Took ${s === 'ours' ? 'ours' : 'theirs'} for ${basenameOf(file.path)}.` });
+  const side = (s: 'ours' | 'theirs') => repo.run(() => api.resolve(file.path, s), { done: `Took ${s === 'ours' ? 'ours' : 'theirs'} for ${basenameOf(file.path)}` });
 
   const bar = <ConflictBar file={file} kind={kind} ours={ours} theirs={theirs} side={side} />;
 
@@ -88,14 +88,14 @@ export function ConflictView({ file }: { file: FileStatus }) {
       {state.error ? (
         <NodeMessage error>{state.error}</NodeMessage>
       ) : state.binary ? (
-        <Blank title="A binary file">Use ours or theirs for it.</Blank>
+        <Blank title="A binary file">Use ours or theirs for it</Blank>
       ) : !state.lines ? (
-        <NodeMessage>Loading…</NodeMessage>
+        <NodeMessage>Loading</NodeMessage>
       ) : (
         <>
           <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs">
             <span className="text-[var(--node-muted)]">
-              {conflicts.length ? `${chosen} of ${plural(conflicts.length, 'conflict')} chosen` : 'No conflict markers are left.'}
+              {conflicts.length ? `${chosen} of ${plural(conflicts.length, 'conflict')} chosen` : 'No conflict markers are left'}
             </span>
             <span className="flex-1" />
             <span className="flex items-center gap-1 text-[var(--node-muted)]">

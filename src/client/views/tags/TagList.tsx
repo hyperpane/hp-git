@@ -71,10 +71,10 @@ export function TagList({
       {error && !tags ? (
         <NodeMessage error>{error}</NodeMessage>
       ) : !tags ? (
-        <NodeMessage>Loading…</NodeMessage>
+        <NodeMessage>Loading</NodeMessage>
       ) : !shown.length ? (
         <Blank icon={TagIcon} title={filter ? undefined : 'No tags'} actions={!filter && repo.status.head ? <NodeButton onClick={() => createTag(repo)}>Tag the Current Commit</NodeButton> : undefined}>
-          {filter ? 'No tag matches.' : 'Tags name commits that matter: releases, milestones.'}
+          {filter ? 'No tag matches' : 'Tags name commits that matter: releases, milestones'}
         </Blank>
       ) : (
         <VirtualList

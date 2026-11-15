@@ -15,7 +15,7 @@ export function commitMenu(repo: Repo, c: Commit, e: { clientX: number; clientY:
   const isHead = c.sha === status.head;
   const items: (MenuEntry | null)[] = [
     {
-      label: 'Check Out This Commit…',
+      label: 'Check Out This Commit',
       disabled: isHead && status.detached,
       run: async () => {
         const ok = await repo.confirm(
@@ -27,7 +27,7 @@ export function commitMenu(repo: Repo, c: Commit, e: { clientX: number; clientY:
       },
     },
     {
-      label: 'Create Branch Here…',
+      label: 'Create Branch Here',
       run: async () => {
         const result = await repo.host.ui.dialog<{ name: string; checkout: boolean }>('branch', {
           title: 'Create a branch',
@@ -35,14 +35,14 @@ export function commitMenu(repo: Repo, c: Commit, e: { clientX: number; clientY:
           width: 440,
           height: 200,
         });
-        if (result) repo.run(() => api.branch('create', { name: result.name, from: c.sha, checkout: result.checkout }), { done: `Created ${result.name}.` });
+        if (result) repo.run(() => api.branch('create', { name: result.name, from: c.sha, checkout: result.checkout }), { done: `Created ${result.name}` });
       },
     },
     {
-      label: 'Create Tag Here…',
+      label: 'Create Tag Here',
       run: async () => {
         const result = await repo.host.ui.dialog<{ name: string; message: string }>('tag', { title: `Tag ${sha}`, data: { sha: c.sha }, width: 440, height: 240 });
-        if (result) repo.run(() => api.tagCreate(result.name, c.sha, result.message), { done: `Tagged ${sha} ${result.name}.` });
+        if (result) repo.run(() => api.tagCreate(result.name, c.sha, result.message), { done: `Tagged ${sha} ${result.name}` });
       },
     },
     null,
@@ -56,7 +56,7 @@ export function commitMenu(repo: Repo, c: Commit, e: { clientX: number; clientY:
       run: async () => repo.outcome(await repo.run(() => api.revert(c.sha)), 'Reverting'),
     },
     {
-      label: 'Reset to This Commit…',
+      label: 'Reset to This Commit',
       disabled: isHead,
       run: () => resetTo(repo, c, e),
     },
@@ -75,10 +75,10 @@ export function commitMenu(repo: Repo, c: Commit, e: { clientX: number; clientY:
 async function resetTo(repo: Repo, c: Commit, at: { clientX: number; clientY: number }) {
   const sha = shortSha(c.sha);
   const modes: (MenuEntry | null)[] = [
-    { label: 'Soft: keep the changes staged', run: () => repo.run(() => repo.api.reset(c.sha, 'soft'), { done: `Reset to ${sha} (soft).` }) },
-    { label: 'Mixed: keep the changes, unstaged', run: () => repo.run(() => repo.api.reset(c.sha, 'mixed'), { done: `Reset to ${sha}.` }) },
+    { label: 'Soft: keep the changes staged', run: () => repo.run(() => repo.api.reset(c.sha, 'soft'), { done: `Reset to ${sha} (soft)` }) },
+    { label: 'Mixed: keep the changes, unstaged', run: () => repo.run(() => repo.api.reset(c.sha, 'mixed'), { done: `Reset to ${sha}` }) },
     {
-      label: 'Hard: discard every change…',
+      label: 'Hard: discard every change',
       danger: true,
       run: async () => {
         const ok = await repo.confirm(
@@ -86,7 +86,7 @@ async function resetTo(repo: Repo, c: Commit, at: { clientX: number; clientY: nu
           `${repo.status.branch ?? 'HEAD'} moves to ${sha} and every uncommitted change is discarded. Commits after it stay reachable only from the reflog.`,
           { confirm: 'Reset Hard', destructive: true },
         );
-        if (ok) repo.run(() => repo.api.reset(c.sha, 'hard'), { done: `Reset hard to ${sha}.` });
+        if (ok) repo.run(() => repo.api.reset(c.sha, 'hard'), { done: `Reset hard to ${sha}` });
       },
     },
   ];

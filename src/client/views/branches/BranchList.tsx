@@ -110,9 +110,9 @@ export function BranchList({
         <ToolButton label="New branch" icon={Plus} onClick={() => createBranch(repo)} />
       </div>
       {!branches ? (
-        <NodeMessage>Loading…</NodeMessage>
+        <NodeMessage>Loading</NodeMessage>
       ) : !rows.length ? (
-        <Blank>{filter ? 'No branch matches.' : 'No branches yet: make the first commit.'}</Blank>
+        <Blank>{filter ? 'No branch matches' : 'No branches yet: make the first commit'}</Blank>
       ) : (
         <VirtualList
           ref={list}

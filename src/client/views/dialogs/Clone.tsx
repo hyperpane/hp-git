@@ -26,7 +26,7 @@ export function Clone({ data }: { data: { folder: string } }) {
         <FieldLabel>Repository URL</FieldLabel>
         <Input autoFocus value={url} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)} placeholder="https://github.com/owner/repo.git" />
       </Field>
-      <Field description="A new folder, or an empty one, on this window’s server.">
+      <Field description="A new folder, or an empty one, on this window’s server">
         <FieldLabel>Into</FieldLabel>
         <Input
           value={target}

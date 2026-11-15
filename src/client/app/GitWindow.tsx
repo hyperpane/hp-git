@@ -120,14 +120,14 @@ export function GitWindow({ host }: { host: Host }) {
         actions={
           <>
             <NodeButton onClick={() => setAttempt((n) => n + 1)}>Try Again</NodeButton>
-            <NodeButton onClick={chooseFolder}>Open Another Folder…</NodeButton>
+            <NodeButton onClick={chooseFolder}>Open Another Folder</NodeButton>
           </>
         }
       >
         <span className="text-[var(--ansi-1)]">{found.error}</span>
       </Blank>
     );
-  if (!f) return <NodeMessage>Looking for a repository…</NodeMessage>;
+  if (!f) return <NodeMessage>Looking for a repository</NodeMessage>;
   if (!f.root) return <Welcome folder={folder} found={f} onDone={(root) => (root === folder ? setAttempt((n) => n + 1) : host.win.setData('folder', root))} onChoose={chooseFolder} />;
   const root = chosen && f.repos.some((r) => r.root === chosen) ? chosen : f.root;
   return <RepoWindow key={`${server ?? ''}\n${root}`} host={host} root={root} server={server} found={f} onChooseFolder={chooseFolder} />;

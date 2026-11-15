@@ -130,7 +130,7 @@ export function FileHistory({ path }: { path: string }) {
           />
         </div>
       }
-      second={c ? <DiffPane key={c.sha} request={{ path: c.path, oldPath: c.from, commit: c.sha }} newRev={c.sha} /> : <Blank>Pick a commit.</Blank>}
+      second={c ? <DiffPane key={c.sha} request={{ path: c.path, oldPath: c.from, commit: c.sha }} newRev={c.sha} /> : <Blank>Pick a commit</Blank>}
     />
   );
 }

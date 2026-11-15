@@ -15,7 +15,7 @@ export function RepoWindow({ host, root, server, found, onChooseFolder }: { host
   const { repo, error } = useRepoState(host, root, server, windowId);
   if (!repo)
     return error ? (
-      <Blank title="Git can’t read this repository" actions={<NodeButton onClick={onChooseFolder}>Open Another Folder…</NodeButton>}>
+      <Blank title="Git can’t read this repository" actions={<NodeButton onClick={onChooseFolder}>Open Another Folder</NodeButton>}>
         <span className="text-[var(--ansi-1)]">{error}</span>
       </Blank>
     ) : (

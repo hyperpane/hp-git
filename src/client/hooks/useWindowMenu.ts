@@ -15,7 +15,7 @@ export function useWindowMenu(host: Host, repo: Repo, onChooseFolder: () => void
       { id: 'push', label: 'Push' },
       { id: 'sep', label: '', separator: true },
       { id: 'refresh', label: 'Refresh' },
-      { id: 'folder', label: 'Open Another Folder…' },
+      { id: 'folder', label: 'Open Another Folder' },
     ]);
     const off = host.on('menu', ({ id }: { id: string }) => {
       const r = actions.current;

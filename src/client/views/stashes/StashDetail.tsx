@@ -12,7 +12,7 @@ import { CommitDetails } from '../commit/CommitDetails.tsx';
 
 export function StashDetail({ stash }: { stash: Stash | null }) {
   const repo = useRepo();
-  if (!stash) return <Blank icon={Archive}>Pick a stash.</Blank>;
+  if (!stash) return <Blank icon={Archive}>Pick a stash</Blank>;
   const ref = `stash@{${stash.index}}`;
   const actions = stashActions(repo, stash);
   return (

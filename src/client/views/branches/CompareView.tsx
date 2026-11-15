@@ -32,7 +32,7 @@ export function CompareView({ base, head }: { base: string; head: string }) {
     return () => p.cancel();
   }, [repo.api, base, head, repo.version]);
   if (state.error) return <NodeMessage error>{state.error}</NodeMessage>;
-  if (!state.c) return <NodeMessage>Comparing…</NodeMessage>;
+  if (!state.c) return <NodeMessage>Comparing</NodeMessage>;
   const c = state.c;
   return (
     <div ref={setBox} className="flex min-h-0 flex-1 flex-col" data-compare={`${base}...${head}`}>
@@ -48,7 +48,7 @@ export function CompareView({ base, head }: { base: string; head: string }) {
           ]}
         />
         <span className="min-w-0 flex-1 truncate">
-          {c.mergeBase ? `They parted at ${shortSha(c.mergeBase)}` : 'They share no history.'}
+          {c.mergeBase ? `They parted at ${shortSha(c.mergeBase)}` : 'They share no history'}
           {show === 'files' && c.mergeBase ? ` · what ${head} changed since` : ''}
         </span>
       </div>
@@ -108,7 +108,7 @@ function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string
           }}
         />
       ) : (
-        <Blank>Nothing.</Blank>
+        <Blank>Nothing</Blank>
       )}
     </div>
   );

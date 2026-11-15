@@ -17,11 +17,11 @@ export function Identity({ data }: { data: { name: string; email: string } }) {
         <FieldLabel>Name</FieldLabel>
         <Input autoFocus value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="Ada Lovelace" />
       </Field>
-      <Field error={bad ? 'That doesn’t look like an email.' : undefined}>
+      <Field error={bad ? 'That doesn’t look like an email' : undefined}>
         <FieldLabel>Email</FieldLabel>
         <Input value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="ada@example.com" />
       </Field>
-      <Check checked={global} onChange={setGlobal} hint="Off: only this repository (user.name and user.email in .git/config).">
+      <Check checked={global} onChange={setGlobal} hint="Off: only this repository (user.name and user.email in .git/config)">
         For every repository on this server
       </Check>
     </Form>

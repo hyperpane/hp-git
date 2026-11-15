@@ -29,16 +29,16 @@ export function OperationBar() {
               ? 'Applying patches'
               : 'Bisecting';
   const next = conflicts
-    ? `${plural(conflicts, 'file')} with conflicts: resolve ${conflicts === 1 ? 'it' : 'them'}, then continue.`
+    ? `${plural(conflicts, 'file')} with conflicts: resolve ${conflicts === 1 ? 'it' : 'them'}, then continue`
     : op.kind === 'merge'
-      ? 'No conflicts left: commit the merge (or continue).'
+      ? 'No conflicts left: commit the merge (or continue)'
       : op.kind === 'bisect'
-        ? 'Finish it in a terminal.'
-        : 'No conflicts left: continue.';
+        ? 'Finish it in a terminal'
+        : 'No conflicts left: continue';
   const label = op.kind === 'cherryPick' ? 'cherry-pick' : op.kind;
   const go = async (action: 'continue' | 'abort' | 'skip') => {
     if (action === 'abort') {
-      const ok = await repo.confirm(`Abort the ${label}?`, 'Everything goes back to how it was before it started; resolved conflicts are lost.', { confirm: 'Abort', destructive: true });
+      const ok = await repo.confirm(`Abort the ${label}?`, 'Everything goes back to how it was before it started; resolved conflicts are lost', { confirm: 'Abort', destructive: true });
       if (!ok) return;
     }
     repo.outcome(await repo.run(() => api.operation(action)), action === 'continue' ? 'Continuing' : 'Skipping');

@@ -16,7 +16,7 @@ export function NewBranch({ data }: { data: { from: string; fromLabel?: string; 
   const problem = branchProblem(clean, data.existing);
   return (
     <Form ok={checkout ? 'Create and Switch' : 'Create Branch'} disabled={!clean || !!problem} onSubmit={() => host.ui.closeDialog({ name: clean, from, checkout })}>
-      <Field error={problem ?? undefined} description={clean && clean !== name.trim() ? `It’ll be ${clean}.` : undefined}>
+      <Field error={problem ?? undefined} description={clean && clean !== name.trim() ? `It’ll be ${clean}` : undefined}>
         <FieldLabel>Name</FieldLabel>
         <Input autoFocus value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="feature/better-things" />
       </Field>

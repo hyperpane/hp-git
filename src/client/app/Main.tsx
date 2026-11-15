@@ -113,7 +113,7 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
     right = <ChangesDetail picked={picked} />;
   } else if (tab === 'history') {
     left = <HistoryList selected={commit} onSelect={setCommit} filterRef={filters.history} />;
-    right = commit ? <CommitDetails key={commit} id={commit} load={() => repo.api.show(commit)} place="history" /> : <Blank icon={GitCommitHorizontal}>Pick a commit.</Blank>;
+    right = commit ? <CommitDetails key={commit} id={commit} load={() => repo.api.show(commit)} place="history" /> : <Blank icon={GitCommitHorizontal}>Pick a commit</Blank>;
   } else if (tab === 'branches') {
     left = <BranchList branches={branches.branches} error={branches.error} picked={branch} onPick={setBranch} filterRef={filters.branches} />;
     right = <BranchDetail pick={branch} branches={branches.branches} />;

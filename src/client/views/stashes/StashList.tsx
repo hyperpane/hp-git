@@ -53,7 +53,7 @@ export function StashList({ stashes, error, picked, onPick }: { stashes: Stash[]
       {error && !stashes ? (
         <NodeMessage error>{error}</NodeMessage>
       ) : !stashes ? (
-        <NodeMessage>Loading…</NodeMessage>
+        <NodeMessage>Loading</NodeMessage>
       ) : !stashes.length ? (
         <Blank
           icon={Archive}
@@ -62,7 +62,7 @@ export function StashList({ stashes, error, picked, onPick }: { stashes: Stash[]
             repo.status.files.length ? <NodeButton onClick={() => stashNow(repo)}>Stash {plural(repo.status.files.length, 'Change')}</NodeButton> : undefined
           }
         >
-          Stash changes to put them aside, switch branches, and bring them back later.
+          Stash changes to put them aside, switch branches, and bring them back later
         </Blank>
       ) : (
         <VirtualList

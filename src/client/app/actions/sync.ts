@@ -40,7 +40,7 @@ export async function addRemote(repo: Repo) {
     width: 440,
     height: 200,
   });
-  if (result) repo.run(() => repo.api.remote('add', result.name, { url: result.url }), { done: `Added the remote ${result.name}.` });
+  if (result) repo.run(() => repo.api.remote('add', result.name, { url: result.url }), { done: `Added the remote ${result.name}` });
 }
 
 export function syncMenu(repo: Repo): (MenuEntry | null)[] {
@@ -52,7 +52,7 @@ export function syncMenu(repo: Repo): (MenuEntry | null)[] {
     { label: 'Pull', disabled: !s.upstream || busy, run: async () => repo.outcome(await repo.startSync('pull', {}, `Pulling ${s.remote}`), 'Pulling') },
     { label: s.upstream ? 'Push' : 'Publish Branch', disabled: !s.remote || !s.branch || busy, run: () => repo.startSync(s.upstream ? 'push' : 'publish', {}, s.upstream ? 'Pushing' : 'Publishing') },
     {
-      label: 'Force Push (with Lease)…',
+      label: 'Force Push (with Lease)',
       danger: true,
       disabled: !s.upstream || busy || s.detached,
       run: async () => {
@@ -65,13 +65,13 @@ export function syncMenu(repo: Repo): (MenuEntry | null)[] {
       },
     },
     null,
-    { label: 'Add Remote…', run: () => addRemote(repo) },
+    { label: 'Add Remote', run: () => addRemote(repo) },
     ...s.remotes.map((r) => ({
       label: `Remove Remote ${r}…`,
       danger: true,
       run: async () => {
         const ok = await repo.confirm(`Remove the remote ${r}?`, 'Its remote branches go from this repository. Nothing changes on the remote itself.', { confirm: 'Remove', destructive: true });
-        if (ok) repo.run(() => repo.api.remote('remove', r), { done: `Removed ${r}.` });
+        if (ok) repo.run(() => repo.api.remote('remove', r), { done: `Removed ${r}` });
       },
     })),
   ];

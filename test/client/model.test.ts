@@ -170,8 +170,8 @@ test('conflicts parsed from their markers (with a base), and merged as chosen', 
 test('names and paths', () => {
   assert.equal(branchName('my new  feature'), 'my-new-feature');
   assert.equal(branchName('a..b~c^d:e'), 'a.b-c-d-e');
-  assert.equal(branchProblem('main', ['main']), 'A branch named main already exists.');
-  assert.equal(branchProblem('x.lock'), 'That isn’t a valid branch name.');
+  assert.equal(branchProblem('main', ['main']), 'A branch named main already exists');
+  assert.equal(branchProblem('x.lock'), 'That isn’t a valid branch name');
   assert.equal(branchProblem('ok/name'), null);
   assert.equal(ignoreExact('build/out[1].log'), '/build/out\\[1\\].log');
   assert.equal(initials('Ada Lovelace'), 'AL');

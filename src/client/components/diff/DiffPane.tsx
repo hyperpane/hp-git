@@ -152,7 +152,7 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
   const onLineMenu = (e: ReactMouseEvent, line: { old?: number; new?: number; text: string } | null, picked: LineKey[]) => {
     const items: (MenuEntry | null)[] = [];
     if (picked.length && lineActions?.primary) items.push({ label: `${lineActions.primary.label} Picked Lines`, run: () => lineActions.primary!.run(picked) });
-    if (picked.length && lineActions?.discard) items.push({ label: `${lineActions.discard.label} Picked Lines…`, danger: true, run: () => lineActions.discard!.run(picked) });
+    if (picked.length && lineActions?.discard) items.push({ label: `${lineActions.discard.label} Picked Lines`, danger: true, run: () => lineActions.discard!.run(picked) });
     if (items.length) items.push(null);
     if (line) {
       items.push({ label: 'Copy Line', run: () => copy(line.text.replace(/\r$/, ''), repo.toast) });
@@ -169,7 +169,7 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
 
   let body: ReactNode;
   if (error) body = <NodeMessage error>{error}</NodeMessage>;
-  else if (!diff) body = <NodeMessage>Loading the diff…</NodeMessage>;
+  else if (!diff) body = <NodeMessage>Loading the diff</NodeMessage>;
   else if (diff.image) body = <ImageDiff diff={diff} />;
   else if (diff.submodule)
     body = (
@@ -184,12 +184,12 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
         {diff.additions + diff.deletions > 0 ? ` (${(diff.additions + diff.deletions).toLocaleString('en-US')} lines)` : ''}. Showing it may take a moment.
       </Blank>
     );
-  else if (diff.binary) body = <Blank title="Binary file">{`It changed (${formatSize(diff.size)}); there are no lines to show.`}</Blank>;
+  else if (diff.binary) body = <Blank title="Binary file">{`It changed (${formatSize(diff.size)}); there are no lines to show`}</Blank>;
   else if (!diff.hunks.length)
     body = (
       empty ?? (
         <Blank title={diff.oldPath ? 'Renamed, with no changes inside' : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode ? 'Only its mode changed' : 'No changes to show'}>
-          {diff.oldPath ? `${diff.oldPath} → ${diff.path}${diff.similarity !== undefined ? ` (${diff.similarity}% similar)` : ''}` : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode ? `${diff.oldMode} → ${diff.newMode}` : ignoreWs ? 'Only whitespace changed, and whitespace is ignored.' : null}
+          {diff.oldPath ? `${diff.oldPath} → ${diff.path}${diff.similarity !== undefined ? ` (${diff.similarity}% similar)` : ''}` : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode ? `${diff.oldMode} → ${diff.newMode}` : ignoreWs ? 'Only whitespace changed, and whitespace is ignored' : null}
         </Blank>
       )
     );

@@ -79,11 +79,11 @@ export function merged(blocks: Block[], choices: Map<number, Choice>, eol: strin
 }
 
 export const KIND: Record<ConflictKind, string> = {
-  bothModified: 'Both sides changed it.',
-  bothAdded: 'Both sides added it.',
-  bothDeleted: 'Both sides deleted it.',
-  addedByUs: 'Added on this branch; the other side doesn’t have it.',
-  addedByThem: 'Added on the other side; this branch doesn’t have it.',
-  deletedByUs: 'Deleted on this branch, changed on the other side.',
-  deletedByThem: 'Changed on this branch, deleted on the other side.',
+  bothModified: 'Both sides changed it',
+  bothAdded: 'Both sides added it',
+  bothDeleted: 'Both sides deleted it',
+  addedByUs: 'Added on this branch; the other side doesn’t have it',
+  addedByThem: 'Added on the other side; this branch doesn’t have it',
+  deletedByUs: 'Deleted on this branch, changed on the other side',
+  deletedByThem: 'Changed on this branch, deleted on the other side',
 };

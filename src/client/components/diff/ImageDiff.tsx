@@ -37,7 +37,7 @@ export function ImageDiff({ diff }: { diff: Diff }) {
       </span>
       {b && <span>{formatSize(b.size)}</span>}
       {d && <span>{d}</span>}
-      {b?.tooLarge && <span>Too big to show.</span>}
+      {b?.tooLarge && <span>Too big to show</span>}
     </div>
   );
   return (

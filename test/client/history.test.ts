@@ -164,7 +164,7 @@ test('a commit’s menu: branch here (the app’s dialog), revert, reset hard (a
   tab(w.root, 'history');
   const first = await until(() => commitRow(w.root, 'first'), 10000, 'the commits');
   w.app.answers['ui.dialog'] = (a: { view: string }) => (a.view === 'branch' ? { name: 'from-first', checkout: false } : null);
-  choose(w.app, 'Create Branch Here…');
+  choose(w.app, 'Create Branch Here');
   first.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 5, clientY: 5 }));
   await until(() => sh(dir, 'branch', '--list', 'from-first').includes('from-first'), 10000, 'the branch');
   assert.equal(w.app.last('ui.dialog').view, 'branch');
@@ -177,7 +177,7 @@ test('a commit’s menu: branch here (the app’s dialog), revert, reset hard (a
   let menus = 0;
   w.app.answers['ui.menu'] = (a: { items: { id: string; label: string }[] }) => {
     menus++;
-    return a.items.find((i) => (menus === 1 ? i.label === 'Reset to This Commit…' : i.label.startsWith('Hard')))?.id ?? null;
+    return a.items.find((i) => (menus === 1 ? i.label === 'Reset to This Commit' : i.label.startsWith('Hard')))?.id ?? null;
   };
   commitRow(w.root, 'first')!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
   await until(() => sh(dir, 'log', '-1', '--format=%s').trim() === 'first', 10000, 'the reset');
@@ -204,7 +204,7 @@ test('Branches: local and remote with what they track; compare, check out, delet
   await until(() => sh(dir, 'branch', '--show-current').trim() === 'feature', 10000, 'checked out');
   await until(() => /current/.test(row('feature')?.textContent ?? ''), 10000, 'feature current');
   // Delete old from its menu.
-  choose(w.app, 'Delete…');
+  choose(w.app, 'Delete');
   row('old')!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
   await until(() => !sh(dir, 'branch', '--list', 'old').trim(), 10000, () => `deleted: ${JSON.stringify(w.app.calls('app.toast'))} ${JSON.stringify(w.app.logs)}`);
   assert.equal(w.app.last('ui.confirm').title, 'Delete old?');

@@ -7,7 +7,7 @@ import type { Repo } from '../repo.ts';
 
 export async function stashNow(repo: Repo) {
   if (!repo.status.files.length) {
-    repo.toast('There are no changes to stash.');
+    repo.toast('There are no changes to stash');
     return;
   }
   const result = await repo.host.ui.dialog<{ message: string; untracked: boolean; keepIndex: boolean }>('stash', {
@@ -22,14 +22,14 @@ export async function stashNow(repo: Repo) {
 export function stashActions(repo: Repo, s: Stash): MenuEntry[] {
   const name = `stash@{${s.index}}`;
   return [
-    { label: 'Apply', run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, false), { done: `Applied ${name}.` }), 'Applying the stash') },
-    { label: 'Pop', run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, true), { done: `Popped ${name}.` }), 'Popping the stash') },
+    { label: 'Apply', run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, false), { done: `Applied ${name}` }), 'Applying the stash') },
+    { label: 'Pop', run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, true), { done: `Popped ${name}` }), 'Popping the stash') },
     {
-      label: 'Drop…',
+      label: 'Drop',
       danger: true,
       run: async () => {
-        const ok = await repo.confirm(`Drop ${name}?`, `“${s.message}” goes for good (git keeps it unreachable for a while, but nothing here can bring it back).`, { confirm: 'Drop', destructive: true });
-        if (ok) repo.run(() => repo.api.stashDrop(s.index), { done: `Dropped ${name}.` });
+        const ok = await repo.confirm(`Drop ${name}?`, `“${s.message}” goes for good (git keeps it unreachable for a while, but nothing here can bring it back)`, { confirm: 'Drop', destructive: true });
+        if (ok) repo.run(() => repo.api.stashDrop(s.index), { done: `Dropped ${name}` });
       },
     },
   ];

@@ -15,7 +15,7 @@ export function branchName(text: string): string {
 /** Why a branch name can't be used, or null. */
 export function branchProblem(name: string, existing: string[] = []): string | null {
   if (!name) return null;
-  if (/\.lock$|\/$|\.$|\/\.|^\/|\/\//.test(name)) return 'That isn’t a valid branch name.';
-  if (existing.includes(name)) return `A branch named ${name} already exists.`;
+  if (/\.lock$|\/$|\.$|\/\.|^\/|\/\//.test(name)) return 'That isn’t a valid branch name';
+  if (existing.includes(name)) return `A branch named ${name} already exists`;
   return null;
 }

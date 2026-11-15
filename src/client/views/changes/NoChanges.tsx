@@ -34,8 +34,8 @@ export function NoChanges() {
       }
     >
       There are no uncommitted changes in this repository{status.branch ? ` on ${status.branch}` : ''}.
-      {status.ahead > 0 ? ` ${plural(status.ahead, 'commit')} to push.` : ''}
-      {status.behind > 0 ? ` ${plural(status.behind, 'commit')} to pull.` : ''}
+      {status.ahead > 0 ? ` ${plural(status.ahead, 'commit')} to push` : ''}
+      {status.behind > 0 ? ` ${plural(status.behind, 'commit')} to pull` : ''}
     </Blank>
   );
 }

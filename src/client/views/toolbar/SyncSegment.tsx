@@ -21,7 +21,7 @@ export function SyncSegment({ icon: Icon, label, sub, badge, onClick, onMenu }: 
         <span className="flex min-w-0 flex-1 flex-col leading-tight">
           <span className="truncate text-xs font-semibold">{sync ? `${sync.label}…` : label}</span>
           <span className="truncate text-[10px] text-[var(--node-muted)]">
-            {sync ? (sync.phase ? `${sync.phase}${sync.percent !== null ? ` ${Math.round(sync.percent)}%` : ''}` : 'Starting…') : sub}
+            {sync ? (sync.phase ? `${sync.phase}${sync.percent !== null ? ` ${Math.round(sync.percent)}%` : ''}` : 'Starting') : sub}
           </span>
         </span>
         {!sync && badge}

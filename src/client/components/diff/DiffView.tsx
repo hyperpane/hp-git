@@ -275,7 +275,7 @@ export const DiffView = memo(function DiffView({ diff, mode, actions, expansions
       )}
       {diff.truncated && (
         <div className="flex h-7 flex-none items-center gap-2 border-t border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
-          The diff was cut here: it’s longer than this window shows.
+          The diff was cut here: it’s longer than this window shows
         </div>
       )}
     </div>

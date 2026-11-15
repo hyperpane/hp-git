@@ -63,7 +63,7 @@ export function Toolbar({
           }))
         : []),
       ...(others.length ? [null] : []),
-      { label: 'Open Another Folder…', run: onChooseFolder },
+      { label: 'Open Another Folder', run: onChooseFolder },
       null,
       { label: 'Copy Path', run: () => copy(repo.root, repo.toast) },
       { label: 'Open Terminal Here', run: () => repo.terminal() },

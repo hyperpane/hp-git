@@ -30,13 +30,13 @@ export function fileMenu(repo: Repo, it: Exclude<Item, { t: 'section' }>, chosen
     ...(changes.length && changes.some((f) => repo.choices[f.path] !== 'out') ? [{ label: n('Leave Out'), run: () => check(changes, false) }] : []),
     ...(unstaged.length ? [{ label: unstaged.length > 1 ? `Stage ${plural(unstaged.length, 'File')}` : chosen[0].side === 'conflict' ? 'Mark as Resolved' : 'Stage', run: () => stage(unstaged) }] : []),
     ...(staged.length ? [{ label: staged.length > 1 ? `Unstage ${plural(staged.length, 'File')}` : 'Unstage', run: () => unstage(staged) }] : []),
-    { label: files.length > 1 ? `Discard Changes to ${plural(files.length, 'File')}…` : 'Discard Changes…', danger: true, run: () => discard(files) },
-    { label: files.length > 1 ? `Stash ${plural(files.length, 'File')}…` : 'Stash This File…', run: () => stashFiles(files) },
+    { label: files.length > 1 ? `Discard Changes to ${plural(files.length, 'File')}…` : 'Discard Changes', danger: true, run: () => discard(files) },
+    { label: files.length > 1 ? `Stash ${plural(files.length, 'File')}…` : 'Stash This File', run: () => stashFiles(files) },
     null,
     ...(one && one.untracked
       ? [
-          { label: `Ignore ${basenameOf(one.path)}`, run: () => repo.run(() => api.ignore(ignoreExact(one.path)), { done: `Ignoring ${one.path}.` }) },
-          ...(ext ? [{ label: `Ignore All .${ext} Files`, run: () => repo.run(() => api.ignore(`*.${ext}`), { done: `Ignoring *.${ext}.` }) }] : []),
+          { label: `Ignore ${basenameOf(one.path)}`, run: () => repo.run(() => api.ignore(ignoreExact(one.path)), { done: `Ignoring ${one.path}` }) },
+          ...(ext ? [{ label: `Ignore All .${ext} Files`, run: () => repo.run(() => api.ignore(`*.${ext}`), { done: `Ignoring *.${ext}` }) }] : []),
           ...(dirnameOf(one.path) ? [{ label: `Ignore the Folder ${dirnameOf(one.path)}`, run: () => repo.run(() => api.ignore(`/${dirnameOf(one.path)}/`), { done: `Ignoring ${dirnameOf(one.path)}/.` }) }] : []),
           null,
         ]
@@ -63,18 +63,18 @@ export function changesMenu(repo: Repo, groups: Record<Side, FileStatus[]>, acti
   const { discard, allIn, allOut } = actions;
   const none = repo.including ? status.files.every((f) => repo.choices[f.path] === 'out') : !groups.staged.length;
   return [
-    { label: 'Stash All Changes…', disabled: !status.files.length, run: () => stashNow(repo) },
+    { label: 'Stash All Changes', disabled: !status.files.length, run: () => stashNow(repo) },
     {
-      label: 'Ignore a Pattern…',
+      label: 'Ignore a Pattern',
       run: async () => {
         const pattern = await repo.prompt('Ignore files', 'A .gitignore pattern', '', '*.log, build/, /secrets.env');
-        if (pattern?.trim()) repo.run(() => api.ignore(pattern.trim()), { done: `Ignoring ${pattern.trim()}.` });
+        if (pattern?.trim()) repo.run(() => api.ignore(pattern.trim()), { done: `Ignoring ${pattern.trim()}` });
       },
     },
     null,
     { label: repo.including ? 'Check Everything' : 'Stage Everything', disabled: !status.files.length, run: allIn },
     { label: repo.including ? 'Uncheck Everything' : 'Unstage Everything', disabled: none, run: allOut },
     null,
-    { label: 'Discard All Changes…', danger: true, disabled: !status.files.length, run: () => discard(status.files.filter((f) => !f.conflict)) },
+    { label: 'Discard All Changes', danger: true, disabled: !status.files.length, run: () => discard(status.files.filter((f) => !f.conflict)) },
   ];
 }

@@ -16,12 +16,12 @@ import { CompareView } from './CompareView.tsx';
  * with the current branch. */
 export function BranchDetail({ pick, branches }: { pick: BranchPick | null; branches: Branches | null }) {
   const repo = useRepo();
-  if (!pick) return <Blank icon={GitBranch}>Pick a branch.</Blank>;
-  if (!branches) return <NodeMessage>Loading…</NodeMessage>;
+  if (!pick) return <Blank icon={GitBranch}>Pick a branch</Blank>;
+  if (!branches) return <NodeMessage>Loading</NodeMessage>;
   const local = pick.kind === 'local' ? branches.local.find((b) => b.name === pick.name) : undefined;
   const remote = pick.kind === 'remote' ? branches.remote.find((b) => b.name === pick.name) : undefined;
   const b = local ?? remote;
-  if (!b) return <Blank>That branch is gone.</Blank>;
+  if (!b) return <Blank>That branch is gone</Blank>;
   const current = !!local?.current;
   const base = repo.status.branch ?? 'HEAD';
   const actions = branchActions(repo, pick, local);
@@ -44,7 +44,7 @@ export function BranchDetail({ pick, branches }: { pick: BranchPick | null; bran
               {a.label.replace(/…$/, '')}
             </NodeButton>
           ))}
-          <NodeButton onClick={more}>More…</NodeButton>
+          <NodeButton onClick={more}>More</NodeButton>
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-[var(--node-muted)]">
           <span className="flex items-center gap-1.5">

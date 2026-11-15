@@ -90,9 +90,9 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
       </div>
       <div ref={listRef} className="git-scroll min-h-0 flex-1 overflow-auto p-1">
         {!branches ? (
-          <div className="p-3 text-center text-[var(--node-muted)]">Loading…</div>
+          <div className="p-3 text-center text-[var(--node-muted)]">Loading</div>
         ) : !rows.length ? (
-          <div className="p-3 text-center text-[var(--node-muted)]">{q ? `No branch matches. ${keys('↵')} makes ${q.trim()}.` : 'No branches.'}</div>
+          <div className="p-3 text-center text-[var(--node-muted)]">{q ? `No branch matches. ${keys('↵')} makes ${q.trim()}.` : 'No branches'}</div>
         ) : (
           rows.map((r, i) =>
             r.t === 'head' ? (

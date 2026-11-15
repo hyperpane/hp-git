@@ -208,7 +208,7 @@ test('a folder that isn’t a repository: initialize it (on the default branch),
   const w = await window(t, fake);
   await until(() => w.root.textContent!.includes('isn’t a Git repository'));
   w.app.answers['ui.dialog'] = (d: { view: string }) => (d.view === 'clone' ? { url: 'https://example.com/x.git', into: '/work/x' } : null);
-  click(button(w.root, 'Clone…')!);
+  click(button(w.root, 'Clone')!);
   await until(() => clone, 5000, 'the clone');
   assert.deepEqual(clone!.request, { op: 'clone', url: 'https://example.com/x.git', into: '/work/x' });
   clone!.send({ type: 'progress', phase: 'Receiving objects', percent: 10, text: 'Receiving objects: 10%' });

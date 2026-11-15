@@ -94,10 +94,10 @@ export function FileDiff({ side, file, onLines }: { side: Side; file: FileStatus
           ? []
           : [
               {
-                label: 'Discard Changes to the File…',
+                label: 'Discard Changes to the File',
                 danger: true,
                 run: async () => {
-                  const ok = await repo.confirm(`Discard the changes to ${basenameOf(file.path)}?`, 'The working copy goes to the Trash first, so it can be put back.', { confirm: 'Discard', destructive: true });
+                  const ok = await repo.confirm(`Discard the changes to ${basenameOf(file.path)}?`, 'The working copy goes to the Trash first, so it can be put back', { confirm: 'Discard', destructive: true });
                   if (ok) repo.run(() => api.discard([file.path]));
                 },
               },

@@ -27,7 +27,7 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
     setError(null);
     try {
       const made = await tools.init(folder, host.settings.get<string>('defaultBranch') || undefined);
-      host.app.toast(`Made ${basenameOf(made.root) || made.root} a Git repository.`);
+      host.app.toast(`Made ${basenameOf(made.root) || made.root} a Git repository`);
       onDone(made.root);
     } catch (e) {
       setError((e as Error).message);
@@ -56,7 +56,7 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
         setCloning(null);
         if (err && err !== 'Cancelled.') setError(err);
         else if (root) {
-          host.app.toast(`Cloned into ${root}.`);
+          host.app.toast(`Cloned into ${root}`);
           host.win.setData('folder', root);
           host.win.setData('repo', null);
         }
@@ -99,13 +99,13 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
       ) : (
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" disabled={busy} onClick={init}>
-            {busy ? 'Initializing…' : 'Initialize Repository'}
+            {busy ? 'Initializing' : 'Initialize Repository'}
           </Button>
           <Button size="sm" variant="secondary" onClick={clone}>
-            Clone…
+            Clone
           </Button>
           <Button size="sm" variant="ghost" onClick={onChoose}>
-            Open Another Folder…
+            Open Another Folder
           </Button>
         </div>
       )}

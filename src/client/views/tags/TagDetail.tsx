@@ -12,7 +12,7 @@ import { CommitDetails } from '../commit/CommitDetails.tsx';
 
 export function TagDetail({ tag }: { tag: Tag | null }) {
   const repo = useRepo();
-  if (!tag) return <Blank icon={TagIcon}>Pick a tag.</Blank>;
+  if (!tag) return <Blank icon={TagIcon}>Pick a tag</Blank>;
   const actions = tagActions(repo, tag);
   return (
     <CommitDetails
