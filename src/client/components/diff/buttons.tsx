@@ -2,7 +2,7 @@
 // lines folded between hunks.
 
 import type { ReactNode } from 'react';
-import { Ellipsis } from 'lucide-react';
+import type { Ellipsis } from 'lucide-react';
 import { cn } from '@hyperpane/ui';
 
 export function HunkButton({ children, onClick, disabled, danger }: { children: ReactNode; onClick(): void; disabled?: boolean; danger?: boolean }) {

@@ -17,7 +17,7 @@ const LETTERS: Record<Shown, { color: string; label: string }> = {
   '!': { color: 'var(--ansi-9)', label: 'Conflicted' },
 };
 
-export function letterInfo(letter: Shown) {
+function letterInfo(letter: Shown) {
   return LETTERS[letter] ?? LETTERS.M;
 }
 

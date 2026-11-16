@@ -46,7 +46,17 @@ export function Avatar({
 
 /** A commit's author and co-authors, stacked with the author on top (as
  * many as `max`, then how many more), everyone named in the tooltip. */
-export function Authors({ commit, size = 16, max = 3, className }: { commit: Pick<Commit, 'author' | 'email' | 'coAuthors'>; size?: number; max?: number; className?: string }) {
+export function Authors({
+  commit,
+  size = 16,
+  max = 3,
+  className,
+}: {
+  commit: Pick<Commit, 'author' | 'email' | 'coAuthors'>;
+  size?: number;
+  max?: number;
+  className?: string;
+}) {
   const people = authorsOf(commit);
   if (people.length === 1) return <Avatar name={people[0].name} email={people[0].email} size={size} className={className} />;
   const shown = people.slice(0, max);
@@ -54,7 +64,14 @@ export function Authors({ commit, size = 16, max = 3, className }: { commit: Pic
   return (
     <span className={cn('flex flex-none items-center', className)} title={people.map((p) => `${p.name} <${p.email}>`).join('\n')} data-authors={people.length}>
       {shown.map((p, i) => (
-        <Avatar key={p.email.toLowerCase()} name={p.name} email={p.email} size={size} stacked={{ z: shown.length - i }} className={i > 0 ? '-ms-1.5' : undefined} />
+        <Avatar
+          key={p.email.toLowerCase()}
+          name={p.name}
+          email={p.email}
+          size={size}
+          stacked={{ z: shown.length - i }}
+          className={i > 0 ? '-ms-1.5' : undefined}
+        />
       ))}
       {more > 0 && <span className="ms-0.5 text-[10px] text-[var(--node-muted)] tabular-nums">+{more}</span>}
     </span>

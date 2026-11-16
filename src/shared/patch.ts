@@ -183,7 +183,17 @@ export function fixEndOfFile(lines: readonly Line[], chosen: readonly boolean[],
  * has a quote, a backslash or a control character. */
 export function quote(name: string): string {
   if (!/["\\\u0000-\u001f\u007f]/.test(name)) return name;
-  const escapes: Record<string, string> = { '"': '\\"', '\\': '\\\\', '\t': '\\t', '\n': '\\n', '\r': '\\r', '\u0007': '\\a', '\b': '\\b', '\f': '\\f', '\v': '\\v' };
+  const escapes: Record<string, string> = {
+    '"': '\\"',
+    '\\': '\\\\',
+    '\t': '\\t',
+    '\n': '\\n',
+    '\r': '\\r',
+    '\u0007': '\\a',
+    '\b': '\\b',
+    '\f': '\\f',
+    '\v': '\\v',
+  };
   let out = '"';
   for (const ch of name) {
     if (escapes[ch]) out += escapes[ch];

@@ -105,7 +105,12 @@ export function ChangesList({
       const a = rows.findIndex((r) => itemKey(r) === anchor.current);
       const b = rows.indexOf(it);
       const [lo, hi] = a < b ? [a, b] : [b, a];
-      setPicked(rows.slice(lo, hi + 1).filter((r) => r.t === 'file').map(itemKey) as Pick[]);
+      setPicked(
+        rows
+          .slice(lo, hi + 1)
+          .filter((r) => r.t === 'file')
+          .map(itemKey) as Pick[],
+      );
       return;
     }
     anchor.current = k;
@@ -138,7 +143,9 @@ export function ChangesList({
     } else if (e.key === ' ') {
       const chosen = filesOf(picked);
       const bySide = new Map<Side, FileStatus[]>();
-      chosen.forEach(({ side, file }) => bySide.set(side, [...(bySide.get(side) ?? []), file]));
+      chosen.forEach(({ side, file }) => {
+        bySide.set(side, [...(bySide.get(side) ?? []), file]);
+      });
       for (const [side, files] of bySide) toggle(side, files);
     } else if (e.key === 'Enter') {
       (document.querySelector('[data-diff-pane] [tabindex="0"]') as HTMLElement | null)?.focus();
@@ -147,7 +154,11 @@ export function ChangesList({
     } else if (e.key === 'ArrowLeft' && cur?.t === 'dir') {
       setClosed((c) => new Set([...c, `${cur.side}:${cur.path}`]));
     } else if (e.key === 'Delete' || (e.key === 'Backspace' && mod(e))) {
-      discard(filesOf(picked).filter((x) => x.side !== 'staged' || true).map((x) => x.file));
+      discard(
+        filesOf(picked)
+          .filter((x) => x.side !== 'staged' || true)
+          .map((x) => x.file),
+      );
     } else if (shortcutKey(e) === 'a' && mod(e)) {
       setPicked(rows.filter((r) => r.t === 'file').map(itemKey) as Pick[]);
     } else return;
@@ -186,15 +197,38 @@ export function ChangesList({
 
   const total = status.files.length;
   const stagedCount = groups.staged.length;
-  const allChecked: boolean | 'mixed' = repo.including ? checkedAll(status.files.filter((f) => !f.conflict).map((f) => stateOf(repo.choices, f.path))) : total === 0 ? false : stagedCount === 0 ? false : groups.unstaged.length + groups.untracked.length + groups.conflict.length === 0 ? true : 'mixed';
+  const allChecked: boolean | 'mixed' = repo.including
+    ? checkedAll(status.files.filter((f) => !f.conflict).map((f) => stateOf(repo.choices, f.path)))
+    : total === 0
+      ? false
+      : stagedCount === 0
+        ? false
+        : groups.unstaged.length + groups.untracked.length + groups.conflict.length === 0
+          ? true
+          : 'mixed';
   /** A file's or a folder's checkbox. */
-  const checked = (side: Side, files: FileStatus[]): boolean | 'mixed' => (side === 'changes' ? checkedAll(files.map((f) => stateOf(repo.choices, f.path))) : side === 'staged');
+  const checked = (side: Side, files: FileStatus[]): boolean | 'mixed' =>
+    side === 'changes' ? checkedAll(files.map((f) => stateOf(repo.choices, f.path))) : side === 'staged';
 
   const row = (n: number) => {
     const it = rows[n];
-    if (it.t === 'section') return <SectionRow it={it} files={groups[it.side]} open={!closed.has(`section:${it.side}`)} click={click} stage={stage} unstage={unstage} />;
-    if (it.t === 'dir') return <DirRow it={it} checked={checked(it.side, it.files)} open={!closed.has(`${it.side}:${it.path}`)} click={click} menu={menu} toggle={toggle} setClosed={setClosed} />;
-    return <FileRow it={it} checked={checked(it.side, [it.file])} isPicked={pickedSet.has(itemKey(it))} tree={tree} click={click} menu={menu} toggle={toggle} />;
+    if (it.t === 'section')
+      return <SectionRow it={it} files={groups[it.side]} open={!closed.has(`section:${it.side}`)} click={click} stage={stage} unstage={unstage} />;
+    if (it.t === 'dir')
+      return (
+        <DirRow
+          it={it}
+          checked={checked(it.side, it.files)}
+          open={!closed.has(`${it.side}:${it.path}`)}
+          click={click}
+          menu={menu}
+          toggle={toggle}
+          setClosed={setClosed}
+        />
+      );
+    return (
+      <FileRow it={it} checked={checked(it.side, [it.file])} isPicked={pickedSet.has(itemKey(it))} tree={tree} click={click} menu={menu} toggle={toggle} />
+    );
   };
 
   return (
@@ -203,7 +237,9 @@ export function ChangesList({
         <Checkbox
           {...inRow}
           checked={allChecked}
-          label={repo.including ? (allChecked === true ? 'Uncheck everything' : 'Check everything') : allChecked === true ? 'Unstage everything' : 'Stage everything'}
+          label={
+            repo.including ? (allChecked === true ? 'Uncheck everything' : 'Check everything') : allChecked === true ? 'Unstage everything' : 'Stage everything'
+          }
           onCheckedChange={() => (allChecked === true ? allOut() : allIn())}
           disabled={!total}
           className="mx-1"
@@ -250,7 +286,11 @@ export function ChangesList({
           onKeyDown={onKey}
         />
       )}
-      {status.truncated && <div className="flex-none border-t border-[var(--node-border)] px-2 py-1 text-2xs text-[var(--ansi-3)]">More than 10 000 files changed: some aren’t listed</div>}
+      {status.truncated && (
+        <div className="flex-none border-t border-[var(--node-border)] px-2 py-1 text-2xs text-[var(--ansi-3)]">
+          More than 10 000 files changed: some aren’t listed
+        </div>
+      )}
       <CommitBox />
     </div>
   );

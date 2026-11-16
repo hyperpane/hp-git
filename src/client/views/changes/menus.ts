@@ -15,7 +15,12 @@ import { basenameOf, dirnameOf, extOf, ignoreExact } from '../../lib/paths.ts';
 import type { Side } from '../../lib/picks.ts';
 
 /** The menu of a file (or the files picked with it) or a folder. */
-export function fileMenu(repo: Repo, it: Exclude<Item, { t: 'section' }>, chosen: { side: Side; file: FileStatus }[], actions: FileActions): (MenuEntry | null)[] {
+export function fileMenu(
+  repo: Repo,
+  it: Exclude<Item, { t: 'section' }>,
+  chosen: { side: Side; file: FileStatus }[],
+  actions: FileActions,
+): (MenuEntry | null)[] {
   const { api } = repo;
   const { stage, unstage, check, allChecked, discard, stashFiles } = actions;
   const files = chosen.map((c) => c.file);
@@ -28,16 +33,30 @@ export function fileMenu(repo: Repo, it: Exclude<Item, { t: 'section' }>, chosen
   return [
     ...(changes.length && !changes.every((f) => allChecked([f])) ? [{ label: n('Include'), run: () => check(changes, true) }] : []),
     ...(changes.length && changes.some((f) => repo.choices[f.path] !== 'out') ? [{ label: n('Leave Out'), run: () => check(changes, false) }] : []),
-    ...(unstaged.length ? [{ label: unstaged.length > 1 ? `Stage ${plural(unstaged.length, 'File')}` : chosen[0].side === 'conflict' ? 'Mark as Resolved' : 'Stage', run: () => stage(unstaged) }] : []),
+    ...(unstaged.length
+      ? [
+          {
+            label: unstaged.length > 1 ? `Stage ${plural(unstaged.length, 'File')}` : chosen[0].side === 'conflict' ? 'Mark as Resolved' : 'Stage',
+            run: () => stage(unstaged),
+          },
+        ]
+      : []),
     ...(staged.length ? [{ label: staged.length > 1 ? `Unstage ${plural(staged.length, 'File')}` : 'Unstage', run: () => unstage(staged) }] : []),
     { label: files.length > 1 ? `Discard Changes to ${plural(files.length, 'File')}…` : 'Discard Changes', danger: true, run: () => discard(files) },
     { label: files.length > 1 ? `Stash ${plural(files.length, 'File')}…` : 'Stash This File', run: () => stashFiles(files) },
     null,
-    ...(one && one.untracked
+    ...(one?.untracked
       ? [
           { label: `Ignore ${basenameOf(one.path)}`, run: () => repo.run(() => api.ignore(ignoreExact(one.path)), { done: `Ignoring ${one.path}` }) },
           ...(ext ? [{ label: `Ignore All .${ext} Files`, run: () => repo.run(() => api.ignore(`*.${ext}`), { done: `Ignoring *.${ext}` }) }] : []),
-          ...(dirnameOf(one.path) ? [{ label: `Ignore the Folder ${dirnameOf(one.path)}`, run: () => repo.run(() => api.ignore(`/${dirnameOf(one.path)}/`), { done: `Ignoring ${dirnameOf(one.path)}/.` }) }] : []),
+          ...(dirnameOf(one.path)
+            ? [
+                {
+                  label: `Ignore the Folder ${dirnameOf(one.path)}`,
+                  run: () => repo.run(() => api.ignore(`/${dirnameOf(one.path)}/`), { done: `Ignoring ${dirnameOf(one.path)}/.` }),
+                },
+              ]
+            : []),
           null,
         ]
       : it.t === 'dir'

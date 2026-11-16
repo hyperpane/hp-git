@@ -61,7 +61,10 @@ export function ImageDiff({ diff }: { diff: Diff }) {
         <div className="flex min-h-0 flex-1 items-start justify-center gap-4">
           {(before || image.before) && (
             <figure className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-              <div className="rounded-control flex max-h-full items-center justify-center overflow-hidden border-2 border-[color-mix(in_srgb,var(--ansi-1)_60%,transparent)]" style={CHECKER}>
+              <div
+                className="rounded-control flex max-h-full items-center justify-center overflow-hidden border-2 border-[color-mix(in_srgb,var(--ansi-1)_60%,transparent)]"
+                style={CHECKER}
+              >
                 {before && <img src={before} alt="Before" onLoad={size('before')} className="max-h-[60vh] max-w-full object-contain" />}
               </div>
               {caption('Before', image.before, dims.before, 'var(--ansi-1)')}
@@ -69,7 +72,10 @@ export function ImageDiff({ diff }: { diff: Diff }) {
           )}
           {(after || image.after) && (
             <figure className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
-              <div className="rounded-control flex max-h-full items-center justify-center overflow-hidden border-2 border-[color-mix(in_srgb,var(--ansi-2)_60%,transparent)]" style={CHECKER}>
+              <div
+                className="rounded-control flex max-h-full items-center justify-center overflow-hidden border-2 border-[color-mix(in_srgb,var(--ansi-2)_60%,transparent)]"
+                style={CHECKER}
+              >
                 {after && <img src={after} alt="After" onLoad={size('after')} className="max-h-[60vh] max-w-full object-contain" />}
               </div>
               {caption('After', image.after, dims.after, 'var(--ansi-2)')}
@@ -88,7 +94,15 @@ export function ImageDiff({ diff }: { diff: Diff }) {
             />
             {mode === 'swipe' && <div className="absolute inset-y-0 w-px bg-[var(--node-accent)]" style={{ left: `${at}%` }} />}
           </div>
-          <input type="range" min={0} max={100} value={at} onChange={(e) => setAt(Number(e.target.value))} aria-label={mode === 'swipe' ? 'Where to divide' : 'How much of the old image'} className="w-60 accent-[var(--node-accent)]" />
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={at}
+            onChange={(e) => setAt(Number(e.target.value))}
+            aria-label={mode === 'swipe' ? 'Where to divide' : 'How much of the old image'}
+            className="w-60 accent-[var(--node-accent)]"
+          />
           <div className="flex gap-6">
             {caption('Before', image.before, dims.before, 'var(--ansi-1)')}
             {caption('After', image.after, dims.after, 'var(--ansi-2)')}

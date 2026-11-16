@@ -4,7 +4,19 @@
 // the next page) and scrolls a row into view for the keyboard
 // (lib/listKey.ts moves through it).
 
-import { type CSSProperties, type KeyboardEvent, type ReactNode, type Ref, forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  type Ref,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import { cn, styles } from '@hyperpane/ui';
 
 export interface VirtualHandle {

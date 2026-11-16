@@ -15,7 +15,10 @@ export function useDiffSpans(diff: Diff, m: Model, expansions?: Map<number, Expa
   useEffect(() => {
     setSpans(null);
     const ac = new AbortController();
-    highlightDiff(diff, ac.signal).then((s) => !ac.signal.aborted && setSpans(s), () => {});
+    highlightDiff(diff, ac.signal).then(
+      (s) => !ac.signal.aborted && setSpans(s),
+      () => {},
+    );
     return () => ac.abort();
   }, [diff]);
   // And the unchanged lines opened between hunks.
@@ -24,7 +27,11 @@ export function useDiffSpans(diff: Diff, m: Model, expansions?: Map<number, Expa
     const rows = m.unified.filter((r) => r.t === 'ctx');
     if (!rows.length) return;
     const ac = new AbortController();
-    highlightLines(diff.path.slice(diff.path.lastIndexOf('/') + 1), rows.map((r) => r.text), ac.signal).then(
+    highlightLines(
+      diff.path.slice(diff.path.lastIndexOf('/') + 1),
+      rows.map((r) => r.text),
+      ac.signal,
+    ).then(
       (s) => {
         if (!s || ac.signal.aborted) return;
         setCtxSpans(new Map(rows.map((r, k) => [r.new, s[k]])));

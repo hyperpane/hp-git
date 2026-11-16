@@ -108,7 +108,13 @@ async function present(repo: Repo, paths: string[], env: Record<string, string>)
   const gone: string[] = [];
   const out: string[] = [];
   for (const p of paths) {
-    if (await lstat(repo.file(p)).then(() => true, () => false)) out.push(p);
+    if (
+      await lstat(repo.file(p)).then(
+        () => true,
+        () => false,
+      )
+    )
+      out.push(p);
     else gone.push(p);
   }
   if (gone.length) {
@@ -135,7 +141,10 @@ export async function undoCommit(repo: Repo): Promise<{ summary: string; descrip
 export async function authors(repo: Repo, limit = 2000, signal?: AbortSignal): Promise<Author[]> {
   if (!(await repo.hasHead())) return [];
   const n = Math.max(1, count(limit, 2000, 20_000));
-  const out = await repo.text(['log', `-n${n}`, '--no-color', '--format=%an%x1f%ae%x1f%(trailers:key=Co-authored-by,valueonly,separator=%x1d)%x1e', 'HEAD', '--'], { signal });
+  const out = await repo.text(
+    ['log', `-n${n}`, '--no-color', '--format=%an%x1f%ae%x1f%(trailers:key=Co-authored-by,valueonly,separator=%x1d)%x1e', 'HEAD', '--'],
+    { signal },
+  );
   const people = new Map<string, Author>();
   const add = (name: string, email: string) => {
     name = name.trim();

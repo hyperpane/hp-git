@@ -6,6 +6,7 @@ import type { Commit, Compare, FileCommit, Letter, LogPage } from '../../shared/
 import { count, rev } from '../lib/args.ts';
 import { FORMAT, RS, parseCommit, walk } from '../lib/commits.ts';
 import { checkPaths, literal } from '../lib/pathspec.ts';
+import type { Output } from '../lib/process.ts';
 import type { Repo } from '../lib/repo.ts';
 
 export interface LogRequest {
@@ -59,7 +60,8 @@ export async function log(repo: Repo, r: LogRequest, signal?: AbortSignal): Prom
     page = await walk(repo, args, paths, skip, limit, signal);
   } catch (e) {
     // No commit yet: no history.
-    if (!r.ref && !r.all && /does not have any commits yet|unknown revision|bad (default )?revision/i.test((e as Error).message) && !(await repo.hasHead())) return { commits: [], more: false };
+    if (!r.ref && !r.all && /does not have any commits yet|unknown revision|bad (default )?revision/i.test((e as Error).message) && !(await repo.hasHead()))
+      return { commits: [], more: false };
     throw e;
   }
   mark(page.commits, await unpushed);
@@ -74,7 +76,7 @@ function mark(commits: Commit[], unpushed: Set<string>) {
  * no remote branch (when there are remotes). */
 async function unpushedSet(repo: Repo): Promise<Set<string>> {
   const [upstream, remotes] = await Promise.all([repo.ok(['rev-parse', '--verify', '--quiet', '@{upstream}']), repo.exec(['remote'])]);
-  let out;
+  let out: Output;
   if (upstream) out = await repo.exec(['rev-list', '--max-count=5000', 'HEAD', '^@{upstream}', '--']);
   else if (remotes.stdout.toString().trim()) out = await repo.exec(['rev-list', '--max-count=5000', 'HEAD', '--not', '--remotes', '--']);
   else return new Set();
@@ -93,14 +95,34 @@ export async function compare(repo: Repo, base: string, head: string, limit = 50
     walk(repo, ['--topo-order', `^${h}`, b], [], 0, max, signal),
     repo.exec(['merge-base', b, h]),
   ]);
-  return { ahead: ahead.commits, behind: behind.commits, aheadCount: aheadCount || 0, behindCount: behindCount || 0, mergeBase: mb.code === 0 ? mb.stdout.toString().trim() : null };
+  return {
+    ahead: ahead.commits,
+    behind: behind.commits,
+    aheadCount: aheadCount || 0,
+    behindCount: behindCount || 0,
+    mergeBase: mb.code === 0 ? mb.stdout.toString().trim() : null,
+  };
 }
 
 export async function fileLog(repo: Repo, p: string, skip = 0, limit = 100, signal?: AbortSignal): Promise<LogPage<FileCommit>> {
   const [file] = checkPaths([p]);
   const max = Math.max(1, count(limit, 100, 1000));
   const out = await repo.run(
-    ['log', '--follow', '--name-status', '-z', '-M', '--decorate=full', '--no-color', FORMAT, `--skip=${count(skip, 0, Number.MAX_SAFE_INTEGER)}`, `--max-count=${max + 1}`, 'HEAD', '--', literal(file)],
+    [
+      'log',
+      '--follow',
+      '--name-status',
+      '-z',
+      '-M',
+      '--decorate=full',
+      '--no-color',
+      FORMAT,
+      `--skip=${count(skip, 0, Number.MAX_SAFE_INTEGER)}`,
+      `--max-count=${max + 1}`,
+      'HEAD',
+      '--',
+      literal(file),
+    ],
     { signal, limit: 64 * 1024 * 1024 },
   );
   const commits: FileCommit[] = [];

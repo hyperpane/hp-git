@@ -19,7 +19,15 @@ export function folderTrash(dir: string): Trash {
   return async (file) => {
     await mkdir(dir, { recursive: true });
     let to = path.join(dir, path.basename(file));
-    for (let n = 1; await lstat(to).then(() => true, () => false); n++) to = path.join(dir, `${path.basename(file)} ${n}`);
+    for (
+      let n = 1;
+      await lstat(to).then(
+        () => true,
+        () => false,
+      );
+      n++
+    )
+      to = path.join(dir, `${path.basename(file)} ${n}`);
     const { rename } = await import('node:fs/promises');
     await rename(file, to);
   };

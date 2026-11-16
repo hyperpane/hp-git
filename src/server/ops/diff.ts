@@ -13,13 +13,13 @@ import type { Repo } from '../lib/repo.ts';
 import { type Side, read, sizeOf } from '../lib/sides.ts';
 
 /** A patch bigger than these comes back `tooLarge` unless asked `full`. */
-export const SOFT_BYTES = 2 * 1024 * 1024;
-export const SOFT_LINES = 20_000;
+const SOFT_BYTES = 2 * 1024 * 1024;
+const SOFT_LINES = 20_000;
 /** With `full`, it's cut (`truncated`) past these. */
-export const HARD_BYTES = 64 * 1024 * 1024;
-export const HARD_LINES = 400_000;
+const HARD_BYTES = 64 * 1024 * 1024;
+const HARD_LINES = 400_000;
 /** Images bigger than this aren't sent. */
-export const IMAGE_MAX = 8 * 1024 * 1024;
+const IMAGE_MAX = 8 * 1024 * 1024;
 
 const IMAGES: Record<string, string> = {
   png: 'image/png',
@@ -110,7 +110,24 @@ export async function diff(repo: Repo, r: DiffRequest, signal?: AbortSignal): Pr
   // A conflicted file's diff is a combined one: show it against HEAD (ours)
   // instead, conflict markers and all.
   if (!r.staged && !r.head && !r.commit && !r.from && !r.untracked && out.stdout.subarray(0, 10).toString() === 'diff --cc ') {
-    out = await repo.run(['diff', '--no-ext-diff', '--no-textconv', '--no-color', '--no-relative', '--src-prefix=a/', '--dst-prefix=b/', `-U${context}`, '--no-renames', ...(r.ignoreWhitespace ? ['-w'] : []), hasHead ? 'HEAD' : await repo.emptyTree(), '--', literal(file)], { limit: limit + 1, signal });
+    out = await repo.run(
+      [
+        'diff',
+        '--no-ext-diff',
+        '--no-textconv',
+        '--no-color',
+        '--no-relative',
+        '--src-prefix=a/',
+        '--dst-prefix=b/',
+        `-U${context}`,
+        '--no-renames',
+        ...(r.ignoreWhitespace ? ['-w'] : []),
+        hasHead ? 'HEAD' : await repo.emptyTree(),
+        '--',
+        literal(file),
+      ],
+      { limit: limit + 1, signal },
+    );
     before = hasHead ? { spec: `HEAD:${file}` } : null;
   }
   const tooBig = out.cut || out.stdout.length > limit;

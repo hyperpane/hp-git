@@ -83,8 +83,16 @@ export function gitApi(host: Host, root: string, server?: string) {
     const promise = new Promise<T>((resolve, reject) => {
       const plain = () =>
         host.call<T>('git', request, o).then(
-          (v) => !done && ((done = true), resolve(v)),
-          (e: Error) => !done && ((done = true), reject(e)),
+          (v) => {
+            if (done) return;
+            done = true;
+            resolve(v);
+          },
+          (e: Error) => {
+            if (done) return;
+            done = true;
+            reject(e);
+          },
         );
       if (onceMissing.has(host)) return void plain();
       cancel = host.subscribe<T>(
@@ -145,8 +153,7 @@ export function gitApi(host: Host, root: string, server?: string) {
       allowEmpty?: boolean;
       /** Exactly these, whatever's staged (lib/include.ts's selection). */
       only?: { paths: string[]; patches: string[] };
-    }) =>
-      call<{ sha: string; summary: string }>('commit', m),
+    }) => call<{ sha: string; summary: string }>('commit', m),
     undoCommit: () => call<{ summary: string; description: string }>('undoCommit'),
     authors: (limit?: number) => call<Author[]>('authors', { limit }),
     config: (c: { get?: string[]; set?: Record<string, string | null>; global?: boolean }) => call<{ values: Record<string, string | null> }>('config', c),
@@ -183,7 +190,8 @@ export function gitApi(host: Host, root: string, server?: string) {
     tagDelete: (name: string) => call<null>('tag', { action: 'delete', name }),
 
     remotes: () => call<Remote[]>('remotes'),
-    remote: (action: 'add' | 'remove' | 'rename' | 'setUrl', name: string, args: { url?: string; to?: string } = {}) => call<null>('remote', { action, name, ...args }),
+    remote: (action: 'add' | 'remove' | 'rename' | 'setUrl', name: string, args: { url?: string; to?: string } = {}) =>
+      call<null>('remote', { action, name, ...args }),
 
     /** A sync's events (progress, prompts, done). Returns the cancel. */
     sync: (action: SyncAction, args: Record<string, unknown>, onEvent: (e: SyncEvent) => void, onEnd: (error?: string) => void) =>

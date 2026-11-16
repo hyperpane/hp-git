@@ -72,7 +72,14 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
       <div className="flex flex-col gap-1.5 ps-[26px]">
         {body && (
           <div className="relative">
-            <pre className={cn('font-sans text-xs leading-relaxed break-words whitespace-pre-wrap text-[var(--node-fg)] opacity-90 select-text', long && !open && 'max-h-[5.2em] overflow-hidden')}>{body}</pre>
+            <pre
+              className={cn(
+                'font-sans text-xs leading-relaxed break-words whitespace-pre-wrap text-[var(--node-fg)] opacity-90 select-text',
+                long && !open && 'max-h-[5.2em] overflow-hidden',
+              )}
+            >
+              {body}
+            </pre>
             {long && (
               <button
                 type="button"
@@ -103,7 +110,10 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
             </span>
           )}
           {c.signature && (
-            <span className={cn('flex items-center gap-1', c.signature.status === 'good' ? 'text-[var(--ansi-2)]' : 'text-[var(--ansi-3)]')} title={`Signed by ${c.signature.signer}: ${c.signature.status}`}>
+            <span
+              className={cn('flex items-center gap-1', c.signature.status === 'good' ? 'text-[var(--ansi-2)]' : 'text-[var(--ansi-3)]')}
+              title={`Signed by ${c.signature.signer}: ${c.signature.status}`}
+            >
               {c.signature.status === 'good' ? <ShieldCheck className="size-3" /> : <ShieldAlert className="size-3" />}
               {c.signature.status === 'good' ? 'Verified' : c.signature.status}
             </span>
@@ -111,7 +121,13 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
           <span className="flex items-center gap-1">
             {c.parents.length === 0 ? 'The first commit' : c.parents.length > 1 ? 'Merges' : 'Parent'}
             {c.parents.map((p) => (
-              <button key={p} type="button" className="rounded-chip px-0.5 font-mono text-[var(--node-accent)] hover:bg-[var(--node-hover)]" title={`Open ${p}`} onClick={() => repo.open({ kind: 'commit', sha: p })}>
+              <button
+                key={p}
+                type="button"
+                className="rounded-chip px-0.5 font-mono text-[var(--node-accent)] hover:bg-[var(--node-hover)]"
+                title={`Open ${p}`}
+                onClick={() => repo.open({ kind: 'commit', sha: p })}
+              >
                 {shortSha(p)}
               </button>
             ))}

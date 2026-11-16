@@ -21,7 +21,13 @@ export async function apply(repo: Repo, patch: unknown, cached: boolean, reverse
     const name = patchPath(patch);
     if (name) {
       const file = repo.file(checkPaths([name])[0]);
-      if (await lstat(file).then((s) => s.isFile(), () => false)) await copyToTrash(repo, file, trash);
+      if (
+        await lstat(file).then(
+          (s) => s.isFile(),
+          () => false,
+        )
+      )
+        await copyToTrash(repo, file, trash);
     }
   }
   await repo.run(args, { input: patch });
@@ -55,7 +61,7 @@ function unquote(text: string): string {
 
 /** Whether a hunk of the patch has no context lines (git applies those only
  * with --unidiff-zero). */
-export function hasHunkWithoutContext(patch: string): boolean {
+function hasHunkWithoutContext(patch: string): boolean {
   let inHunk = false;
   let context = true;
   for (const line of patch.split('\n')) {

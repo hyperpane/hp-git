@@ -14,8 +14,16 @@ export async function operation(gitDir: string): Promise<Operation | null> {
       return null;
     }
   };
-  const isDir = (name: string) => stat(path.join(gitDir, name)).then((s) => s.isDirectory(), () => false);
-  const exists = (name: string) => stat(path.join(gitDir, name)).then(() => true, () => false);
+  const isDir = (name: string) =>
+    stat(path.join(gitDir, name)).then(
+      (s) => s.isDirectory(),
+      () => false,
+    );
+  const exists = (name: string) =>
+    stat(path.join(gitDir, name)).then(
+      () => true,
+      () => false,
+    );
   const number = async (name: string) => {
     const v = await read(name);
     const n = v === null ? NaN : Number(v);

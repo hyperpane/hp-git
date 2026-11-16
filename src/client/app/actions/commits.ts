@@ -41,7 +41,12 @@ export function commitMenu(repo: Repo, c: Commit, e: { clientX: number; clientY:
     {
       label: 'Create Tag Here',
       run: async () => {
-        const result = await repo.host.ui.dialog<{ name: string; message: string }>('tag', { title: `Tag ${sha}`, data: { sha: c.sha }, width: 440, height: 240 });
+        const result = await repo.host.ui.dialog<{ name: string; message: string }>('tag', {
+          title: `Tag ${sha}`,
+          data: { sha: c.sha },
+          width: 440,
+          height: 240,
+        });
         if (result) repo.run(() => api.tagCreate(result.name, c.sha, result.message), { done: `Tagged ${sha} ${result.name}` });
       },
     },

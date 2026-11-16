@@ -7,7 +7,7 @@ import { Field, FieldLabel, Input } from '@hyperpane/ui';
 import { Form } from './Form.tsx';
 
 /** The folder a clone of `url` gets by default: the repository's name. */
-export function cloneName(url: string): string {
+function cloneName(url: string): string {
   const m = /([^/:\\]+?)(?:\.git)?\/*$/.exec(url.trim());
   return m ? m[1] : '';
 }
@@ -24,7 +24,12 @@ export function Clone({ data }: { data: { folder: string } }) {
     <Form ok="Clone" disabled={!url.trim() || !target.trim()} onSubmit={() => host.ui.closeDialog({ url: url.trim(), into: target.trim() })}>
       <Field>
         <FieldLabel>Repository URL</FieldLabel>
-        <Input autoFocus value={url} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)} placeholder="https://github.com/owner/repo.git" />
+        <Input
+          autoFocus
+          value={url}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)}
+          placeholder="https://github.com/owner/repo.git"
+        />
       </Field>
       <Field description="A new folder, or an empty one, on this window’s server">
         <FieldLabel>Into</FieldLabel>

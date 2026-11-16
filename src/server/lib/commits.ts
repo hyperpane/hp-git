@@ -44,7 +44,7 @@ export function parseCoAuthors(text: string): Person[] {
   const seen = new Set<string>();
   for (const value of text.split(/[\n\x1d]/)) {
     const m = /^(.*?)\s*<([^<>\s]+)>\s*$/.exec(value.trim());
-    if (!m || !m[1].trim()) continue;
+    if (!m?.[1].trim()) continue;
     const key = m[2].toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);

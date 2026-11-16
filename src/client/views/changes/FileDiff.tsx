@@ -29,7 +29,12 @@ export function FileDiff({ side, file, onLines }: { side: Side; file: FileStatus
         ? file.untracked
           ? { path: file.path, untracked: true }
           : { path: file.path, oldPath: file.from, head: true }
-        : { path: file.path, oldPath: side === 'staged' ? file.from : undefined, staged: side === 'staged' || undefined, untracked: side === 'untracked' || undefined },
+        : {
+            path: file.path,
+            oldPath: side === 'staged' ? file.from : undefined,
+            staged: side === 'staged' || undefined,
+            untracked: side === 'untracked' || undefined,
+          },
     [file.path, file.from, file.untracked, side],
   );
   // Against HEAD, its lines are checked for the next commit (a rename's
@@ -53,7 +58,8 @@ export function FileDiff({ side, file, onLines }: { side: Side; file: FileStatus
           if (!patch) return;
           await repo.run(() => api.apply(patch, o));
         };
-        if (side === 'staged') return { primary: { label: 'Unstage', run: (keys) => apply(unstagePatch(diff, new Set(keys)), { cached: true, reverse: true }) } };
+        if (side === 'staged')
+          return { primary: { label: 'Unstage', run: (keys) => apply(unstagePatch(diff, new Set(keys)), { cached: true, reverse: true }) } };
         return {
           // Against HEAD there's no staging: the lines are checked instead.
           primary: side === 'changes' ? undefined : { label: 'Stage', run: (keys) => apply(stagePatch(diff, new Set(keys)), { cached: true }) },
@@ -76,9 +82,7 @@ export function FileDiff({ side, file, onLines }: { side: Side; file: FileStatus
     side === 'changes' ? null : side === 'staged' ? (
       <NodeButton onClick={() => unstage([file])}>Unstage File</NodeButton>
     ) : (
-      <>
-        <NodeButton onClick={() => stage([file])}>Stage File</NodeButton>
-      </>
+      <NodeButton onClick={() => stage([file])}>Stage File</NodeButton>
     );
   return (
     <DiffPane
@@ -97,7 +101,11 @@ export function FileDiff({ side, file, onLines }: { side: Side; file: FileStatus
                 label: 'Discard Changes to the File',
                 danger: true,
                 run: async () => {
-                  const ok = await repo.confirm(`Discard the changes to ${basenameOf(file.path)}?`, 'The working copy goes to the Trash first, so it can be put back', { confirm: 'Discard', destructive: true });
+                  const ok = await repo.confirm(
+                    `Discard the changes to ${basenameOf(file.path)}?`,
+                    'The working copy goes to the Trash first, so it can be put back',
+                    { confirm: 'Discard', destructive: true },
+                  );
                   if (ok) repo.run(() => api.discard([file.path]));
                 },
               },

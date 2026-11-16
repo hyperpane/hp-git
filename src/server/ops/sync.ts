@@ -56,7 +56,8 @@ export async function sync(repo: Repo, r: SyncRequest, ch: Channel, askpass: Ask
     case 'pull': {
       const branch = await currentBranch(repo);
       if (!(await repo.config(`branch.${branch}.merge`))) throw new PluginError(`${branch} has no upstream to pull from. Push it first.`);
-      const configured = (await repo.config('pull.rebase')) !== null || (await repo.config('pull.ff')) !== null || (await repo.config(`branch.${branch}.rebase`)) !== null;
+      const configured =
+        (await repo.config('pull.rebase')) !== null || (await repo.config('pull.ff')) !== null || (await repo.config(`branch.${branch}.rebase`)) !== null;
       const args = ['pull', '--progress', '--no-recurse-submodules'];
       // Neither set: merge (git's old default) rather than refuse when the branches have diverged.
       if (!configured) args.push('--no-rebase');
@@ -101,12 +102,20 @@ export async function quietFetch(repo: Repo): Promise<void> {
   if (out.code !== 0) throw new PluginError(explain(out.stderr));
 }
 
-export async function clone(git: Git, r: { url: unknown; into: string; branch?: unknown; depth?: unknown }, ch: Channel, askpass: Askpass | null): Promise<{ root: string }> {
+export async function clone(
+  git: Git,
+  r: { url: unknown; into: string; branch?: unknown; depth?: unknown },
+  ch: Channel,
+  askpass: Askpass | null,
+): Promise<{ root: string }> {
   const url = typeof r.url === 'string' ? r.url.trim() : '';
   if (!url || url.startsWith('-') || /\s/.test(url)) throw new PluginError("That isn't a repository's URL.");
   const into = r.into;
   let made = false;
-  const there = await stat(into).then((s) => s, () => null);
+  const there = await stat(into).then(
+    (s) => s,
+    () => null,
+  );
   if (there) {
     if (!there.isDirectory()) throw new PluginError(`${path.basename(into)} is there already, and isn't a folder.`);
     if ((await readdir(into)).length) throw new PluginError('The folder to clone into is there already, and not empty.');

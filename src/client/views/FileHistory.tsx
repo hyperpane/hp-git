@@ -72,7 +72,8 @@ export function FileHistory({ path }: { path: string }) {
   };
 
   if (error && !commits.length) return <NodeMessage error>{error}</NodeMessage>;
-  if (!commits.length) return loading ? <NodeMessage>Loading the history of {path}…</NodeMessage> : <Blank icon={FileClock}>No commit has touched {path}.</Blank>;
+  if (!commits.length)
+    return loading ? <NodeMessage>Loading the history of {path}…</NodeMessage> : <Blank icon={FileClock}>No commit has touched {path}.</Blank>;
   return (
     <SplitPane
       id="fileHistory"

@@ -37,7 +37,10 @@ const decode = (b: Uint8Array) => JSON.parse(new TextDecoder().decode(b));
 
 // Git as the tests run it: a home of its own (no user config), fixed names.
 const home = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'git-ui-home-')));
-writeFileSync(path.join(home, '.gitconfig'), '[user]\n\tname = Ada Lovelace\n\temail = ada@example.com\n[init]\n\tdefaultBranch = main\n[core]\n\tautocrlf = false\n');
+writeFileSync(
+  path.join(home, '.gitconfig'),
+  '[user]\n\tname = Ada Lovelace\n\temail = ada@example.com\n[init]\n\tdefaultBranch = main\n[core]\n\tautocrlf = false\n',
+);
 process.env.HOME = home;
 process.env.USERPROFILE = home;
 process.env.XDG_CONFIG_HOME = path.join(home, '.config');
@@ -85,7 +88,10 @@ export async function realPart(t: { after(fn: () => void): void }, projectFolder
     dataDir: data,
     projects: [{ id: 'p1', name: 'project', folder: projectFolder }],
     settings: { gitPath: '', autoFetch: 'off', defaultBranch: 'main' },
-    events: { publish: ['git.changed', 'git.committed', 'git.checkedOut'], subscribe: ['git.status', 'git.open', 'git.changed', 'git.committed', 'git.checkedOut'] },
+    events: {
+      publish: ['git.changed', 'git.committed', 'git.checkedOut'],
+      subscribe: ['git.status', 'git.open', 'git.changed', 'git.committed', 'git.checkedOut'],
+    },
   });
   const part = makeGit({ trash: folderTrash(trash) })(host);
   t.after(() => part.shutdown?.());
@@ -139,7 +145,10 @@ export class FakeApp {
 
   #receive(msg: any) {
     if (msg.t === 'hello') return this.#post({ t: 'init', v: this.init });
-    if (msg.t === 'batch') return msg.m.forEach((m: any) => this.#receive(m));
+    if (msg.t === 'batch') {
+      for (const m of msg.m) this.#receive(m);
+      return;
+    }
     if (msg.t === 'log') return void this.logs.push(msg);
     if (msg.t === 'cancel') {
       this.#bus.delete(msg.id);
@@ -383,7 +392,7 @@ export async function boot(o: Options): Promise<{ app: FakeApp; root: HTMLElemen
     app,
     root,
     stop() {
-      timers.forEach((t) => clearInterval(t));
+      for (const t of timers) clearInterval(t);
       globalThis.setInterval = setInterval_;
       app.stop();
       port1.close();
@@ -430,4 +439,8 @@ export function type(el: HTMLInputElement | HTMLTextAreaElement, value: string) 
 }
 
 export const button = (root: ParentNode, label: string | RegExp) =>
-  [...root.querySelectorAll<HTMLButtonElement>('button')].find((b) => (typeof label === 'string' ? b.textContent?.trim() === label || b.title === label || b.getAttribute('aria-label') === label : label.test(b.textContent ?? '') || label.test(b.title)));
+  [...root.querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+    typeof label === 'string'
+      ? b.textContent?.trim() === label || b.title === label || b.getAttribute('aria-label') === label
+      : label.test(b.textContent ?? '') || label.test(b.title),
+  );

@@ -12,22 +12,25 @@ import { NewRemote } from './NewRemote.tsx';
 import { NewStash } from './NewStash.tsx';
 import { NewTag } from './NewTag.tsx';
 
-export function DialogView({ view, data }: { view: string; data: any }) {
+/** The data a dialog takes: the app hands it over as JSON. */
+type Data<C extends (props: { data: never }) => unknown> = Parameters<C>[0]['data'];
+
+export function DialogView({ view, data }: { view: string; data: unknown }) {
   const content =
     view === 'credentials' ? (
-      <Credentials data={data} />
+      <Credentials data={data as Data<typeof Credentials>} />
     ) : view === 'identity' ? (
-      <Identity data={data} />
+      <Identity data={data as Data<typeof Identity>} />
     ) : view === 'branch' ? (
-      <NewBranch data={data} />
+      <NewBranch data={data as Data<typeof NewBranch>} />
     ) : view === 'tag' ? (
-      <NewTag data={data} />
+      <NewTag data={data as Data<typeof NewTag>} />
     ) : view === 'stash' ? (
-      <NewStash data={data} />
+      <NewStash data={data as Data<typeof NewStash>} />
     ) : view === 'remote' ? (
-      <NewRemote data={data} />
+      <NewRemote data={data as Data<typeof NewRemote>} />
     ) : view === 'clone' ? (
-      <Clone data={data} />
+      <Clone data={data as Data<typeof Clone>} />
     ) : (
       <p className="text-muted-foreground p-5 text-sm">This dialog isn’t known: {view}.</p>
     );

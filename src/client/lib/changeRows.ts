@@ -30,7 +30,10 @@ export function items(groups: Record<Side, FileStatus[]>, tree: boolean, closed:
       node.all.push(f);
       for (let i = 0; i < parts.length - 1; i++) {
         let next = node.dirs.get(parts[i]);
-        if (!next) node.dirs.set(parts[i], (next = { name: parts[i], path: parts.slice(0, i + 1).join('/'), dirs: new Map(), files: [], all: [] }));
+        if (!next) {
+          next = { name: parts[i], path: parts.slice(0, i + 1).join('/'), dirs: new Map(), files: [], all: [] };
+          node.dirs.set(parts[i], next);
+        }
         next.all.push(f);
         node = next;
       }

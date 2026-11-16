@@ -97,7 +97,9 @@ export interface Made {
 }
 
 /** The plugin with a test host, its Trash a folder. */
-export async function plugin(o: { projects?: { id: string; name: string; folder: string }[]; settings?: Record<string, unknown>; promptTimeout?: number; minute?: number } = {}): Promise<Made> {
+export async function plugin(
+  o: { projects?: { id: string; name: string; folder: string }[]; settings?: Record<string, unknown>; promptTimeout?: number; minute?: number } = {},
+): Promise<Made> {
   await testHome();
   const trash = await folder('git-trash-');
   const data = await folder('git-data-');
@@ -106,7 +108,10 @@ export async function plugin(o: { projects?: { id: string; name: string; folder:
     id: 'git',
     bus,
     dataDir: data,
-    events: { publish: ['git.changed', 'git.committed', 'git.checkedOut'], subscribe: ['git.status', 'git.open', 'git.changed', 'git.committed', 'git.checkedOut'] },
+    events: {
+      publish: ['git.changed', 'git.committed', 'git.checkedOut'],
+      subscribe: ['git.status', 'git.open', 'git.changed', 'git.committed', 'git.checkedOut'],
+    },
     projects: o.projects ?? [],
     settings: { gitPath: '', autoFetch: 'off', defaultBranch: 'main', ...(o.settings ?? {}) },
   });

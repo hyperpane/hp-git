@@ -50,7 +50,9 @@ export async function makeBigRepo(dir: string, o: BigRepo, env: NodeJS.ProcessEn
     const side = 1_000_000 + c;
     if (isMerge) {
       // A side commit off a few commits back, then merged.
-      await write(`commit refs/heads/side\nmark :${side}\nauthor ${who(c + 1)}\ncommitter ${who(c + 1)}\n${data(`Side work before ${c}`)}from :${c - 5}\nM 100644 inline side/notes${c}.md\n${data(`notes ${c}\n`)}`);
+      await write(
+        `commit refs/heads/side\nmark :${side}\nauthor ${who(c + 1)}\ncommitter ${who(c + 1)}\n${data(`Side work before ${c}`)}from :${c - 5}\nM 100644 inline side/notes${c}.md\n${data(`notes ${c}\n`)}`,
+      );
     }
     const author = who(c);
     let commit = `commit refs/heads/main\nmark :${c}\nauthor ${author}\ncommitter ${author}\n${data(isMerge ? `Merge side work into main (${c})` : `Change ${c}: update values in ${c % o.files}`)}from :${c - 1}\n`;

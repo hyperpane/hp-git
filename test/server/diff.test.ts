@@ -41,7 +41,10 @@ test('working tree, staged, untracked and conflicted diffs', async () => {
   await write(dir, { 'a.txt': 'one\nTWO\nthree\n' });
   const unstaged = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt' });
   assert.equal(unstaged.status, 'M');
-  assert.deepEqual(unstaged.hunks[0].lines.map((l) => l.kind + l.text), [' one', '-two', '+TWO', ' three']);
+  assert.deepEqual(
+    unstaged.hunks[0].lines.map((l) => l.kind + l.text),
+    [' one', '-two', '+TWO', ' three'],
+  );
   assert.equal(unstaged.binary, false);
   sh(dir, 'add', 'a.txt');
   assert.equal((await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt' })).hunks.length, 0);
@@ -51,7 +54,13 @@ test('working tree, staged, untracked and conflicted diffs', async () => {
   const untracked = await g.call<Diff>({ op: 'diff', repo: dir, path: 'n.txt', untracked: true });
   assert.equal(untracked.status, 'A');
   assert.equal(untracked.newMode, '100644');
-  assert.deepEqual(untracked.hunks[0].lines.map((l) => [l.kind, l.new]), [['+', 1], ['+', 2]]);
+  assert.deepEqual(
+    untracked.hunks[0].lines.map((l) => [l.kind, l.new]),
+    [
+      ['+', 1],
+      ['+', 2],
+    ],
+  );
   // Context and whitespace.
   await write(dir, { 'w.txt': 'a\nb\nc\nd\ne\nf\ng\n' });
   commitAll(dir, 'w');
@@ -79,9 +88,15 @@ test('a commit’s diff, a root commit’s, between revisions, and a revision ag
   const inRoot = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt', commit: root });
   assert.equal(inRoot.status, 'A');
   const inSecond = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt', commit: second });
-  assert.deepEqual(inSecond.hunks[0].lines.map((l) => l.kind + l.text), [' a', '+b']);
+  assert.deepEqual(
+    inSecond.hunks[0].lines.map((l) => l.kind + l.text),
+    [' a', '+b'],
+  );
   const between = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt', from: second, to: root });
-  assert.deepEqual(between.hunks[0].lines.map((l) => l.kind + l.text), [' a', '-b']);
+  assert.deepEqual(
+    between.hunks[0].lines.map((l) => l.kind + l.text),
+    [' a', '-b'],
+  );
   await write(dir, { 'a.txt': 'a\nb\nc\n' });
   const toTree = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt', from: root });
   assert.equal(toTree.additions, 2);
@@ -107,7 +122,7 @@ test('renames with similarity, binary files and images before and after', async 
 
 test('a huge diff comes back too large, with counts; full shows it anyway', async () => {
   const dir = await repo({ 'big.txt': 'x\n' });
-  const big = Array.from({ length: 30_000 }, (_, i) => `line ${i} ${'y'.repeat(60)}`).join('\n') + '\n';
+  const big = `${Array.from({ length: 30_000 }, (_, i) => `line ${i} ${'y'.repeat(60)}`).join('\n')}\n`;
   await write(dir, { 'big.txt': big });
   const started = Date.now();
   const capped = await g.call<Diff>({ op: 'diff', repo: dir, path: 'big.txt' });
@@ -128,7 +143,10 @@ test('blob: the working tree, the index, a revision, lines and base64', async ()
   assert.deepEqual(tree, { size: 19, binary: false, total: 4, lines: ['two', 'three'] });
   assert.deepEqual((await g.call<BlobContent>({ op: 'blob', repo: dir, path: 'a.txt', rev: ':0' })).lines, ['one', 'two', 'three']);
   assert.deepEqual((await g.call<BlobContent>({ op: 'blob', repo: dir, path: 'a.txt', rev: 'HEAD' })).total, 3);
-  assert.equal(Buffer.from((await g.call<BlobContent>({ op: 'blob', repo: dir, path: 'a.txt', base64: true })).data!, 'base64').toString(), 'ONE\ntwo\nthree\nfour\n');
+  assert.equal(
+    Buffer.from((await g.call<BlobContent>({ op: 'blob', repo: dir, path: 'a.txt', base64: true })).data!, 'base64').toString(),
+    'ONE\ntwo\nthree\nfour\n',
+  );
   await rm(path.join(dir, 'a.txt'));
   await assert.rejects(g.call({ op: 'blob', repo: dir, path: 'a.txt' }), { message: "a.txt isn't there." });
 });

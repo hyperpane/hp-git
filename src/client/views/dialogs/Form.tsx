@@ -6,7 +6,19 @@ import { type FormEvent, type ReactNode, useEffect, useRef } from 'react';
 import { useHost } from '@hyperpane/sdk/client';
 import { Button, Checkbox, DialogFooter } from '@hyperpane/ui';
 
-export function Form({ children, onSubmit, ok, disabled, danger }: { children: ReactNode; onSubmit(): void; ok: string; disabled?: boolean; danger?: boolean }) {
+export function Form({
+  children,
+  onSubmit,
+  ok,
+  disabled,
+  danger,
+}: {
+  children: ReactNode;
+  onSubmit(): void;
+  ok: string;
+  disabled?: boolean;
+  danger?: boolean;
+}) {
   const host = useHost();
   const box = useRef<HTMLFormElement>(null);
   // As tall as what's in it.

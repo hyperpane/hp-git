@@ -37,7 +37,16 @@ function status(o: Partial<Status> = {}): Status {
   };
 }
 
-const file = (path: string, worktree: 'M' | 'D' = 'M') => ({ path, staged: null, worktree, untracked: false, conflict: null, mtime: 1, additions: 1, deletions: 1 });
+const file = (path: string, worktree: 'M' | 'D' = 'M') => ({
+  path,
+  staged: null,
+  worktree,
+  untracked: false,
+  conflict: null,
+  mtime: 1,
+  additions: 1,
+  deletions: 1,
+});
 
 function diffOf(path: string): Diff {
   return {
@@ -48,7 +57,19 @@ function diffOf(path: string): Diff {
     size: 40,
     additions: 1,
     deletions: 1,
-    hunks: [{ header: '@@ -1,1 +1,1 @@', oldStart: 1, oldLines: 1, newStart: 1, newLines: 1, lines: [{ kind: '-', old: 1, text: `old ${path}` }, { kind: '+', new: 1, text: `new ${path}` }] }],
+    hunks: [
+      {
+        header: '@@ -1,1 +1,1 @@',
+        oldStart: 1,
+        oldLines: 1,
+        newStart: 1,
+        newLines: 1,
+        lines: [
+          { kind: '-', old: 1, text: `old ${path}` },
+          { kind: '+', new: 1, text: `new ${path}` },
+        ],
+      },
+    ],
   };
 }
 
@@ -56,7 +77,11 @@ type Handler = (c: ServerCall) => unknown;
 
 /** The watches open now: `pushStatus()` sends them a new status. */
 const watches = new Set<ServerCall>();
-const pushStatus = (s: Status) => watches.forEach((c) => (c.signal.aborted ? watches.delete(c) : c.send(s)));
+const pushStatus = (s: Status) =>
+  watches.forEach((c) => {
+    if (c.signal.aborted) watches.delete(c);
+    else c.send(s);
+  });
 
 /** A fake server: `find` and `watch` for a repository with `s`; the rest by `ops`. */
 function server(s: () => Status, ops: Record<string, Handler> = {}): Handler {
@@ -65,7 +90,16 @@ function server(s: () => Status, ops: Record<string, Handler> = {}): Handler {
     if (c.request.op === 'once') c = { ...c, request: c.request.call };
     const op = c.request.op;
     if (ops[op]) return ops[op](c);
-    if (op === 'find') return { root: ROOT, gitDir: `${ROOT}/.git`, bare: false, repos: [{ root: ROOT, kind: 'main', name: 'app' }, { root: `${ROOT}/lib`, kind: 'submodule', name: 'lib' }] };
+    if (op === 'find')
+      return {
+        root: ROOT,
+        gitDir: `${ROOT}/.git`,
+        bare: false,
+        repos: [
+          { root: ROOT, kind: 'main', name: 'app' },
+          { root: `${ROOT}/lib`, kind: 'submodule', name: 'lib' },
+        ],
+      };
     if (op === 'watch') {
       watches.add(c);
       c.send(s());
@@ -219,7 +253,10 @@ test('a folder that isn’t a repository: initialize it (on the default branch),
 });
 
 test('keys: Ctrl+2 (by its place) is History, the list folds away and back', async (t) => {
-  const w = await window(t, server(() => status({ files: [file('a.txt')] })));
+  const w = await window(
+    t,
+    server(() => status({ files: [file('a.txt')] })),
+  );
   await until(() => w.root.querySelector('[data-git]'));
   // Pressed again until heard: the window listens from an effect, which a
   // slow machine (CI) runs after the first press.
@@ -238,7 +275,16 @@ test('keys: Ctrl+2 (by its place) is History, the list folds away and back', asy
 });
 
 test('other plugins open a file’s blame here (git.open), in this window', async (t) => {
-  const w = await window(t, server(() => status(), { blame: () => ({ lines: [{ sha: 'b'.repeat(40), line: 1, text: 'hello' }], commits: { ['b'.repeat(40)]: { author: 'Ada', email: 'a@x', date: Date.now(), summary: 'said hello' } }, truncated: false }) }));
+  const w = await window(
+    t,
+    server(() => status(), {
+      blame: () => ({
+        lines: [{ sha: 'b'.repeat(40), line: 1, text: 'hello' }],
+        commits: { ['b'.repeat(40)]: { author: 'Ada', email: 'a@x', date: Date.now(), summary: 'said hello' } },
+        truncated: false,
+      }),
+    }),
+  );
   await until(() => w.root.querySelector('[data-git]'));
   await wait(50);
   w.app.publish('git.open', { path: `${ROOT}/src/hi.ts`, view: 'blame', line: 1 });
@@ -253,7 +299,15 @@ test('other plugins open a file’s blame here (git.open), in this window', asyn
 
 test('the repository menu switches to a submodule; the window menu fetches', async (t) => {
   const syncs: ServerCall[] = [];
-  const w = await window(t, server(() => status(), { sync: (c) => (syncs.push(c), STREAM) }));
+  const w = await window(
+    t,
+    server(() => status(), {
+      sync: (c) => {
+        syncs.push(c);
+        return STREAM;
+      },
+    }),
+  );
   await until(() => w.root.querySelector('[data-git]'));
   w.app.answers['ui.menu'] = (a: { items: { id: string; label: string }[] }) => a.items.find((i) => i.label.startsWith('lib'))?.id ?? null;
   click([...w.root.querySelectorAll('button')].find((b) => b.textContent!.startsWith('Repository'))!);
@@ -292,7 +346,12 @@ test('10 000 changed files and 5 000 commits: only the rows on screen are drawn'
     refs: [],
   }));
   const started = performance.now();
-  const w = await window(t, server(() => status({ files: many }), { log: (c) => ({ commits: commits.slice(c.request.skip, c.request.skip + c.request.limit), more: c.request.skip + c.request.limit < commits.length }) }));
+  const w = await window(
+    t,
+    server(() => status({ files: many }), {
+      log: (c) => ({ commits: commits.slice(c.request.skip, c.request.skip + c.request.limit), more: c.request.skip + c.request.limit < commits.length }),
+    }),
+  );
   const list = await until(() => w.root.querySelector<HTMLElement>('[aria-label="Changed files"]'), 10_000, 'the list');
   const ms = performance.now() - started;
   const rows = list.querySelectorAll('[data-row]').length;
@@ -312,7 +371,10 @@ test('10 000 changed files and 5 000 commits: only the rows on screen are drawn'
 });
 
 test('git.changed from another window loads the lists again', async (t) => {
-  const w = await window(t, server(() => status()));
+  const w = await window(
+    t,
+    server(() => status()),
+  );
   await until(() => w.root.querySelector('[data-git]'));
   click(w.root.querySelector('[role="tab"][data-value="history"]')!);
   await until(() => w.app.ops('log').length === 1);

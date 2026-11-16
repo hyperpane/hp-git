@@ -38,7 +38,7 @@ export const letterFor = (side: Side, f: FileStatus): Letter | '?' | '!' =>
   side === 'conflict' ? '!' : side === 'untracked' ? '?' : side === 'staged' ? (f.staged ?? 'M') : side === 'changes' ? headLetter(f) : (f.worktree ?? 'M');
 
 /** A file's change against HEAD: new, gone, renamed or changed. */
-export function headLetter(f: FileStatus): Letter | '?' {
+function headLetter(f: FileStatus): Letter | '?' {
   if (f.untracked) return '?';
   if (f.worktree === 'D') return 'D';
   return f.staged ?? f.worktree ?? 'M';

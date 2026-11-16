@@ -12,7 +12,13 @@ export function Credentials({ data }: { data: { prompt: string; kind: string } }
     <Form ok={data.kind === 'passphrase' ? 'Unlock' : 'Sign In'} onSubmit={() => host.ui.closeDialog(value)}>
       <Field>
         <FieldLabel>{data.prompt.replace(/:\s*$/, '')}</FieldLabel>
-        <Input type="password" autoFocus value={value} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)} placeholder={data.kind === 'passphrase' ? 'Passphrase' : 'Password or token'} />
+        <Input
+          type="password"
+          autoFocus
+          value={value}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          placeholder={data.kind === 'passphrase' ? 'Passphrase' : 'Password or token'}
+        />
       </Field>
     </Form>
   );

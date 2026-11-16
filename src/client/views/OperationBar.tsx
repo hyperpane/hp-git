@@ -38,13 +38,20 @@ export function OperationBar() {
   const label = op.kind === 'cherryPick' ? 'cherry-pick' : op.kind;
   const go = async (action: 'continue' | 'abort' | 'skip') => {
     if (action === 'abort') {
-      const ok = await repo.confirm(`Abort the ${label}?`, 'Everything goes back to how it was before it started; resolved conflicts are lost', { confirm: 'Abort', destructive: true });
+      const ok = await repo.confirm(`Abort the ${label}?`, 'Everything goes back to how it was before it started; resolved conflicts are lost', {
+        confirm: 'Abort',
+        destructive: true,
+      });
       if (!ok) return;
     }
     repo.outcome(await repo.run(() => api.operation(action)), action === 'continue' ? 'Continuing' : 'Skipping');
   };
   return (
-    <div className="flex min-h-9 flex-none flex-wrap items-center gap-x-2 gap-y-1 border-b border-[var(--node-border)] px-3 py-1" style={{ background: 'color-mix(in srgb, var(--ansi-3) 12%, transparent)' }} data-operation={op.kind}>
+    <div
+      className="flex min-h-9 flex-none flex-wrap items-center gap-x-2 gap-y-1 border-b border-[var(--node-border)] px-3 py-1"
+      style={{ background: 'color-mix(in srgb, var(--ansi-3) 12%, transparent)' }}
+      data-operation={op.kind}
+    >
       <span className="size-2 flex-none rounded-full bg-[var(--ansi-3)]" />
       <span className="font-medium">{what}</span>
       <span className="min-w-0 flex-1 truncate text-[var(--node-muted)]">{next}</span>
@@ -54,12 +61,20 @@ export function OperationBar() {
         </NodeButton>
       )}
       {op.kind === 'rebase' && (
-        <button type="button" className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]" onClick={() => go('skip')}>
+        <button
+          type="button"
+          className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
+          onClick={() => go('skip')}
+        >
           Skip Commit
         </button>
       )}
       {op.kind !== 'bisect' && (
-        <button type="button" className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]" onClick={() => go('abort')}>
+        <button
+          type="button"
+          className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
+          onClick={() => go('abort')}
+        >
           Abort
         </button>
       )}

@@ -81,7 +81,10 @@ export function wordDiff(a: string, b: string): [Range[], Range[]] | null {
   const ids = new Map<string, number>();
   const id = (t: string) => {
     let n = ids.get(t);
-    if (n === undefined) ids.set(t, (n = ids.size));
+    if (n === undefined) {
+      n = ids.size;
+      ids.set(t, n);
+    }
     return n;
   };
   const na = Int32Array.from(ta, (x) => id(x.t));

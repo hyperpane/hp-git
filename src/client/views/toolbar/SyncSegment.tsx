@@ -6,7 +6,21 @@ import { ChevronDown, X, type LucideIcon } from 'lucide-react';
 import { Progress, cn, styles } from '@hyperpane/ui';
 import { useRepo } from '../../app/repo.ts';
 
-export function SyncSegment({ icon: Icon, label, sub, badge, onClick, onMenu }: { icon: LucideIcon; label: string; sub: string; badge: ReactNode; onClick(): void; onMenu(el: HTMLElement): void }) {
+export function SyncSegment({
+  icon: Icon,
+  label,
+  sub,
+  badge,
+  onClick,
+  onMenu,
+}: {
+  icon: LucideIcon;
+  label: string;
+  sub: string;
+  badge: ReactNode;
+  onClick(): void;
+  onMenu(el: HTMLElement): void;
+}) {
   const repo = useRepo();
   const sync = repo.sync;
   return (
@@ -14,7 +28,10 @@ export function SyncSegment({ icon: Icon, label, sub, badge, onClick, onMenu }: 
       <button
         type="button"
         onClick={sync ? undefined : onClick}
-        className={cn('flex min-w-0 flex-1 items-center gap-2 px-2.5 text-left transition-colors duration-100 hover:bg-[var(--node-hover)]', styles.focusRingInset)}
+        className={cn(
+          'flex min-w-0 flex-1 items-center gap-2 px-2.5 text-left transition-colors duration-100 hover:bg-[var(--node-hover)]',
+          styles.focusRingInset,
+        )}
         title={sync ? sync.text || sync.label : label}
       >
         <Icon className={cn('size-4 flex-none text-[var(--node-muted)]', sync && 'animate-[git-spin_1s_linear_infinite]')} />
@@ -27,7 +44,13 @@ export function SyncSegment({ icon: Icon, label, sub, badge, onClick, onMenu }: 
         {!sync && badge}
       </button>
       {sync ? (
-        <button type="button" title="Cancel" aria-label="Cancel" className="flex w-7 flex-none items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]" onClick={() => sync.cancel()}>
+        <button
+          type="button"
+          title="Cancel"
+          aria-label="Cancel"
+          className="flex w-7 flex-none items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          onClick={() => sync.cancel()}
+        >
           <X className="size-3.5" />
         </button>
       ) : (

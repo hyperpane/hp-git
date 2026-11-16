@@ -12,7 +12,7 @@ import type { Repo } from './repo.ts';
 import { WIN } from './platform.ts';
 
 /** After an event, how long to wait for the rest of the burst. */
-export const SETTLE_MS = 150;
+const SETTLE_MS = 150;
 /** A burst that goes on is looked at after this at most. */
 const MAX_WAIT_MS = 1000;
 /** How often it looks without being told (more often where the working
@@ -216,7 +216,10 @@ export class Watches {
       const started = Date.now();
       let now: Status;
       try {
-        now = await this.#hooks.status(entry.repo, [...entry.listeners].some((l) => l.stats));
+        now = await this.#hooks.status(
+          entry.repo,
+          [...entry.listeners].some((l) => l.stats),
+        );
       } catch (e) {
         this.#hooks.log('status failed:', (e as Error).message);
         return;
@@ -250,18 +253,21 @@ export class Watches {
     if (entry.fetchTimer) clearInterval(entry.fetchTimer);
     entry.fetchTimer = null;
     if (!minutes) return;
-    entry.fetchTimer = setInterval(() => {
-      this.#hooks.fetch(entry.repo).then(
-        () => {
-          entry.fetchError = undefined;
-          this.#check(entry);
-        },
-        (e) => {
-          entry.fetchError = (e as Error).message;
-          this.#check(entry);
-        },
-      );
-    }, minutes * (this.#hooks.minute ?? 60_000));
+    entry.fetchTimer = setInterval(
+      () => {
+        this.#hooks.fetch(entry.repo).then(
+          () => {
+            entry.fetchError = undefined;
+            this.#check(entry);
+          },
+          (e) => {
+            entry.fetchError = (e as Error).message;
+            this.#check(entry);
+          },
+        );
+      },
+      minutes * (this.#hooks.minute ?? 60_000),
+    );
     entry.fetchTimer.unref?.();
   }
 

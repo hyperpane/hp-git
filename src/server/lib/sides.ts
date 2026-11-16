@@ -12,7 +12,11 @@ export type Side = { spec: string } | { worktree: string } | null;
 
 export async function sizeOf(repo: Repo, side: Side): Promise<number> {
   if (!side) return 0;
-  if ('worktree' in side) return stat(repo.file(side.worktree)).then((s) => s.size, () => 0);
+  if ('worktree' in side)
+    return stat(repo.file(side.worktree)).then(
+      (s) => s.size,
+      () => 0,
+    );
   const out = await repo.exec(['cat-file', '-s', side.spec]);
   return out.code === 0 ? Number(out.stdout.toString().trim()) || 0 : 0;
 }

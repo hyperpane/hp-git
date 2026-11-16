@@ -152,12 +152,15 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
   const onLineMenu = (e: ReactMouseEvent, line: { old?: number; new?: number; text: string } | null, picked: LineKey[]) => {
     const items: (MenuEntry | null)[] = [];
     if (picked.length && lineActions?.primary) items.push({ label: `${lineActions.primary.label} Picked Lines`, run: () => lineActions.primary!.run(picked) });
-    if (picked.length && lineActions?.discard) items.push({ label: `${lineActions.discard.label} Picked Lines`, danger: true, run: () => lineActions.discard!.run(picked) });
+    if (picked.length && lineActions?.discard)
+      items.push({ label: `${lineActions.discard.label} Picked Lines`, danger: true, run: () => lineActions.discard!.run(picked) });
     if (items.length) items.push(null);
     if (line) {
       items.push({ label: 'Copy Line', run: () => copy(line.text.replace(/\r$/, ''), repo.toast) });
-      if (line.new) items.push({ label: `Blame Line ${line.new}`, run: () => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to, line: line.new }) });
-      if (line.new && !request.commit && !request.staged) items.push({ label: `Open in Editor at Line ${line.new}`, run: () => repo.openInEditor(path, line.new) });
+      if (line.new)
+        items.push({ label: `Blame Line ${line.new}`, run: () => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to, line: line.new }) });
+      if (line.new && !request.commit && !request.staged)
+        items.push({ label: `Open in Editor at Line ${line.new}`, run: () => repo.openInEditor(path, line.new) });
       items.push(null);
     }
     items.push({ label: 'File History', run: () => repo.open({ kind: 'fileHistory', path }) });
@@ -174,7 +177,8 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
   else if (diff.submodule)
     body = (
       <Blank title="Submodule changed">
-        <span className="font-mono">{diff.submodule.before?.slice(0, 10) ?? 'nothing'}</span> → <span className="font-mono">{diff.submodule.after?.slice(0, 10) ?? 'nothing'}</span>
+        <span className="font-mono">{diff.submodule.before?.slice(0, 10) ?? 'nothing'}</span> →{' '}
+        <span className="font-mono">{diff.submodule.after?.slice(0, 10) ?? 'nothing'}</span>
       </Blank>
     );
   else if (diff.tooLarge)
@@ -186,12 +190,24 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
     );
   else if (diff.binary) body = <Blank title="Binary file">{`It changed (${formatSize(diff.size)}); there are no lines to show`}</Blank>;
   else if (!diff.hunks.length)
-    body = (
-      empty ?? (
-        <Blank title={diff.oldPath ? 'Renamed, with no changes inside' : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode ? 'Only its mode changed' : 'No changes to show'}>
-          {diff.oldPath ? `${diff.oldPath} → ${diff.path}${diff.similarity !== undefined ? ` (${diff.similarity}% similar)` : ''}` : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode ? `${diff.oldMode} → ${diff.newMode}` : ignoreWs ? 'Only whitespace changed, and whitespace is ignored' : null}
-        </Blank>
-      )
+    body = empty ?? (
+      <Blank
+        title={
+          diff.oldPath
+            ? 'Renamed, with no changes inside'
+            : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode
+              ? 'Only its mode changed'
+              : 'No changes to show'
+        }
+      >
+        {diff.oldPath
+          ? `${diff.oldPath} → ${diff.path}${diff.similarity !== undefined ? ` (${diff.similarity}% similar)` : ''}`
+          : diff.oldMode && diff.newMode && diff.oldMode !== diff.newMode
+            ? `${diff.oldMode} → ${diff.newMode}`
+            : ignoreWs
+              ? 'Only whitespace changed, and whitespace is ignored'
+              : null}
+      </Blank>
     );
   else
     body = (
@@ -220,7 +236,12 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
           disabled={narrow}
           onClick={() => setMode(mode === 'split' ? 'unified' : 'split')}
         />
-        <ToolButton label={ignoreWs ? 'Show whitespace changes' : 'Ignore whitespace changes'} icon={Pilcrow} active={ignoreWs} onClick={() => setIgnoreWs(!ignoreWs)} />
+        <ToolButton
+          label={ignoreWs ? 'Show whitespace changes' : 'Ignore whitespace changes'}
+          icon={Pilcrow}
+          active={ignoreWs}
+          onClick={() => setIgnoreWs(!ignoreWs)}
+        />
         <ToolButton label="File history" icon={FileClock} onClick={() => repo.open({ kind: 'fileHistory', path })} />
         <ToolButton label="Blame" icon={ScanSearch} onClick={() => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to })} />
         <ToolButton label="More" icon={MoreHorizontal} onClick={moreMenu} />

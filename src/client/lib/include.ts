@@ -43,15 +43,15 @@ export function withFiles(choices: Choices, paths: string[], on: boolean): Choic
 export function lineIds(diff: Pick<Diff, 'hunks'>): Map<LineKey, string> {
   const ids = new Map<LineKey, string>();
   const seen = new Map<string, number>();
-  diff.hunks.forEach((hunk, h) =>
+  diff.hunks.forEach((hunk, h) => {
     hunk.lines.forEach((line, i) => {
       if (line.kind === ' ') return;
       const what = `${line.kind}${line.text}`;
       const n = seen.get(what) ?? 0;
       seen.set(what, n + 1);
       ids.set(keyOf(h, i), `${line.kind}${n}:${line.text}`);
-    }),
-  );
+    });
+  });
   return ids;
 }
 
@@ -100,7 +100,11 @@ export const checkedFiles = (files: FileStatus[], choices: Choices) => files.fil
  * old path, which goes), and for each file in part a patch of its lines
  * that are in, from its diff against HEAD as it is now.
  */
-export async function selection(files: FileStatus[], choices: Choices, diffOf: (f: FileStatus) => Promise<Diff>): Promise<{ paths: string[]; patches: string[] }> {
+export async function selection(
+  files: FileStatus[],
+  choices: Choices,
+  diffOf: (f: FileStatus) => Promise<Diff>,
+): Promise<{ paths: string[]; patches: string[] }> {
   const paths: string[] = [];
   const patches: string[] = [];
   for (const f of checkedFiles(files, choices)) {

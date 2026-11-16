@@ -87,7 +87,9 @@ export function useRepoState(host: Host, root: string, server: string | undefine
   });
 
   // A new HEAD, branch or upstream position: the lists load again.
-  const refsKey = status ? `${status.head}|${status.branch}|${status.ahead}|${status.behind}|${status.fetched}|${status.stashes}|${status.operation?.kind}` : '';
+  const refsKey = status
+    ? `${status.head}|${status.branch}|${status.ahead}|${status.behind}|${status.fetched}|${status.stashes}|${status.operation?.kind}`
+    : '';
   const seenRefs = useRef(refsKey);
   useEffect(() => {
     if (seenRefs.current === refsKey) return;
@@ -118,7 +120,7 @@ export function useRepoState(host: Host, root: string, server: string | undefine
   );
 
   const run = useCallback(
-    async <T,>(change: () => Promise<T>, o: { done?: string; failed?: string } = {}): Promise<T | undefined> => {
+    async <T>(change: () => Promise<T>, o: { done?: string; failed?: string } = {}): Promise<T | undefined> => {
       try {
         const result = await change();
         if (o.done) toast(o.done);

@@ -25,7 +25,8 @@ export function fileActions(repo: Repo) {
   /** Everything in the next commit, or nothing. */
   const allIn = () => (repo.including ? check(repo.status.files, true) : repo.run(() => api.stage('all')));
   const allOut = () => (repo.including ? check(repo.status.files, false) : repo.run(() => api.unstage('all')));
-  const toggle = (side: Side, files: FileStatus[]) => (side === 'changes' ? check(files, !allChecked(files)) : side === 'staged' ? unstage(files) : stage(files));
+  const toggle = (side: Side, files: FileStatus[]) =>
+    side === 'changes' ? check(files, !allChecked(files)) : side === 'staged' ? unstage(files) : stage(files);
   const discard = async (files: FileStatus[]) => {
     if (!files.length) return;
     const one = files.length === 1;

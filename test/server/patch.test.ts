@@ -16,7 +16,11 @@ const lines = (n: number, f = (i: number) => `line ${i}`) => Array.from({ length
 const index = (dir: string, file: string) => sh(dir, 'show', `:${file}`);
 const keys = (diff: Diff, pred: (text: string, kind: string) => boolean) => {
   const out = new Set<string>();
-  diff.hunks.forEach((h, hi) => h.lines.forEach((l, li) => l.kind !== ' ' && pred(l.text, l.kind) && out.add(lineKey(hi, li))));
+  diff.hunks.forEach((h, hi) => {
+    h.lines.forEach((l, li) => {
+      if (l.kind !== ' ' && pred(l.text, l.kind)) out.add(lineKey(hi, li));
+    });
+  });
   return out;
 };
 
@@ -57,7 +61,10 @@ test('unstages some lines of a staged change', async () => {
   await write(dir, { 'a.txt': lines(10).replace('line 4\n', 'four\n').replace('line 6\n', 'line 6\nsix and a half\n') });
   sh(dir, 'add', 'a.txt');
   const staged = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt', staged: true });
-  const patch = unstagePatch(staged, keys(staged, (t) => t === 'six and a half'))!;
+  const patch = unstagePatch(
+    staged,
+    keys(staged, (t) => t === 'six and a half'),
+  )!;
   await g.call({ op: 'apply', repo: dir, patch, cached: true, reverse: true });
   assert.equal(index(dir, 'a.txt'), lines(10).replace('line 4\n', 'four\n'));
   // Unstaging the replacement's two lines takes it back too.
@@ -71,7 +78,10 @@ test('discards some lines from the working tree, a copy going to the Trash first
   await write(dir, { 'a.txt': lines(10).replace('line 2\n', 'two\n').replace('line 9\n', 'nine\n') });
   const diff = await g.call<Diff>({ op: 'diff', repo: dir, path: 'a.txt' });
   const before = (await trashed(g.trash)).length;
-  const patch = discardPatch(diff, keys(diff, (t) => t === 'nine' || t === 'line 9'))!;
+  const patch = discardPatch(
+    diff,
+    keys(diff, (t) => t === 'nine' || t === 'line 9'),
+  )!;
   await g.call({ op: 'apply', repo: dir, patch, reverse: true });
   assert.equal(await readFile(path.join(dir, 'a.txt'), 'utf8'), lines(10).replace('line 2\n', 'two\n'));
   const now = await trashed(g.trash);
@@ -84,10 +94,27 @@ test('stages part of a new file, and unstages part of it again', async () => {
   await write(dir, { 'new.txt': 'one\ntwo\nthree\n' });
   const diff = await g.call<Diff>({ op: 'diff', repo: dir, path: 'new.txt', untracked: true });
   assert.equal(diff.status, 'A');
-  await g.call({ op: 'apply', repo: dir, patch: stagePatch(diff, keys(diff, (t) => t !== 'two')), cached: true });
+  await g.call({
+    op: 'apply',
+    repo: dir,
+    patch: stagePatch(
+      diff,
+      keys(diff, (t) => t !== 'two'),
+    ),
+    cached: true,
+  });
   assert.equal(index(dir, 'new.txt'), 'one\nthree\n');
   const staged = await g.call<Diff>({ op: 'diff', repo: dir, path: 'new.txt', staged: true });
-  await g.call({ op: 'apply', repo: dir, patch: unstagePatch(staged, keys(staged, (t) => t === 'one')), cached: true, reverse: true });
+  await g.call({
+    op: 'apply',
+    repo: dir,
+    patch: unstagePatch(
+      staged,
+      keys(staged, (t) => t === 'one'),
+    ),
+    cached: true,
+    reverse: true,
+  });
   assert.equal(index(dir, 'new.txt'), 'three\n');
   // All of it unstaged: the file leaves the index.
   const rest = await g.call<Diff>({ op: 'diff', repo: dir, path: 'new.txt', staged: true });
@@ -102,7 +129,15 @@ test('stages part of a deletion as a change, all of it as the deletion', async (
   await import('node:fs/promises').then((fs) => fs.rm(path.join(dir, 'gone.txt')));
   const diff = await g.call<Diff>({ op: 'diff', repo: dir, path: 'gone.txt' });
   assert.equal(diff.status, 'D');
-  await g.call({ op: 'apply', repo: dir, patch: stagePatch(diff, keys(diff, (t) => t === 'b')), cached: true });
+  await g.call({
+    op: 'apply',
+    repo: dir,
+    patch: stagePatch(
+      diff,
+      keys(diff, (t) => t === 'b'),
+    ),
+    cached: true,
+  });
   assert.equal(index(dir, 'gone.txt'), 'a\nc\n');
   const rest = await g.call<Diff>({ op: 'diff', repo: dir, path: 'gone.txt' });
   await g.call({ op: 'apply', repo: dir, patch: stagePatch(rest, new Set(allLines(rest))), cached: true });
@@ -115,12 +150,28 @@ test('keeps “no newline at end of file” right on both sides', async () => {
   const diff = await g.call<Diff>({ op: 'diff', repo: dir, path: 'n.txt' });
   // -b (no newline), +b, +c (no newline): only c picked.
   assert.ok(diff.hunks[0].lines.some((l) => l.noNewline));
-  await g.call({ op: 'apply', repo: dir, patch: stagePatch(diff, keys(diff, (t, k) => t === 'c' && k === '+')), cached: true });
+  await g.call({
+    op: 'apply',
+    repo: dir,
+    patch: stagePatch(
+      diff,
+      keys(diff, (t, k) => t === 'c' && k === '+'),
+    ),
+    cached: true,
+  });
   assert.equal(index(dir, 'n.txt'), 'a\nb\nc');
   // In reverse: discard only the deleted b's return: the file keeps c.
   sh(dir, 'reset', '-q');
   const again = await g.call<Diff>({ op: 'diff', repo: dir, path: 'n.txt' });
-  await g.call({ op: 'apply', repo: dir, patch: discardPatch(again, keys(again, (t, k) => t === 'c' && k === '+')), reverse: true });
+  await g.call({
+    op: 'apply',
+    repo: dir,
+    patch: discardPatch(
+      again,
+      keys(again, (t, k) => t === 'c' && k === '+'),
+    ),
+    reverse: true,
+  });
   assert.equal(await readFile(path.join(dir, 'n.txt'), 'utf8'), 'a\nb\n');
 });
 
@@ -128,7 +179,10 @@ test('picking the old last line alone puts it back with a newline', async () => 
   const dir = await repo({ 'n.txt': 'a\nb' });
   await write(dir, { 'n.txt': 'a\nB\nc\n' });
   const diff = await g.call<Diff>({ op: 'diff', repo: dir, path: 'n.txt' });
-  const patch = discardPatch(diff, keys(diff, (t, k) => t === 'b' && k === '-'))!;
+  const patch = discardPatch(
+    diff,
+    keys(diff, (t, k) => t === 'b' && k === '-'),
+  )!;
   await g.call({ op: 'apply', repo: dir, patch, reverse: true });
   assert.equal(await readFile(path.join(dir, 'n.txt'), 'utf8'), 'a\nb\nB\nc\n');
 });
@@ -141,7 +195,15 @@ test('CRLF lines, odd names and zero context apply as they are', async () => {
   const diff = await g.call<Diff>({ op: 'diff', repo: dir, path: name, context: 0 });
   assert.ok(diff.hunks.every((h) => h.lines.every((l) => l.kind !== ' ')));
   assert.equal(diff.hunks[0].lines[0].text, 'two\r');
-  await g.call({ op: 'apply', repo: dir, patch: stagePatch(diff, keys(diff, (t) => t === 'four\r')), cached: true });
+  await g.call({
+    op: 'apply',
+    repo: dir,
+    patch: stagePatch(
+      diff,
+      keys(diff, (t) => t === 'four\r'),
+    ),
+    cached: true,
+  });
   assert.equal(index(dir, name), 'one\r\ntwo\r\nthree\r\nfour\r\n');
   const spaced = await g.call<Diff>({ op: 'diff', repo: dir, path: 'with space.txt' });
   await g.call({ op: 'apply', repo: dir, patch: stagePatch(spaced, new Set(allLines(spaced))), cached: true });
@@ -159,7 +221,19 @@ test('nothing picked, or only context: no patch', async () => {
     size: 0,
     additions: 1,
     deletions: 0,
-    hunks: [{ header: '@@ -1,1 +1,2 @@', oldStart: 1, oldLines: 1, newStart: 1, newLines: 2, lines: [{ kind: ' ', text: 'a', old: 1, new: 1 }, { kind: '+', text: 'b', new: 2 }] }],
+    hunks: [
+      {
+        header: '@@ -1,1 +1,2 @@',
+        oldStart: 1,
+        oldLines: 1,
+        newStart: 1,
+        newLines: 2,
+        lines: [
+          { kind: ' ', text: 'a', old: 1, new: 1 },
+          { kind: '+', text: 'b', new: 2 },
+        ],
+      },
+    ],
   };
   assert.equal(stagePatch(diff, new Set()), null);
   assert.equal(stagePatch(diff, new Set(['0:0'])), null);

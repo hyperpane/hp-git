@@ -96,7 +96,18 @@ export class Graph {
 }
 
 /** Lane colors, from the terminal palette. */
-export const LANE_COLORS = ['var(--ansi-4)', 'var(--ansi-2)', 'var(--ansi-5)', 'var(--ansi-3)', 'var(--ansi-6)', 'var(--ansi-1)', 'var(--ansi-12)', 'var(--ansi-10)', 'var(--ansi-13)', 'var(--ansi-11)'];
+const LANE_COLORS = [
+  'var(--ansi-4)',
+  'var(--ansi-2)',
+  'var(--ansi-5)',
+  'var(--ansi-3)',
+  'var(--ansi-6)',
+  'var(--ansi-1)',
+  'var(--ansi-12)',
+  'var(--ansi-10)',
+  'var(--ansi-13)',
+  'var(--ansi-11)',
+];
 
 export function laneColor(n: number): string {
   return LANE_COLORS[n % LANE_COLORS.length];

@@ -14,7 +14,15 @@ import { WIN, as, commitAll, folder, plugin, repo, sh, write } from './support.t
 
 const g = await plugin();
 
-const file = (p: string, o: Partial<FileStatus> = {}): FileStatus => ({ path: p, staged: null, worktree: null, untracked: false, conflict: null, mtime: 0, ...o });
+const file = (p: string, o: Partial<FileStatus> = {}): FileStatus => ({
+  path: p,
+  staged: null,
+  worktree: null,
+  untracked: false,
+  conflict: null,
+  mtime: 0,
+  ...o,
+});
 
 test('each change as a letter and a color', () => {
   const pick = (f: FileStatus) => {
@@ -40,7 +48,13 @@ test('each change as a letter and a color', () => {
 });
 
 test('the paths asked about: files, folders with changes inside, ignored ones; the rest left out', () => {
-  const files = [file('src/a.ts', { worktree: 'M' }), file('src/deep/b.ts', { untracked: true }), file('new/x.txt', { untracked: true }), file('bad/c.txt', { staged: 'U', worktree: 'U', conflict: 'bothAdded' }), file('nested/', { untracked: true })];
+  const files = [
+    file('src/a.ts', { worktree: 'M' }),
+    file('src/deep/b.ts', { untracked: true }),
+    file('new/x.txt', { untracked: true }),
+    file('bad/c.txt', { staged: 'U', worktree: 'U', conflict: 'bothAdded' }),
+    file('nested/', { untracked: true }),
+  ];
   const wanted = ['src', 'src/a.ts', 'src/deep', 'new', 'bad', 'clean.txt', 'dist', 'nested'].map((rel) => ({ path: `/r/${rel}`, rel }));
   const out = decorate(files, wanted, new Set(['dist', 'src/a.ts']));
   assert.deepEqual(Object.keys(out).sort(), ['/r/bad', '/r/dist', '/r/nested', '/r/new', '/r/src', '/r/src/a.ts', '/r/src/deep']);
@@ -104,7 +118,9 @@ test('explorerStage stages what Explorer chose, and says so', async () => {
   const dir = await repo({ 'a.txt': 'a\n' });
   await write(dir, { 'a.txt': 'A\n', 'b.txt': 'b\n', 'sub/c.txt': 'c\n' });
   const p = (rel: string) => `${as(dir)}/${rel}`;
-  assert.deepEqual(await g.call({ op: 'explorerStage', point: 'explorer.menus', server: null, folder: as(dir), paths: [p('a.txt'), p('b.txt')] }), { message: 'Staged 2 files.' });
+  assert.deepEqual(await g.call({ op: 'explorerStage', point: 'explorer.menus', server: null, folder: as(dir), paths: [p('a.txt'), p('b.txt')] }), {
+    message: 'Staged 2 files.',
+  });
   let s = await g.call<Status>({ op: 'status', repo: dir });
   assert.deepEqual(
     s.files.map((f) => [f.path, f.staged, f.untracked]),
@@ -125,5 +141,8 @@ test('explorerStage stages what Explorer chose, and says so', async () => {
   // Outside a repository: told, as an error.
   const plain = await folder();
   await mkdir(path.join(plain, 'x'));
-  assert.deepEqual(await g.call({ op: 'explorerStage', folder: as(plain), paths: [`${as(plain)}/x`] }), { message: 'That isn’t in a Git repository.', error: true });
+  assert.deepEqual(await g.call({ op: 'explorerStage', folder: as(plain), paths: [`${as(plain)}/x`] }), {
+    message: 'That isn’t in a Git repository.',
+    error: true,
+  });
 });

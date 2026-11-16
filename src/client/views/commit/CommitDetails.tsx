@@ -62,7 +62,13 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
         min={140}
         minOther={240}
         first={<FileList files={c.files} truncated={c.truncated} picked={file} onPick={setFile} sha={c.sha} />}
-        second={request ? <DiffPane key={`${c.sha}:${picked!.path}`} request={request} newRev={rev ? rev(c) : c.sha} /> : <Blank>{c.files.length ? 'Pick a file' : 'This commit changes no files'}</Blank>}
+        second={
+          request ? (
+            <DiffPane key={`${c.sha}:${picked!.path}`} request={request} newRev={rev ? rev(c) : c.sha} />
+          ) : (
+            <Blank>{c.files.length ? 'Pick a file' : 'This commit changes no files'}</Blank>
+          )
+        }
       />
     </div>
   );

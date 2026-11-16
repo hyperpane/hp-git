@@ -43,7 +43,9 @@ export function BranchList({
     const recent = new Set(branches.recent.slice(0, 5));
     const local = branches.local.filter((b) => match(b.name));
     const order = (b: LocalBranch) => (b.current ? 0 : recent.has(b.name) ? 1 : 2);
-    local.sort((a, b) => order(a) - order(b) || (order(a) === 1 ? branches.recent.indexOf(a.name) - branches.recent.indexOf(b.name) : a.name.localeCompare(b.name)));
+    local.sort(
+      (a, b) => order(a) - order(b) || (order(a) === 1 ? branches.recent.indexOf(a.name) - branches.recent.indexOf(b.name) : a.name.localeCompare(b.name)),
+    );
     const remote = branches.remote.filter((b) => match(b.name));
     const out: Row[] = [];
     if (local.length) {
@@ -105,7 +107,18 @@ export function BranchList({
       <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput ref={filterRef} className="w-full ps-6" placeholder={`Filter branches (${keys('⌘F')})`} value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === 'ArrowDown' && (list.current?.element?.focus(), e.preventDefault())} />
+          <NodeInput
+            ref={filterRef}
+            className="w-full ps-6"
+            placeholder={`Filter branches (${keys('⌘F')})`}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowDown') return;
+              list.current?.element?.focus();
+              e.preventDefault();
+            }}
+          />
         </div>
         <ToolButton label="New branch" icon={Plus} onClick={() => createBranch(repo)} />
       </div>
@@ -143,7 +156,11 @@ export function BranchList({
                   onContextMenu={(e) => menu(e, r)}
                   title={`${r.b.name}\n${r.b.subject}\n${r.b.author} · ${longDate(r.b.date)}`}
                 >
-                  {r.t === 'remote' ? <Cloud className="size-3.5 flex-none text-[var(--node-muted)]" /> : <GitBranch className={cn('size-3.5 flex-none', current ? 'text-[var(--node-accent)]' : 'text-[var(--node-muted)]')} />}
+                  {r.t === 'remote' ? (
+                    <Cloud className="size-3.5 flex-none text-[var(--node-muted)]" />
+                  ) : (
+                    <GitBranch className={cn('size-3.5 flex-none', current ? 'text-[var(--node-accent)]' : 'text-[var(--node-muted)]')} />
+                  )}
                   <div className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="flex min-w-0 items-center gap-1.5">
                       <span className={cn('truncate', current && 'font-semibold')}>{r.b.name}</span>

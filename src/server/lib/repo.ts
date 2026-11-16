@@ -136,7 +136,8 @@ export class Repos {
     const lines = out.stdout.toString('utf8').split('\n');
     if (out.code !== 0 || lines.length < 3 || !lines[0]) {
       if (/not a git repository/i.test(out.stderr)) throw new PluginError(`${shown(folder)} isn't in a Git repository.`);
-      if (/this operation must be run in a work tree|bare repository/i.test(out.stderr)) throw new PluginError(`${shown(folder)} is a bare repository: it has no files to work with.`);
+      if (/this operation must be run in a work tree|bare repository/i.test(out.stderr))
+        throw new PluginError(`${shown(folder)} is a bare repository: it has no files to work with.`);
       throw new PluginError(out.stderr.trim().replace(/^fatal: /, '') || `${shown(folder)} isn't in a Git repository.`);
     }
     const root = path.resolve(lines[0]);
@@ -160,5 +161,13 @@ function withProject(repo: Repo, project?: string | null): Repo {
   return repo;
 }
 
-const exists = (p: string) => stat(p).then(() => true, () => false);
-const isDir = (p: string) => stat(p).then((s) => s.isDirectory(), () => false);
+const exists = (p: string) =>
+  stat(p).then(
+    () => true,
+    () => false,
+  );
+const isDir = (p: string) =>
+  stat(p).then(
+    (s) => s.isDirectory(),
+    () => false,
+  );

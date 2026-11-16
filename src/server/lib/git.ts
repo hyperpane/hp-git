@@ -16,7 +16,7 @@ import { WIN } from './platform.ts';
  * advice; and nothing that waits for an answer nobody can give. */
 const COMMON = ['--no-pager', '-c', 'color.ui=false', '-c', 'core.quotePath=false', '-c', 'advice.detachedHead=false'];
 
-export function baseEnv(): Record<string, string | undefined> {
+function baseEnv(): Record<string, string | undefined> {
   const env: Record<string, string | undefined> = {
     ...process.env,
     GIT_TERMINAL_PROMPT: '0',
@@ -32,7 +32,17 @@ export function baseEnv(): Record<string, string | undefined> {
     LC_ALL: 'C',
     LANGUAGE: 'C',
   };
-  for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_ASKPASS', 'SSH_ASKPASS', 'GIT_PREFIX', 'GIT_OBJECT_DIRECTORY', 'GIT_CEILING_DIRECTORIES']) delete env[name];
+  for (const name of [
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_INDEX_FILE',
+    'GIT_ASKPASS',
+    'SSH_ASKPASS',
+    'GIT_PREFIX',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_CEILING_DIRECTORIES',
+  ])
+    delete env[name];
   return env;
 }
 

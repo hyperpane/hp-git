@@ -53,15 +53,23 @@ test('a merge stopped at conflicts: the bar, the file first, its blocks chosen a
   assert.match(one.textContent!, /theirs two/);
   click(button(one, 'Theirs')!);
   click(button(two, 'Both')!);
-  await until(() => view.textContent!.includes('2 of 2 conflicts chosen'), 8000, () => `chosen: ${view.isConnected} ${w.root.querySelector('[data-conflict]')?.textContent?.slice(0, 200)}`);
+  await until(
+    () => view.textContent!.includes('2 of 2 conflicts chosen'),
+    8000,
+    () => `chosen: ${view.isConnected} ${w.root.querySelector('[data-conflict]')?.textContent?.slice(0, 200)}`,
+  );
   click(button(view, 'Save and Mark Resolved')!);
   await until(() => read(dir, 'a.txt') === `1\ntheirs two\n${MID}ours five\ntheirs five\n6\n`, 10000, 'the merged file');
   await until(() => !sh(dir, 'diff', '--name-only', '--diff-filter=U').trim(), 10000, 'resolved');
   // Continue commits the merge with its prepared message.
-  const cont = await until(() => {
-    const b = button(w.root.querySelector('[data-operation="merge"]') ?? w.root, 'Continue');
-    return b && !b.disabled && b;
-  }, 10000, 'Continue enabled');
+  const cont = await until(
+    () => {
+      const b = button(w.root.querySelector('[data-operation="merge"]') ?? w.root, 'Continue');
+      return b && !b.disabled && b;
+    },
+    10000,
+    'Continue enabled',
+  );
   click(cont);
   await until(() => !w.root.querySelector('[data-operation]'), 10000, 'the merge done');
   assert.match(sh(dir, 'log', '-1', '--format=%s'), /Merge branch 'feature'/);

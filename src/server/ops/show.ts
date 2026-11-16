@@ -19,7 +19,10 @@ export async function show(repo: Repo, sha: string, signal?: AbortSignal): Promi
   const f = record.split(US);
   const c = parseCommit(f.slice(0, FIELD_COUNT).join(US));
   if (!c) throw new PluginError(`There's no commit ${commit} here.`);
-  const message = f.slice(FIELD_COUNT + 2).join(US).replace(/\n+$/, '');
+  const message = f
+    .slice(FIELD_COUNT + 2)
+    .join(US)
+    .replace(/\n+$/, '');
   const nl = message.indexOf('\n');
   const body = nl < 0 ? '' : message.slice(nl + 1).replace(/^\n+/, '');
   const detail: CommitDetail = { ...c, body, files: [], truncated: false };
@@ -28,7 +31,7 @@ export async function show(repo: Repo, sha: string, signal?: AbortSignal): Promi
   const base = await baseOf(repo, c.sha);
   const changed = await changes(repo, base, c.sha, signal);
   // A stash: its untracked files are a third parent.
-  if (c.parents.length === 3 && c.refs.some((r) => r.kind === 'stash') || (await isStash(repo, c.sha, c.parents))) {
+  if ((c.parents.length === 3 && c.refs.some((r) => r.kind === 'stash')) || (await isStash(repo, c.sha, c.parents))) {
     const untracked = await changes(repo, await repo.emptyTree(), c.parents[2], signal);
     for (const u of untracked.files) changed.files.push({ ...u, untracked: true });
   }

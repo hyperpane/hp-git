@@ -16,19 +16,29 @@ export async function stashNow(repo: Repo) {
     width: 440,
     height: 216,
   });
-  if (result) repo.run(() => repo.api.stashPush({ message: result.message || undefined, untracked: result.untracked, keepIndex: result.keepIndex || undefined }), { done: 'Stashed.' });
+  if (result)
+    repo.run(() => repo.api.stashPush({ message: result.message || undefined, untracked: result.untracked, keepIndex: result.keepIndex || undefined }), {
+      done: 'Stashed.',
+    });
 }
 
 export function stashActions(repo: Repo, s: Stash): MenuEntry[] {
   const name = `stash@{${s.index}}`;
   return [
-    { label: 'Apply', run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, false), { done: `Applied ${name}` }), 'Applying the stash') },
+    {
+      label: 'Apply',
+      run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, false), { done: `Applied ${name}` }), 'Applying the stash'),
+    },
     { label: 'Pop', run: async () => repo.outcome(await repo.run(() => repo.api.stashApply(s.index, true), { done: `Popped ${name}` }), 'Popping the stash') },
     {
       label: 'Drop',
       danger: true,
       run: async () => {
-        const ok = await repo.confirm(`Drop ${name}?`, `“${s.message}” goes for good (git keeps it unreachable for a while, but nothing here can bring it back)`, { confirm: 'Drop', destructive: true });
+        const ok = await repo.confirm(
+          `Drop ${name}?`,
+          `“${s.message}” goes for good (git keeps it unreachable for a while, but nothing here can bring it back)`,
+          { confirm: 'Drop', destructive: true },
+        );
         if (ok) repo.run(() => repo.api.stashDrop(s.index), { done: `Dropped ${name}` });
       },
     },

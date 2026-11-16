@@ -131,7 +131,13 @@ export function HistoryList({
               <RefBadge key={`${r.kind}:${r.name}`} refName={r} className="max-w-28 min-w-6 shrink" />
             ))}
             {c.refs.length > 2 && (
-              <span className="flex-none text-[10px] text-[var(--node-muted)]" title={c.refs.slice(2).map((r) => r.name).join('\n')}>
+              <span
+                className="flex-none text-[10px] text-[var(--node-muted)]"
+                title={c.refs
+                  .slice(2)
+                  .map((r) => r.name)
+                  .join('\n')}
+              >
                 +{c.refs.length - 2}
               </span>
             )}
@@ -180,7 +186,12 @@ export function HistoryList({
             }}
           />
           {text && (
-            <button type="button" aria-label="Clear" className="absolute top-1/2 right-1 flex size-4 -translate-y-1/2 items-center justify-center rounded-full text-[var(--node-muted)] hover:text-[var(--node-fg)]" onClick={() => setText('')}>
+            <button
+              type="button"
+              aria-label="Clear"
+              className="absolute top-1/2 right-1 flex size-4 -translate-y-1/2 items-center justify-center rounded-full text-[var(--node-muted)] hover:text-[var(--node-fg)]"
+              onClick={() => setText('')}
+            >
               <X className="size-3" />
             </button>
           )}
@@ -192,7 +203,15 @@ export function HistoryList({
           <span className="text-[var(--ansi-1)]">{log.error}</span>
         </Blank>
       ) : !commits.length ? (
-        <Blank>{log.loading ? 'Loading the history' : searching ? 'No commit matches' : status.unborn ? 'No commits yet: make the first one in Changes' : 'No commits'}</Blank>
+        <Blank>
+          {log.loading
+            ? 'Loading the history'
+            : searching
+              ? 'No commit matches'
+              : status.unborn
+                ? 'No commits yet: make the first one in Changes'
+                : 'No commits'}
+        </Blank>
       ) : (
         <VirtualList
           ref={list}

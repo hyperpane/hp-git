@@ -26,14 +26,17 @@ async function timed<T>(fn: () => Promise<T>): Promise<[T, number]> {
 
 test('status, a log page and a 5 MB diff, in time', async () => {
   for (let i = 0; i < 20; i++) await writeFile(path.join(dir, pathOf(i * 31)), `// changed ${i}\n`);
-  const big = Array.from({ length: 60_000 }, (_, i) => `export const line${i} = ${'"x"'.repeat(20)};`).join('\n') + '\n';
+  const big = `${Array.from({ length: 60_000 }, (_, i) => `export const line${i} = ${'"x"'.repeat(20)};`).join('\n')}\n`;
   await writeFile(path.join(dir, pathOf(1)), big);
   const [s, statusMs] = await timed(() => g.call<Status>({ op: 'status', repo: dir }));
   assert.equal(s.files.length, 21);
   const [page, logMs] = await timed(() => g.call<LogPage>({ op: 'log', repo: dir, skip: 0, limit: 100 }));
   assert.equal(page.commits.length, 100);
   assert.equal(page.more, true);
-  assert.ok(page.commits.some((c) => c.parents.length === 2), 'merges are in the history');
+  assert.ok(
+    page.commits.some((c) => c.parents.length === 2),
+    'merges are in the history',
+  );
   const [d, diffMs] = await timed(() => g.call<Diff>({ op: 'diff', repo: dir, path: pathOf(1) }));
   assert.equal(d.tooLarge, true);
   assert.ok(d.size > 2 * 1024 * 1024);
@@ -45,10 +48,24 @@ test('status, a log page and a 5 MB diff, in time', async () => {
 
 test('the first watch writes the commit-graph', async () => {
   const graph = path.join(dir, '.git', 'objects', 'info', 'commit-graph');
-  assert.equal(await stat(graph).then(() => true, () => false), false);
+  assert.equal(
+    await stat(graph).then(
+      () => true,
+      () => false,
+    ),
+    false,
+  );
   const w = stream<Status>(g.plugin, { op: 'watch', repo: dir });
   await w.next();
-  await until(() => stat(graph).then(() => true, () => false), 20_000, 'the commit-graph');
+  await until(
+    () =>
+      stat(graph).then(
+        () => true,
+        () => false,
+      ),
+    20_000,
+    'the commit-graph',
+  );
   w.cancel();
   assert.equal(await w.end, null);
   // The history reads the same with it: 4 000 commits and 40 merged side ones.
@@ -74,13 +91,18 @@ test('a cancelled git ends at once, with what it started', async () => {
   assert.ok(pid > 0);
   // The shell the alias ran (and its sleep) went with git. (On Windows $$ is
   // the shell's own id, not the system's.)
-  if (!WIN) await until(() => {
-    try {
-      process.kill(pid, 0);
-      return false;
-    } catch {
-      return true;
-    }
-  }, 3000, 'the shell to end');
+  if (!WIN)
+    await until(
+      () => {
+        try {
+          process.kill(pid, 0);
+          return false;
+        } catch {
+          return true;
+        }
+      },
+      3000,
+      'the shell to end',
+    );
   assert.equal(git.running, 0);
 });

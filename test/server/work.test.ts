@@ -12,7 +12,11 @@ import { WIN, as, commitAll, folder, plugin, repo, sh, trashed, write } from './
 
 const g = await plugin();
 const files = async (dir: string) => (await g.call<Status>({ op: 'status', repo: dir })).files;
-const exists = (p: string) => stat(p).then(() => true, () => false);
+const exists = (p: string) =>
+  stat(p).then(
+    () => true,
+    () => false,
+  );
 
 // A name that's a pattern (the * isn't allowed on Windows).
 const ODD = WIN ? '[x]+.txt' : '[x]*.txt';
@@ -23,12 +27,15 @@ test('stages and unstages files: new, changed, deleted, odd names, all', async (
   await import('node:fs/promises').then((fs) => fs.rm(path.join(dir, 'gone.txt')));
   await g.call({ op: 'stage', repo: dir, paths: ['a.txt', 'new.txt', 'gone.txt', ODD] });
   let f = await files(dir);
-  assert.deepEqual(f.map((x) => [x.path, x.staged, x.worktree]), [
-    [ODD, 'M', null],
-    ['a.txt', 'M', null],
-    ['gone.txt', 'D', null],
-    ['new.txt', 'A', null],
-  ]);
+  assert.deepEqual(
+    f.map((x) => [x.path, x.staged, x.worktree]),
+    [
+      [ODD, 'M', null],
+      ['a.txt', 'M', null],
+      ['gone.txt', 'D', null],
+      ['new.txt', 'A', null],
+    ],
+  );
   await g.call({ op: 'unstage', repo: dir, paths: ['new.txt', ODD] });
   f = await files(dir);
   assert.equal(f.find((x) => x.path === 'new.txt')?.untracked, true);
@@ -45,7 +52,13 @@ test('unstages before the first commit', async () => {
   await g.call({ op: 'stage', repo: dir, all: true });
   await g.call({ op: 'unstage', repo: dir, paths: ['a.txt'] });
   const f = await files(dir);
-  assert.deepEqual(f.map((x) => [x.path, x.staged, x.untracked]), [['a.txt', null, true], ['b.txt', 'A', false]]);
+  assert.deepEqual(
+    f.map((x) => [x.path, x.staged, x.untracked]),
+    [
+      ['a.txt', null, true],
+      ['b.txt', 'A', false],
+    ],
+  );
   await g.call({ op: 'unstage', repo: dir, all: true });
   assert.ok((await files(dir)).every((x) => x.untracked));
 });
@@ -125,13 +138,21 @@ test('commits: summary and description, sign-off, co-authors, amend, all; and th
   assert.deepEqual(await files(dir), []);
   await assert.rejects(p.call({ op: 'commit', repo: dir, summary: '' }), { message: 'A commit needs a summary.' });
   await assert.rejects(p.call({ op: 'commit', repo: dir, summary: 'Nothing' }), { message: "There's nothing to commit." });
-  await assert.rejects(p.call({ op: 'commit', repo: dir, summary: 'x', coAuthors: ['nobody'] }), { message: "“nobody” isn't a co-author: a name and an email are needed." });
+  await assert.rejects(p.call({ op: 'commit', repo: dir, summary: 'x', coAuthors: ['nobody'] }), {
+    message: "“nobody” isn't a co-author: a name and an email are needed.",
+  });
 });
 
 test('commits exactly what’s checked: whole files and some lines, git’s index untouched but for what was committed', async () => {
   const lines = Array.from({ length: 20 }, (_, i) => `line ${i + 1}\n`);
   const dir = await repo({ 'a.txt': 'a\n', 'b.txt': 'b\n', 'p.txt': lines.join(''), 'gone.txt': 'g\n' });
-  await write(dir, { 'a.txt': 'a2\n', 'b.txt': 'b2\n', 'new.txt': 'new\n', 'staged.txt': 'staged by hand\n', 'p.txt': lines.map((l, i) => (i === 1 || i === 17 ? l.toUpperCase() : l)).join('') });
+  await write(dir, {
+    'a.txt': 'a2\n',
+    'b.txt': 'b2\n',
+    'new.txt': 'new\n',
+    'staged.txt': 'staged by hand\n',
+    'p.txt': lines.map((l, i) => (i === 1 || i === 17 ? l.toUpperCase() : l)).join(''),
+  });
   await rm(path.join(dir, 'gone.txt'));
   sh(dir, 'add', 'staged.txt');
   // p.txt: only its first change, from its diff against HEAD.
@@ -140,7 +161,10 @@ test('commits exactly what’s checked: whole files and some lines, git’s inde
   const patch = stagePatch(d, new Set(allLines({ hunks: [d.hunks[0]] })));
   const indexBefore = sh(dir, 'diff', '--cached', '--name-status');
   await g.call({ op: 'commit', repo: dir, summary: 'Checked', only: { paths: ['a.txt', 'new.txt', 'gone.txt'], patches: [patch] } });
-  assert.equal(sh(dir, 'show', '--name-status', '--format=', 'HEAD').trim().split('\n').sort().join(' '), 'A\tnew.txt D\tgone.txt M\ta.txt M\tp.txt'.split(' ').sort().join(' '));
+  assert.equal(
+    sh(dir, 'show', '--name-status', '--format=', 'HEAD').trim().split('\n').sort().join(' '),
+    'A\tnew.txt D\tgone.txt M\ta.txt M\tp.txt'.split(' ').sort().join(' '),
+  );
   assert.equal(sh(dir, 'show', 'HEAD:p.txt'), lines.map((l, i) => (i === 1 ? l.toUpperCase() : l)).join(''));
   // The index: what was staged by hand still is; nothing committed shows staged.
   assert.equal(indexBefore, 'A\tstaged.txt\n');
@@ -149,7 +173,14 @@ test('commits exactly what’s checked: whole files and some lines, git’s inde
   assert.match(sh(dir, 'diff', 'p.txt'), /\+LINE 18/);
   assert.equal((await readdir(path.join(dir, '.git'))).filter((f) => f.startsWith('hyperpane-commit-')).length, 0);
   // A commit that fails leaves the index as it was.
-  await assert.rejects(g.call({ op: 'commit', repo: dir, summary: 'Bad', only: { paths: ['b.txt'], patches: ['diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1 +1 @@\n-no\n+yes\n'] } }));
+  await assert.rejects(
+    g.call({
+      op: 'commit',
+      repo: dir,
+      summary: 'Bad',
+      only: { paths: ['b.txt'], patches: ['diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1 +1 @@\n-no\n+yes\n'] },
+    }),
+  );
   assert.equal(sh(dir, 'log', '-1', '--format=%s').trim(), 'Checked');
   assert.equal(sh(dir, 'diff', '--cached', '--name-status'), 'A\tstaged.txt\n');
   assert.equal((await readdir(path.join(dir, '.git'))).filter((f) => f.startsWith('hyperpane-commit-')).length, 0);
@@ -170,7 +201,10 @@ test('undoes the last commit, its changes staged and its message back; the first
   await write(dir, { 'b.txt': 'b\n' });
   commitAll(dir, 'Second');
   assert.deepEqual(await g.call({ op: 'undoCommit', repo: dir }), { summary: 'Second', description: '' });
-  assert.deepEqual((await files(dir)).map((f) => [f.path, f.staged]), [['b.txt', 'A']]);
+  assert.deepEqual(
+    (await files(dir)).map((f) => [f.path, f.staged]),
+    [['b.txt', 'A']],
+  );
   sh(dir, 'commit', '-q', '-m', 'Second again');
   await g.call({ op: 'undoCommit', repo: dir });
   assert.deepEqual(await g.call({ op: 'undoCommit', repo: dir }), { summary: 'First', description: 'The body.' });
@@ -193,7 +227,9 @@ test('authors from history, co-authors included', async () => {
 
 test('config: reads and writes the identity, refuses other keys', async () => {
   const dir = await repo({ 'a.txt': 'a\n' });
-  assert.deepEqual(await g.call({ op: 'config', repo: dir, get: ['user.name', 'user.email'] }), { values: { 'user.name': 'Ada Lovelace', 'user.email': 'ada@example.com' } });
+  assert.deepEqual(await g.call({ op: 'config', repo: dir, get: ['user.name', 'user.email'] }), {
+    values: { 'user.name': 'Ada Lovelace', 'user.email': 'ada@example.com' },
+  });
   await g.call({ op: 'config', repo: dir, set: { 'user.name': 'Someone Else' } });
   assert.equal(sh(dir, 'config', '--local', 'user.name').trim(), 'Someone Else');
   assert.equal((await g.call<Status>({ op: 'status', repo: dir })).identity.name, 'Someone Else');

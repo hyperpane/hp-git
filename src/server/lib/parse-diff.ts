@@ -103,7 +103,8 @@ export function parse(out: Buffer | string, max = Infinity): Diff {
   // A submodule's change: its commits, not lines.
   if (d.oldMode === '160000' || d.newMode === '160000' || d.hunks.some((h) => h.lines.some((l) => l.text.startsWith('Subproject commit ')))) {
     const pick = (kind: '+' | '-') => {
-      for (const h of d.hunks) for (const l of h.lines) if (l.kind === kind && l.text.startsWith('Subproject commit ')) return l.text.slice(18).trim().split(/[\s-]/)[0];
+      for (const h of d.hunks)
+        for (const l of h.lines) if (l.kind === kind && l.text.startsWith('Subproject commit ')) return l.text.slice(18).trim().split(/[\s-]/)[0];
       return null;
     };
     if (d.hunks.every((h) => h.lines.every((l) => l.text.startsWith('Subproject commit ')))) d.submodule = { before: pick('-'), after: pick('+') };

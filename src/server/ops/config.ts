@@ -5,7 +5,7 @@
 import { PluginError } from '@hyperpane/sdk/server';
 import type { Repo } from '../lib/repo.ts';
 
-export const CONFIG_KEYS = [
+const CONFIG_KEYS = [
   'user.name',
   'user.email',
   'user.signingkey',

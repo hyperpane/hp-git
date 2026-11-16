@@ -103,7 +103,7 @@ test('says what’s wrong with a path plainly', async () => {
   await assert.rejects(g.call({ op: 'status', repo: path.join(dir, 'nope') }), { message: `${as(path.join(dir, 'nope'))} isn't there.` });
   await assert.rejects(g.call({ op: 'status', repo: 'relative/x' }), { message: "relative/x isn't a whole path." });
   await assert.rejects(g.call({ op: 'status' }), { message: 'Which repository? No path was given.' });
-  await assert.rejects(g.call({ op: 'stage', repo: (await repo({ a: 'a' })), paths: ['../outside'] }), { message: "../outside isn't a path in the repository." });
+  await assert.rejects(g.call({ op: 'stage', repo: await repo({ a: 'a' }), paths: ['../outside'] }), { message: "../outside isn't a path in the repository." });
 });
 
 test('finds the repository, its submodules and nested ones; inits one', async () => {
@@ -137,7 +137,10 @@ test('finds the repository, its submodules and nested ones; inits one', async ()
   sh(path.join(plain, 'one'), 'init', '-q');
   const none = await g.call<Found>({ op: 'find', path: plain });
   assert.equal(none.root, null);
-  assert.deepEqual(none.repos.map((r) => r.name), ['one']);
+  assert.deepEqual(
+    none.repos.map((r) => r.name),
+    ['one'],
+  );
   // Init: the default branch setting, or the one asked for.
   const fresh = await folder();
   assert.deepEqual(await g.call({ op: 'init', path: fresh, branch: 'trunk' }), { root: as(fresh) });
@@ -163,9 +166,18 @@ test('version: the git it runs; findGit looks on PATH, then the usual places', a
 test('git’s complaints, put plainly', () => {
   assert.match(explain("fatal: could not read Username for 'https://github.com': terminal prompts disabled\n"), /^The remote wants a username and password/);
   assert.match(explain('git@github.com: Permission denied (publickey).\nfatal: Could not read from remote repository.\n'), /SSH key/);
-  assert.equal(explain('ssh: Could not resolve hostname nowhere.example: nodename nor servname provided\n'), "Couldn't reach nowhere.example: is the network up?");
-  assert.equal(explain(' ! [rejected]        main -> main (fetch first)\nerror: failed to push some refs\n'), "The remote has commits this branch doesn't have. Pull first, then push.");
-  assert.equal(explain('error: Your local changes to the following files would be overwritten by checkout:\n\ta.txt\nPlease commit\n'), 'Your changes to a.txt would be overwritten. Commit or stash them first.');
+  assert.equal(
+    explain('ssh: Could not resolve hostname nowhere.example: nodename nor servname provided\n'),
+    "Couldn't reach nowhere.example: is the network up?",
+  );
+  assert.equal(
+    explain(' ! [rejected]        main -> main (fetch first)\nerror: failed to push some refs\n'),
+    "The remote has commits this branch doesn't have. Pull first, then push.",
+  );
+  assert.equal(
+    explain('error: Your local changes to the following files would be overwritten by checkout:\n\ta.txt\nPlease commit\n'),
+    'Your changes to a.txt would be overwritten. Commit or stash them first.',
+  );
   assert.equal(explain('fatal: something odd happened\nhint: try this\n'), 'Something odd happened.');
   assert.equal(explain(''), 'Git failed.');
 });

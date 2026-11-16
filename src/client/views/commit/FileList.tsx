@@ -18,7 +18,19 @@ import { basenameOf } from '../../lib/paths.ts';
 import { rowClass } from '../../lib/rows.ts';
 
 /** The files a commit changed, flat or by folder, with their counts. */
-export function FileList({ files, truncated, picked, onPick, sha }: { files: ChangedFile[]; truncated: boolean; picked: string | null; onPick(p: string): void; sha?: string }) {
+export function FileList({
+  files,
+  truncated,
+  picked,
+  onPick,
+  sha,
+}: {
+  files: ChangedFile[];
+  truncated: boolean;
+  picked: string | null;
+  onPick(p: string): void;
+  sha?: string;
+}) {
   const repo = useRepo();
   const [tree, setTreeState] = useState(() => local.get('commitTree', false));
   const list = useRef<VirtualHandle>(null);
@@ -85,7 +97,8 @@ export function FileList({ files, truncated, picked, onPick, sha }: { files: Cha
       <div className="flex h-8 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-2 pe-1 text-2xs text-[var(--node-muted)]">
         <span className="min-w-0 flex-1 truncate">
           {plural(files.length, 'file')}
-          {truncated ? '+' : ''} <span className="text-[var(--ansi-2)]">+{additions.toLocaleString('en-US')}</span> <span className="text-[var(--ansi-1)]">−{deletions.toLocaleString('en-US')}</span>
+          {truncated ? '+' : ''} <span className="text-[var(--ansi-2)]">+{additions.toLocaleString('en-US')}</span>{' '}
+          <span className="text-[var(--ansi-1)]">−{deletions.toLocaleString('en-US')}</span>
         </span>
         <ToolButton
           label={tree ? 'Show as a list' : 'Group by folder'}
@@ -118,14 +131,21 @@ export function FileList({ files, truncated, picked, onPick, sha }: { files: Cha
           const Icon = fileIcon(basenameOf(f.path));
           return (
             <div className="h-full px-1">
-              <div className={rowClass(f.path === picked)} style={{ paddingLeft: 6 + r.depth * 12 }} onClick={() => onPick(f.path)} onContextMenu={(e) => menu(e, f)} title={f.from ? `${f.from} → ${f.path}` : f.path}>
+              <div
+                className={rowClass(f.path === picked)}
+                style={{ paddingLeft: 6 + r.depth * 12 }}
+                onClick={() => onPick(f.path)}
+                onContextMenu={(e) => menu(e, f)}
+                title={f.from ? `${f.from} → ${f.path}` : f.path}
+              >
                 {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
                 {tree ? <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span> : <PathLabel path={f.path} from={f.from} />}
                 {f.binary ? (
                   <span className="text-[10px] text-[var(--node-muted)]">bin</span>
                 ) : (
                   <span className="flex-none text-[10px] tabular-nums opacity-80">
-                    {f.additions > 0 && <span className="text-[var(--ansi-2)]">+{f.additions}</span>} {f.deletions > 0 && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
+                    {f.additions > 0 && <span className="text-[var(--ansi-2)]">+{f.additions}</span>}{' '}
+                    {f.deletions > 0 && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
                   </span>
                 )}
                 <StatusLetter letter={f.untracked ? '?' : f.status} />

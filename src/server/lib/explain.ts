@@ -15,7 +15,7 @@ export function explain(stderr: string, stdout = ''): string {
       .join(', ');
 
   if (has('could not read username') || has('could not read password') || has('terminal prompts disabled') || has('user interactivity has been disabled')) {
-    return 'The remote wants a username and password, and no credential helper on this server has them. Sign in with git\'s credential helper (or gh auth login) on the server, or use an SSH remote.';
+    return "The remote wants a username and password, and no credential helper on this server has them. Sign in with git's credential helper (or gh auth login) on the server, or use an SSH remote.";
   }
   if (has('authentication failed') || has('invalid username or password') || has('http basic: access denied')) {
     return "The remote turned down the credentials (authentication failed). Sign in again with git's credential helper on the server.";
@@ -41,7 +41,9 @@ export function explain(stderr: string, stdout = ''): string {
   }
   if (has('would be overwritten by')) {
     const list = files();
-    return list ? `Your changes to ${list} would be overwritten. Commit or stash them first.` : 'Your changes would be overwritten. Commit or stash them first.';
+    return list
+      ? `Your changes to ${list} would be overwritten. Commit or stash them first.`
+      : 'Your changes would be overwritten. Commit or stash them first.';
   }
   if (has('untracked working tree files would be')) {
     const list = files();
@@ -78,7 +80,7 @@ export function explain(stderr: string, stdout = ''): string {
     return 'You have changes that a rebase would overwrite. Commit or stash them first.';
   }
   if (has('no tracking information') || has('there is no tracking information')) {
-    return "This branch has no upstream to pull from. Push it first.";
+    return 'This branch has no upstream to pull from. Push it first.';
   }
   if (has('refusing to merge unrelated histories')) {
     return "These branches have no commit in common, so git won't merge them.";

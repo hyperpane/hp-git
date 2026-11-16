@@ -6,7 +6,7 @@ import type { Span } from './highlight.ts';
 import type { Range } from './words.ts';
 
 /** Past this, a line is cut (with …): wider than anything on screen. */
-export const MAX_SHOWN = 4000;
+const MAX_SHOWN = 4000;
 
 export function paint(text: string, spans: Span[] | undefined, words: Range[] | null | undefined, wordClass: string): ReactNode {
   const cut = text.length > MAX_SHOWN;

@@ -13,7 +13,10 @@ export function useLinePicks(diff: Diff, canPick: boolean, onSelection?: (keys: 
   const dragging = useRef(false);
 
   // A different diff: nothing picked. (The same one fetched again keeps the pick.)
-  const signature = useMemo(() => `${diff.path}|${diff.additions}|${diff.deletions}|${diff.hunks.map((h) => `${h.header}:${h.lines.length}`).join(',')}`, [diff]);
+  const signature = useMemo(
+    () => `${diff.path}|${diff.additions}|${diff.deletions}|${diff.hunks.map((h) => `${h.header}:${h.lines.length}`).join(',')}`,
+    [diff],
+  );
   const seen = useRef(signature);
   useEffect(() => {
     if (seen.current === signature) return;

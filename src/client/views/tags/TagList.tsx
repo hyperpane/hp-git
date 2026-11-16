@@ -64,7 +64,18 @@ export function TagList({
       <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput ref={filterRef} className="w-full ps-6" placeholder={`Filter tags (${keys('⌘F')})`} value={filter} onChange={(e) => setFilter(e.target.value)} onKeyDown={(e) => e.key === 'ArrowDown' && (list.current?.element?.focus(), e.preventDefault())} />
+          <NodeInput
+            ref={filterRef}
+            className="w-full ps-6"
+            placeholder={`Filter tags (${keys('⌘F')})`}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'ArrowDown') return;
+              list.current?.element?.focus();
+              e.preventDefault();
+            }}
+          />
         </div>
         <ToolButton label="New tag" icon={Plus} disabled={!repo.status.head} onClick={() => createTag(repo)} />
       </div>
@@ -73,7 +84,11 @@ export function TagList({
       ) : !tags ? (
         <NodeMessage>Loading</NodeMessage>
       ) : !shown.length ? (
-        <Blank icon={TagIcon} title={filter ? undefined : 'No tags'} actions={!filter && repo.status.head ? <NodeButton onClick={() => createTag(repo)}>Tag the Current Commit</NodeButton> : undefined}>
+        <Blank
+          icon={TagIcon}
+          title={filter ? undefined : 'No tags'}
+          actions={!filter && repo.status.head ? <NodeButton onClick={() => createTag(repo)}>Tag the Current Commit</NodeButton> : undefined}
+        >
           {filter ? 'No tag matches' : 'Tags name commits that matter: releases, milestones'}
         </Blank>
       ) : (
@@ -90,7 +105,12 @@ export function TagList({
             const t = shown[n];
             return (
               <div className="h-full px-1 py-px" data-tag={t.name}>
-                <div className={rowClass(t.name === picked)} onClick={() => onPick(t.name)} onContextMenu={(e) => menu(e, t)} title={`${t.name}${t.message ? `\n${t.message}` : ''}\n${longDate(t.date)}`}>
+                <div
+                  className={rowClass(t.name === picked)}
+                  onClick={() => onPick(t.name)}
+                  onContextMenu={(e) => menu(e, t)}
+                  title={`${t.name}${t.message ? `\n${t.message}` : ''}\n${longDate(t.date)}`}
+                >
                   <TagIcon className="size-3.5 flex-none text-[var(--ansi-3)]" />
                   <div className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="truncate font-medium">{t.name}</span>
@@ -106,7 +126,11 @@ export function TagList({
           }}
         />
       )}
-      {tags && tags.length > 0 && <div className="flex h-6 flex-none items-center border-t border-[var(--node-border)] px-2 text-2xs text-[var(--node-muted)]">{plural(tags.length, 'tag')}</div>}
+      {tags && tags.length > 0 && (
+        <div className="flex h-6 flex-none items-center border-t border-[var(--node-border)] px-2 text-2xs text-[var(--node-muted)]">
+          {plural(tags.length, 'tag')}
+        </div>
+      )}
     </div>
   );
 }

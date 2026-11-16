@@ -128,7 +128,15 @@ export function GitWindow({ host }: { host: Host }) {
       </Blank>
     );
   if (!f) return <NodeMessage>Looking for a repository</NodeMessage>;
-  if (!f.root) return <Welcome folder={folder} found={f} onDone={(root) => (root === folder ? setAttempt((n) => n + 1) : host.win.setData('folder', root))} onChoose={chooseFolder} />;
+  if (!f.root)
+    return (
+      <Welcome
+        folder={folder}
+        found={f}
+        onDone={(root) => (root === folder ? setAttempt((n) => n + 1) : host.win.setData('folder', root))}
+        onChoose={chooseFolder}
+      />
+    );
   const root = chosen && f.repos.some((r) => r.root === chosen) ? chosen : f.root;
   return <RepoWindow key={`${server ?? ''}\n${root}`} host={host} root={root} server={server} found={f} onChooseFolder={chooseFolder} />;
 }

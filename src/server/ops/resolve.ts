@@ -19,7 +19,10 @@ export async function resolve(repo: Repo, file: unknown, side: unknown, trash: T
     // copy (which goes to the Trash first), and staged with `mark`.
     if (typeof text !== 'string') throw new PluginError('The merged text is missing.');
     const full = repo.file(p);
-    const st = await lstat(full).then((s) => s, () => null);
+    const st = await lstat(full).then(
+      (s) => s,
+      () => null,
+    );
     if (st && !st.isFile()) throw new PluginError(`${p} isn't a file.`);
     if (st) await copyToTrash(repo, full, trash);
     else await mkdir(path.dirname(full), { recursive: true });
@@ -29,7 +32,10 @@ export async function resolve(repo: Repo, file: unknown, side: unknown, trash: T
   }
   if (side === 'mark') {
     const full = repo.file(p);
-    const there = await lstat(full).then((s) => s.isFile(), () => false);
+    const there = await lstat(full).then(
+      (s) => s.isFile(),
+      () => false,
+    );
     if (there) {
       const text = await readFile(full, 'utf8').catch(() => '');
       if (/^<{7}( |$)/m.test(text) && /^>{7}( |$)/m.test(text)) throw new PluginError(`${p} still has conflict markers.`);

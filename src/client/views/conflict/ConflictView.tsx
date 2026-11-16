@@ -58,17 +58,18 @@ export function ConflictView({ file }: { file: FileStatus }) {
   }, [text]);
   const conflicts = blocks.map((b, k) => (b.t === 'conflict' ? k : -1)).filter((k) => k >= 0);
   const chosen = conflicts.filter((k) => choices.has(k)).length;
-  const ours = status.operation?.kind === 'rebase' ? 'the branch you rebase onto' : status.branch ?? 'HEAD';
+  const ours = status.operation?.kind === 'rebase' ? 'the branch you rebase onto' : (status.branch ?? 'HEAD');
   const theirs = status.operation?.kind === 'rebase' ? 'your commit' : status.operation?.kind === 'merge' ? 'the merged branch' : 'the incoming change';
 
   const save = async (mark: boolean) => {
     if (!state.lines) return;
     setSaving(true);
-    const text = merged(blocks, choices, state.eol ?? '\n') + (state.lines.length ? state.eol ?? '\n' : '');
+    const text = merged(blocks, choices, state.eol ?? '\n') + (state.lines.length ? (state.eol ?? '\n') : '');
     await repo.run(() => api.resolveText(file.path, text, mark), { done: mark ? `${basenameOf(file.path)} is resolved` : undefined });
     setSaving(false);
   };
-  const side = (s: 'ours' | 'theirs') => repo.run(() => api.resolve(file.path, s), { done: `Took ${s === 'ours' ? 'ours' : 'theirs'} for ${basenameOf(file.path)}` });
+  const side = (s: 'ours' | 'theirs') =>
+    repo.run(() => api.resolve(file.path, s), { done: `Took ${s === 'ours' ? 'ours' : 'theirs'} for ${basenameOf(file.path)}` });
 
   const bar = <ConflictBar file={file} kind={kind} ours={ours} theirs={theirs} side={side} />;
 
@@ -118,7 +119,17 @@ export function ConflictView({ file }: { file: FileStatus }) {
           </div>
           <div className="git-scroll min-h-0 flex-1 overflow-auto p-2" style={{ fontFamily: MONO, fontSize: 12, lineHeight: '18px' }}>
             {blocks.map((b, k) => {
-              if (b.t === 'text') return <FoldedText key={k} lines={b.lines} first={k === 0} last={k === blocks.length - 1} open={open.has(k)} onOpen={() => setOpen(new Set([...open, k]))} />;
+              if (b.t === 'text')
+                return (
+                  <FoldedText
+                    key={k}
+                    lines={b.lines}
+                    first={k === 0}
+                    last={k === blocks.length - 1}
+                    open={open.has(k)}
+                    onOpen={() => setOpen(new Set([...open, k]))}
+                  />
+                );
               const c = choices.get(k);
               const choose = (x: Choice | null) =>
                 setChoices((m) => {

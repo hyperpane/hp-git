@@ -8,11 +8,26 @@ import { useRepo } from '../../app/repo.ts';
 import { KIND } from '../../lib/conflicts.ts';
 import { basenameOf } from '../../lib/paths.ts';
 
-export function ConflictBar({ file, kind, ours, theirs, side }: { file: FileStatus; kind: ConflictKind; ours: string; theirs: string; side(s: 'ours' | 'theirs'): unknown }) {
+export function ConflictBar({
+  file,
+  kind,
+  ours,
+  theirs,
+  side,
+}: {
+  file: FileStatus;
+  kind: ConflictKind;
+  ours: string;
+  theirs: string;
+  side(s: 'ours' | 'theirs'): unknown;
+}) {
   const repo = useRepo();
   const { api } = repo;
   return (
-    <div className="flex flex-none flex-wrap items-center gap-2 border-b border-[var(--node-border)] px-3 py-1.5" style={{ background: 'color-mix(in srgb, var(--ansi-9) 10%, transparent)' }}>
+    <div
+      className="flex flex-none flex-wrap items-center gap-2 border-b border-[var(--node-border)] px-3 py-1.5"
+      style={{ background: 'color-mix(in srgb, var(--ansi-9) 10%, transparent)' }}
+    >
       <TriangleAlert className="size-3.5 flex-none text-[var(--ansi-9)]" />
       <span className="min-w-0 flex-1">
         <span className="font-medium">{file.path}</span> <span className="text-[var(--node-muted)]">{KIND[kind]}</span>

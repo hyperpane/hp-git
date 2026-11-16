@@ -101,7 +101,8 @@ export const DiffView = memo(function DiffView({ diff, mode, actions, expansions
     else if (k === 'p' && !e.metaKey && !e.ctrlKey) jump(-1);
     else if (k === 'a' && (e.metaKey || e.ctrlKey) && canPick) setSelected(new Set(diff.hunks.flatMap((_, h) => hunkKeys(h))));
     else if (e.key === ' ' && selected.size && actions?.primary) run(actions.primary, [...selected]);
-    else if ((e.key === 'Delete' || (e.key === 'Backspace' && (e.metaKey || e.ctrlKey))) && selected.size && actions?.discard) run(actions.discard, [...selected]);
+    else if ((e.key === 'Delete' || (e.key === 'Backspace' && (e.metaKey || e.ctrlKey))) && selected.size && actions?.discard)
+      run(actions.discard, [...selected]);
     else return;
     e.preventDefault();
     e.stopPropagation();
@@ -143,7 +144,20 @@ export const DiffView = memo(function DiffView({ diff, mode, actions, expansions
   const gapRow = (gap: Gap, hidden: number | null, withActions: boolean) => <GapRow gap={gap} hidden={hidden} withActions={withActions} onExpand={onExpand} />;
 
   const numbers = (old: number | undefined, now: number | undefined, kind: Line['kind'] | 'ctx', key: LineKey | null, isSelected: boolean, both = true) => (
-    <Gutter old={old} now={now} kind={kind} lineKey={key} selected={isSelected} out={isOut(key)} checking={!!checks} both={both} width={gutter} canPick={canPick || !!checks} onPress={press} onEnter={dragTo} />
+    <Gutter
+      old={old}
+      now={now}
+      kind={kind}
+      lineKey={key}
+      selected={isSelected}
+      out={isOut(key)}
+      checking={!!checks}
+      both={both}
+      width={gutter}
+      canPick={canPick || !!checks}
+      onPress={press}
+      onEnter={dragTo}
+    />
   );
 
   const code = (text: string, s: Span[] | undefined, words: ReturnType<Model['words']>, kind: Line['kind'] | 'ctx', noNewline?: boolean) => (
@@ -177,34 +191,36 @@ export const DiffView = memo(function DiffView({ diff, mode, actions, expansions
     );
   };
 
-  const half = (side: 'left' | 'right') => (k: number): ReactNode => {
-    const r = m.split[k];
-    if (r.t === 'hunk') return hunkRow(r.h, side === 'left');
-    if (r.t === 'gap') return gapRow(r.gap, r.hidden, side === 'left');
-    if (r.t === 'ctx')
+  const half =
+    (side: 'left' | 'right') =>
+    (k: number): ReactNode => {
+      const r = m.split[k];
+      if (r.t === 'hunk') return hunkRow(r.h, side === 'left');
+      if (r.t === 'gap') return gapRow(r.gap, r.hidden, side === 'left');
+      if (r.t === 'ctx')
+        return (
+          <div className="flex h-full" onContextMenu={(e) => menuFor(e, { old: r.old, new: r.new, text: r.text })}>
+            {numbers(side === 'left' ? r.old : r.new, undefined, 'ctx', null, false, false)}
+            {code(shown(r.text), ctxSpans.get(r.new), null, 'ctx')}
+          </div>
+        );
+      const i = side === 'left' ? r.left : r.right;
+      if (i === null) return <div className="h-full" style={{ background: EMPTY_SIDE }} />;
+      const line = lineOf(r.h, i);
+      const key = line.kind === ' ' ? null : keyOf(r.h, i);
+      const isSel = !!key && selected.has(key);
+      const bg = line.kind === '+' ? ADDED : line.kind === '-' ? REMOVED : undefined;
       return (
-        <div className="flex h-full" onContextMenu={(e) => menuFor(e, { old: r.old, new: r.new, text: r.text })}>
-          {numbers(side === 'left' ? r.old : r.new, undefined, 'ctx', null, false, false)}
-          {code(shown(r.text), ctxSpans.get(r.new), null, 'ctx')}
+        <div
+          className="flex h-full"
+          style={{ background: isSel ? `linear-gradient(${SELECTED}, ${SELECTED}), ${bg}` : isOut(key) ? undefined : bg }}
+          onContextMenu={(e) => menuFor(e, { old: line.old, new: line.new, text: line.text })}
+        >
+          {numbers(side === 'left' ? line.old : line.new, undefined, line.kind, key, isSel, false)}
+          {code(shown(line), spans?.get(keyOf(r.h, i)), key ? m.words(r.h, i) : null, line.kind, line.noNewline)}
         </div>
       );
-    const i = side === 'left' ? r.left : r.right;
-    if (i === null) return <div className="h-full" style={{ background: EMPTY_SIDE }} />;
-    const line = lineOf(r.h, i);
-    const key = line.kind === ' ' ? null : keyOf(r.h, i);
-    const isSel = !!key && selected.has(key);
-    const bg = line.kind === '+' ? ADDED : line.kind === '-' ? REMOVED : undefined;
-    return (
-      <div
-        className="flex h-full"
-        style={{ background: isSel ? `linear-gradient(${SELECTED}, ${SELECTED}), ${bg}` : isOut(key) ? undefined : bg }}
-        onContextMenu={(e) => menuFor(e, { old: line.old, new: line.new, text: line.text })}
-      >
-        {numbers(side === 'left' ? line.old : line.new, undefined, line.kind, key, isSel, false)}
-        {code(shown(line), spans?.get(keyOf(r.h, i)), key ? m.words(r.h, i) : null, line.kind, line.noNewline)}
-      </div>
-    );
-  };
+    };
 
   // Side by side: both halves scroll together.
   const syncing = useRef(false);

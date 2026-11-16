@@ -10,7 +10,24 @@ import type { Git } from '../lib/git.ts';
 import { whole } from '../lib/repo.ts';
 
 /** Folders never looked in for nested repositories. */
-const SKIP = new Set(['node_modules', '.git', 'target', 'dist', 'build', 'out', 'vendor', '.venv', 'venv', '__pycache__', '.cache', '.next', '.gradle', 'Pods', 'DerivedData', '.hyperpane']);
+const SKIP = new Set([
+  'node_modules',
+  '.git',
+  'target',
+  'dist',
+  'build',
+  'out',
+  'vendor',
+  '.venv',
+  'venv',
+  '__pycache__',
+  '.cache',
+  '.next',
+  '.gradle',
+  'Pods',
+  'DerivedData',
+  '.hyperpane',
+]);
 const DEPTH = 6;
 const FOLDERS_MAX = 5000;
 
@@ -39,7 +56,13 @@ export async function find(git: Git, p: unknown): Promise<Found> {
       const nl = entry.indexOf('\n');
       if (nl < 0) continue;
       const dir = path.join(root, ...entry.slice(nl + 1).split('/'));
-      if (await stat(path.join(dir, '.git')).then(() => true, () => false)) submodules.add(dir);
+      if (
+        await stat(path.join(dir, '.git')).then(
+          () => true,
+          () => false,
+        )
+      )
+        submodules.add(dir);
     }
   }
   const base = root ?? folder;
@@ -59,7 +82,12 @@ export async function find(git: Git, p: unknown): Promise<Found> {
         if (!e.isDirectory() || SKIP.has(e.name)) continue;
         if (++seen > FOLDERS_MAX) break;
         const child = path.join(dir, e.name);
-        if (await stat(path.join(child, '.git')).then(() => true, () => false)) {
+        if (
+          await stat(path.join(child, '.git')).then(
+            () => true,
+            () => false,
+          )
+        ) {
           if (!submodules.has(child)) nested.push(child);
         }
         next.push(child);

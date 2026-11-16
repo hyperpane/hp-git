@@ -18,10 +18,12 @@ async function window(t: { after(fn: () => void): void }, dir: string) {
 }
 
 const tab = (root: HTMLElement, id: string) => click(root.querySelector(`[role="tab"][data-value="${id}"]`)!);
-const commitRow = (root: HTMLElement, subject: string) => [...root.querySelectorAll<HTMLElement>('[data-sha] > div')].find((r) => r.textContent!.includes(subject));
+const commitRow = (root: HTMLElement, subject: string) =>
+  [...root.querySelectorAll<HTMLElement>('[data-sha] > div')].find((r) => r.textContent!.includes(subject));
 /** Answers the next menu with the item labelled so. */
 const choose = (app: { answers: Record<string, (a: any) => unknown> }, label: string | RegExp) =>
-  (app.answers['ui.menu'] = (a: { items: { id: string; label: string }[] }) => a.items.find((i) => (typeof label === 'string' ? i.label === label : label.test(i.label)))?.id ?? null);
+  (app.answers['ui.menu'] = (a: { items: { id: string; label: string }[] }) =>
+    a.items.find((i) => (typeof label === 'string' ? i.label === label : label.test(i.label)))?.id ?? null);
 
 /** A repository with a merged branch: main has m1, m2; feature f1 merged as m3. */
 function branchy(t: { after(fn: () => void): void }) {
@@ -56,7 +58,12 @@ test('History: commits with the graph and their refs; a commit’s details, file
   assert.match(details.textContent!, /Merges/);
   // m2: its file and diff.
   click(commitRow(w.root, 'm2')!);
-  await until(() => w.root.querySelector('[data-commit-files]')?.textContent?.includes('a.txt') && w.root.querySelector('[data-diff="a.txt"]')?.textContent?.includes('two'), 10000, 'm2’s diff');
+  await until(
+    () =>
+      w.root.querySelector('[data-commit-files]')?.textContent?.includes('a.txt') && w.root.querySelector('[data-diff="a.txt"]')?.textContent?.includes('two'),
+    10000,
+    'm2’s diff',
+  );
   // Its parent opens over the tabs; Back comes back.
   const parent = [...w.root.querySelectorAll<HTMLButtonElement>('[data-commit] button')].find((b) => b.title.startsWith('Open '))!;
   click(parent);
@@ -194,7 +201,11 @@ test('Branches: local and remote with what they track; compare, check out, delet
   await until(() => row('main') && row('feature') && row('old'), 10000, 'the branches');
   assert.match(row('main')!.textContent!, /current/);
   click(row('feature')!);
-  const detail = await until(() => w.root.querySelector<HTMLElement>('[data-branch-detail="feature"]'), 10000, () => `feature: ${w.root.textContent}`);
+  const detail = await until(
+    () => w.root.querySelector<HTMLElement>('[data-branch-detail="feature"]'),
+    10000,
+    () => `feature: ${w.root.textContent}`,
+  );
   await until(() => detail.textContent!.includes('on main not on feature'), 10000, 'the compare');
   assert.match(detail.textContent!, /0 commits on feature not on main/);
   assert.match(detail.textContent!, /2 commits on main not on feature/);
@@ -206,7 +217,11 @@ test('Branches: local and remote with what they track; compare, check out, delet
   // Delete old from its menu.
   choose(w.app, 'Delete');
   row('old')!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
-  await until(() => !sh(dir, 'branch', '--list', 'old').trim(), 10000, () => `deleted: ${JSON.stringify(w.app.calls('app.toast'))} ${JSON.stringify(w.app.logs)}`);
+  await until(
+    () => !sh(dir, 'branch', '--list', 'old').trim(),
+    10000,
+    () => `deleted: ${JSON.stringify(w.app.calls('app.toast'))} ${JSON.stringify(w.app.logs)}`,
+  );
   assert.equal(w.app.last('ui.confirm').title, 'Delete old?');
 });
 
@@ -242,7 +257,13 @@ test('Stashes: stash with the dialog, see its files, pop it', async (t) => {
   await until(() => sh(dir, 'stash', 'list').includes('wip things'), 10000, 'stashed');
   const row = await until(() => w.root.querySelector<HTMLElement>('[data-stash="0"] > div'), 10000, 'the stash');
   assert.match(row.textContent!, /wip things/);
-  await until(() => w.root.querySelector('[data-commit-files]')?.textContent?.includes('a.txt') && w.root.querySelector('[data-commit-files]')?.textContent?.includes('new.txt'), 10000, 'its files');
+  await until(
+    () =>
+      w.root.querySelector('[data-commit-files]')?.textContent?.includes('a.txt') &&
+      w.root.querySelector('[data-commit-files]')?.textContent?.includes('new.txt'),
+    10000,
+    'its files',
+  );
   click(button(w.root, 'Pop')!);
   // (Read while pop drops refs/stash, git can say it's a bad revision: not yet.)
   await until(() => !stashList(dir).trim(), 10000, 'popped');

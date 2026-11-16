@@ -6,6 +6,7 @@
 
 import { languageFor } from '@hyperpane/code';
 import { codeHighlighter } from '@hyperpane/code';
+import type { LanguageSupport } from '@codemirror/language';
 import { highlightTree } from '@lezer/highlight';
 import type { Diff } from '../../../shared/index.ts';
 import { type LineKey, keyOf, shown } from './model.ts';
@@ -27,7 +28,7 @@ const turn = () => new Promise<void>((r) => setTimeout(r, 0));
 export async function highlightDiff(diff: Diff, signal: AbortSignal): Promise<Map<LineKey, Span[]> | null> {
   const lang = languageFor(diff.path.slice(diff.path.lastIndexOf('/') + 1));
   if (!lang || diff.binary || !diff.hunks.length) return null;
-  let support;
+  let support: LanguageSupport;
   try {
     support = await lang.load();
   } catch {
@@ -41,7 +42,7 @@ export async function highlightDiff(diff: Diff, signal: AbortSignal): Promise<Ma
     /** Whether a line's spans are this side's: an unchanged line's are the new side's. */
     const emit: boolean[] = [];
     let size = 0;
-    diff.hunks.forEach((hunk, h) =>
+    diff.hunks.forEach((hunk, h) => {
       hunk.lines.forEach((line, i) => {
         if (line.kind === (side === 'old' ? '+' : '-')) return;
         keys.push(keyOf(h, i));
@@ -49,19 +50,20 @@ export async function highlightDiff(diff: Diff, signal: AbortSignal): Promise<Ma
         const t = shown(line);
         texts.push(t);
         size += t.length + 1;
-      }),
-    );
+      });
+    });
     if (!texts.length || size > MAX_SIDE) continue;
     const doc = texts.join('\n');
     const parse = support.language.parser.startParse(doc);
-    let tree = null;
     let started = performance.now();
-    while (!(tree = parse.advance())) {
+    let tree = parse.advance();
+    while (!tree) {
       if (performance.now() - started > SLICE) {
         await turn();
         if (signal.aborted) return null;
         started = performance.now();
       }
+      tree = parse.advance();
     }
     // Line starts, to place each span.
     const starts: number[] = [];
@@ -87,7 +89,10 @@ export async function highlightDiff(diff: Diff, signal: AbortSignal): Promise<Ma
             if (e > s && emit[l]) {
               const key = keys[l];
               let spans = out.get(key);
-              if (!spans) out.set(key, (spans = []));
+              if (!spans) {
+                spans = [];
+                out.set(key, spans);
+              }
               spans.push([s - starts[l], e - starts[l], cls]);
             }
             l++;
@@ -111,7 +116,7 @@ export async function highlightDiff(diff: Diff, signal: AbortSignal): Promise<Ma
 export async function highlightLines(name: string, lines: string[], signal: AbortSignal): Promise<Span[][] | null> {
   const lang = languageFor(name);
   if (!lang || !lines.length) return null;
-  let support;
+  let support: LanguageSupport;
   try {
     support = await lang.load();
   } catch {
@@ -120,14 +125,15 @@ export async function highlightLines(name: string, lines: string[], signal: Abor
   const doc = lines.join('\n');
   if (doc.length > MAX_SIDE * 2 || signal.aborted) return null;
   const parse = support.language.parser.startParse(doc);
-  let tree = null;
   let started = performance.now();
-  while (!(tree = parse.advance())) {
+  let tree = parse.advance();
+  while (!tree) {
     if (performance.now() - started > SLICE) {
       await turn();
       if (signal.aborted) return null;
       started = performance.now();
     }
+    tree = parse.advance();
   }
   const starts: number[] = [];
   let at = 0;

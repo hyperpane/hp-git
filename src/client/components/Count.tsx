@@ -16,7 +16,10 @@ export function Count({ n, className }: { n: number; className?: string }) {
 export function AheadBehind({ ahead, behind, className }: { ahead?: number; behind?: number; className?: string }) {
   if (!ahead && !behind) return null;
   return (
-    <span className={cn('flex flex-none items-center gap-1 text-[10px] text-[var(--node-muted)] tabular-nums', className)} title={`${ahead ?? 0} ahead, ${behind ?? 0} behind`}>
+    <span
+      className={cn('flex flex-none items-center gap-1 text-[10px] text-[var(--node-muted)] tabular-nums', className)}
+      title={`${ahead ?? 0} ahead, ${behind ?? 0} behind`}
+    >
       {!!behind && <span>↓{behind}</span>}
       {!!ahead && <span>↑{ahead}</span>}
     </span>

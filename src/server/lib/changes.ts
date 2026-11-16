@@ -7,7 +7,10 @@ import type { Repo } from './repo.ts';
 /** The files changed between two trees, with their lines. */
 export async function changes(repo: Repo, base: string, commit: string | null, signal?: AbortSignal): Promise<{ files: ChangedFile[] }> {
   // Two trees: diff-tree; a tree and the working tree: diff.
-  const args = commit === null ? ['diff', '--no-ext-diff', '--no-relative', '-z', '-M', '--raw', '--numstat', base, '--'] : ['diff-tree', '-r', '-z', '-M', '--raw', '--numstat', '--no-commit-id', base, commit, '--'];
+  const args =
+    commit === null
+      ? ['diff', '--no-ext-diff', '--no-relative', '-z', '-M', '--raw', '--numstat', base, '--']
+      : ['diff-tree', '-r', '-z', '-M', '--raw', '--numstat', '--no-commit-id', base, commit, '--'];
   const out = await repo.run(args, { signal, limit: 64 * 1024 * 1024 });
   const t = out.stdout.toString('utf8').split('\0');
   const files: ChangedFile[] = [];

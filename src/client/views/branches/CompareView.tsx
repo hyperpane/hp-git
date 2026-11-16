@@ -61,8 +61,20 @@ export function CompareView({ base, head }: { base: string; head: string }) {
           initial={box.clientHeight ? Math.max(80, Math.round((box.clientHeight - 32) / 2)) : 200}
           min={80}
           minOther={80}
-          first={<CommitColumn icon={<ArrowUpRight className="size-3.5 text-[var(--ansi-2)]" />} title={`${plural(c.aheadCount, 'commit')} on ${head} not on ${base}`} commits={c.ahead} />}
-          second={<CommitColumn icon={<ArrowDownLeft className="size-3.5 text-[var(--ansi-4)]" />} title={`${plural(c.behindCount, 'commit')} on ${base} not on ${head}`} commits={c.behind} />}
+          first={
+            <CommitColumn
+              icon={<ArrowUpRight className="size-3.5 text-[var(--ansi-2)]" />}
+              title={`${plural(c.aheadCount, 'commit')} on ${head} not on ${base}`}
+              commits={c.ahead}
+            />
+          }
+          second={
+            <CommitColumn
+              icon={<ArrowDownLeft className="size-3.5 text-[var(--ansi-4)]" />}
+              title={`${plural(c.behindCount, 'commit')} on ${base} not on ${head}`}
+              commits={c.behind}
+            />
+          }
         />
       )}
     </div>

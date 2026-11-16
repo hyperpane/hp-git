@@ -31,7 +31,11 @@ test('Changes lists changed, staged and untracked files; the title says where', 
   sh(dir, 'add', 'a.txt');
   write(dir, { 'src/b.ts': 'export const b = 2;\n' });
   const w = await window(t, dir, byHand);
-  await until(() => fileRow(w.root, 'staged', 'a.txt') && fileRow(w.root, 'unstaged', 'src/b.ts') && fileRow(w.root, 'untracked', 'new.md'), 10000, 'the files');
+  await until(
+    () => fileRow(w.root, 'staged', 'a.txt') && fileRow(w.root, 'unstaged', 'src/b.ts') && fileRow(w.root, 'untracked', 'new.md'),
+    10000,
+    'the files',
+  );
   const name = dir.slice(dir.lastIndexOf('/') + 1);
   await until(() => w.app.last('window.setTitle')?.title === `${name} · main`);
   // The tab counts them; the toolbar names the branch.
@@ -56,7 +60,12 @@ test('a file’s diff shows; a line picked in it stages alone, a hunk unstages w
   const minus = rows.find((r) => r.textContent!.includes('let two'))!;
   pointer(minus.querySelector('[title^="Pick this line"]')!, 'pointerdown');
   pointer(two.querySelector('[title^="Pick this line"]')!, 'pointerdown', { shiftKey: true });
-  await until(() => w.root.textContent!.includes('2 lines picked'), 8000, () => `2 picked: ${pane.isConnected} ${[...pane.querySelectorAll('[data-row]')].map((r) => r.textContent).join(' | ')} :: ${minus.isConnected} ${two.isConnected}`);
+  await until(
+    () => w.root.textContent!.includes('2 lines picked'),
+    8000,
+    () =>
+      `2 picked: ${pane.isConnected} ${[...pane.querySelectorAll('[data-row]')].map((r) => r.textContent).join(' | ')} :: ${minus.isConnected} ${two.isConnected}`,
+  );
   key(pane, ' ');
   await until(() => sh(dir, 'diff', '--cached').includes('+let TWO'), 10000, `the staged line (${JSON.stringify(w.app.calls('app.toast'))})`);
   assert.ok(!sh(dir, 'diff', '--cached').includes('FOUR'));
@@ -91,7 +100,8 @@ test('checkboxes stage and unstage files; discarding asks, then the file goes ba
   assert.match(confirm.message, /Trash/);
   // The menu had the rest too.
   const labels = w.app.last('ui.menu').items.map((i: { label: string }) => i.label);
-  for (const l of ['Stage', 'File History', 'Blame', 'Copy Path', 'Open in Editor', 'Reveal in Explorer', 'Open Terminal Here']) assert.ok(labels.includes(l), l);
+  for (const l of ['Stage', 'File History', 'Blame', 'Copy Path', 'Open in Editor', 'Reveal in Explorer', 'Open Terminal Here'])
+    assert.ok(labels.includes(l), l);
 });
 
 test('the commit box commits the staged files with ⌘↵, then the commit can be undone', async (t) => {
@@ -137,7 +147,11 @@ test('the keyboard: ↓ moves through the files, Space stages them, ⌘F (in any
   list.focus();
   key(list, 'ArrowDown');
   key(list, 'ArrowDown');
-  await until(() => w.root.querySelector('[data-diff-pane="b.txt"]'), 10000, () => `b.txt picked: ${w.root.textContent}`);
+  await until(
+    () => w.root.querySelector('[data-diff-pane="b.txt"]'),
+    10000,
+    () => `b.txt picked: ${w.root.textContent}`,
+  );
   key(list, ' ');
   await until(() => sh(dir, 'diff', '--cached', '--name-only').trim() === 'b.txt', 10000, 'b staged');
   // ⌘F with ЙЦУКЕН: the key marked F types а.
@@ -208,7 +222,11 @@ test('nothing checked: the commit box says so, commits nothing, and checks every
   write(dir, { 'a.txt': 'a2\n', 'n.txt': 'n\n' });
   const w = await window(t, dir);
   click(await until(() => w.root.querySelector<HTMLElement>('[role="checkbox"][aria-label="Uncheck everything"]'), 10000, 'the list’s checkbox'));
-  await until(() => w.root.textContent!.includes('No file is checked') && state(w.root, 'a.txt') === 'false' && state(w.root, 'n.txt') === 'false', 10000, 'nothing checked');
+  await until(
+    () => w.root.textContent!.includes('No file is checked') && state(w.root, 'a.txt') === 'false' && state(w.root, 'n.txt') === 'false',
+    10000,
+    'nothing checked',
+  );
   type(summaryOf(w.root)!, 'Nothing');
   await wait(200);
   assert.ok(button(w.root, /Commit to main/)!.disabled);
@@ -224,10 +242,14 @@ test('some of a file’s lines checked: a hunk or a line left out stays out of t
   write(dir, { 'a.txt': upper([2, 18]) });
   const w = await window(t, dir);
   click(await until(() => fileRow(w.root, 'changes', 'a.txt'), 10000, 'the row'));
-  const pane = await until(() => {
-    const p = w.root.querySelector<HTMLElement>('[data-diff="a.txt"]');
-    return p && p.textContent!.includes('LINE 2') && p.querySelector('button[aria-label="Leave this hunk out"]') && p;
-  }, 10000, 'the diff');
+  const pane = await until(
+    () => {
+      const p = w.root.querySelector<HTMLElement>('[data-diff="a.txt"]');
+      return p && p.textContent!.includes('LINE 2') && p.querySelector('button[aria-label="Leave this hunk out"]') && p;
+    },
+    10000,
+    'the diff',
+  );
   // The first hunk out: the file is in part.
   click(pane.querySelector('button[aria-label="Leave this hunk out"]')!);
   await until(() => state(w.root, 'a.txt') === 'mixed', 10000, 'a.txt in part');
@@ -261,10 +283,14 @@ test('a diff’s code can be selected and copied, a line per row, without the li
   write(dir, { 'a.txt': 'one\nlet TWO = 2;\nthree\n' });
   const w = await window(t, dir, byHand);
   click(await until(() => fileRow(w.root, 'unstaged', 'a.txt')));
-  const pane = await until(() => {
-    const p = w.root.querySelector<HTMLElement>('[data-diff="a.txt"]');
-    return p && p.textContent!.includes('TWO') && p;
-  }, 10000, 'the diff');
+  const pane = await until(
+    () => {
+      const p = w.root.querySelector<HTMLElement>('[data-diff="a.txt"]');
+      return p && p.textContent!.includes('TWO') && p;
+    },
+    10000,
+    'the diff',
+  );
   const cells = [...pane.querySelectorAll<HTMLElement>('[data-code]')];
   const two = cells.findIndex((c) => c.textContent === 'let TWO = 2;');
   assert.ok(two > 0);

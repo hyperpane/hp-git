@@ -147,7 +147,24 @@ test('the graph: lanes for branches, a merge joining them, paged in without redr
 });
 
 test('conflicts parsed from their markers (with a base), and merged as chosen', () => {
-  const lines = ['top', '<<<<<<< HEAD', 'ours 1', 'ours 2', '||||||| base', 'base', '=======', 'theirs', '>>>>>>> feature', 'middle', '<<<<<<< HEAD', 'a', '=======', 'b', '>>>>>>> feature', 'end'];
+  const lines = [
+    'top',
+    '<<<<<<< HEAD',
+    'ours 1',
+    'ours 2',
+    '||||||| base',
+    'base',
+    '=======',
+    'theirs',
+    '>>>>>>> feature',
+    'middle',
+    '<<<<<<< HEAD',
+    'a',
+    '=======',
+    'b',
+    '>>>>>>> feature',
+    'end',
+  ];
   const blocks = parseConflicts(lines);
   assert.deepEqual(
     blocks.map((b) => b.t),
@@ -159,12 +176,31 @@ test('conflicts parsed from their markers (with a base), and merged as chosen', 
   assert.deepEqual(c.base, ['base']);
   assert.deepEqual(c.theirs, ['theirs']);
   assert.equal(c.theirsLabel, 'feature');
-  assert.equal(merged(blocks, new Map([[1, 'theirs'], [3, 'both']]), '\n'), 'top\ntheirs\nmiddle\na\nb\nend');
-  assert.equal(merged(blocks, new Map([[3, 'bothTheirsFirst']]), '\n').split('\n').slice(-3).join('|'), 'b|a|end');
+  assert.equal(
+    merged(
+      blocks,
+      new Map([
+        [1, 'theirs'],
+        [3, 'both'],
+      ]),
+      '\n',
+    ),
+    'top\ntheirs\nmiddle\na\nb\nend',
+  );
+  assert.equal(
+    merged(blocks, new Map([[3, 'bothTheirsFirst']]), '\n')
+      .split('\n')
+      .slice(-3)
+      .join('|'),
+    'b|a|end',
+  );
   // An unchosen conflict keeps its markers.
   assert.match(merged(blocks, new Map(), '\n'), /<<<<<<< HEAD\nours 1/);
   // A line that only looks like a marker isn't a conflict.
-  assert.deepEqual(parseConflicts(['<<<<<<< not closed', 'x']).map((b) => b.t), ['text']);
+  assert.deepEqual(
+    parseConflicts(['<<<<<<< not closed', 'x']).map((b) => b.t),
+    ['text'],
+  );
 });
 
 test('names and paths', () => {
@@ -180,16 +216,38 @@ test('names and paths', () => {
   assert.equal(relativeTo('/r/app', '/r/apps/a.ts'), null);
 });
 
-const file = (path: string, o: Partial<FileStatus> = {}): FileStatus => ({ path, staged: null, worktree: null, untracked: false, conflict: null, mtime: 1, ...o });
+const file = (path: string, o: Partial<FileStatus> = {}): FileStatus => ({
+  path,
+  staged: null,
+  worktree: null,
+  untracked: false,
+  conflict: null,
+  mtime: 1,
+  ...o,
+});
 
 test('every change is checked for the next commit until it’s left out: files whole, or some of their lines', () => {
-  const files = [file('a.txt', { worktree: 'M' }), file('new.txt', { untracked: true }), file('staged.txt', { staged: 'A' }), file('both.txt', { conflict: 'bothModified' })];
+  const files = [
+    file('a.txt', { worktree: 'M' }),
+    file('new.txt', { untracked: true }),
+    file('staged.txt', { staged: 'A' }),
+    file('both.txt', { conflict: 'bothModified' }),
+  ];
   // Nothing chosen: everything's in (a file staged in a terminal too); a conflict isn't to be chosen.
-  assert.deepEqual(files.map((f) => stateOf({}, f.path)), [true, true, true, true]);
-  assert.deepEqual(checkedFiles(files, {}).map((f) => f.path), ['a.txt', 'new.txt', 'staged.txt']);
+  assert.deepEqual(
+    files.map((f) => stateOf({}, f.path)),
+    [true, true, true, true],
+  );
+  assert.deepEqual(
+    checkedFiles(files, {}).map((f) => f.path),
+    ['a.txt', 'new.txt', 'staged.txt'],
+  );
   let c = withFiles({}, ['a.txt', 'new.txt'], false);
   assert.deepEqual(c, { 'a.txt': 'out', 'new.txt': 'out' });
-  assert.deepEqual(checkedFiles(files, c).map((f) => f.path), ['staged.txt']);
+  assert.deepEqual(
+    checkedFiles(files, c).map((f) => f.path),
+    ['staged.txt'],
+  );
   c = withFiles(c, ['new.txt'], true);
   assert.deepEqual(c, { 'a.txt': 'out' });
   // Lines: named by what they are, so they stay out as the lines around them move.
@@ -198,12 +256,16 @@ test('every change is checked for the next commit until it’s left out: files w
   assert.deepEqual(c, { 'src/a.ts': { out: ['+0:let x = 2;'] } });
   assert.equal(stateOf(c, 'src/a.ts'), 'mixed');
   assert.deepEqual([...includedLines(sample, c['src/a.ts'])], ['0:1', '0:3', '1:0']);
-  const moved = diff([{ ...sample.hunks[0], oldStart: 40, newStart: 41, lines: sample.hunks[0].lines.map((l) => ({ ...l, old: l.old && l.old + 30, new: l.new && l.new + 31 })) }]);
+  const moved = diff([
+    { ...sample.hunks[0], oldStart: 40, newStart: 41, lines: sample.hunks[0].lines.map((l) => ({ ...l, old: l.old && l.old + 30, new: l.new && l.new + 31 })) },
+  ]);
   assert.deepEqual([...includedLines(moved, c['src/a.ts'])], ['0:1', '0:3']);
   // Every line out is the file out; every line back in, no choice at all.
   assert.equal(withLines({}, 'src/a.ts', sample, ['0:1', '0:2', '0:3', '1:0'], false)['src/a.ts'], 'out');
   assert.deepEqual(withLines(c, 'src/a.ts', sample, ['0:2'], true), {});
-  assert.deepEqual(withLines({ 'src/a.ts': 'out' }, 'src/a.ts', sample, ['1:0'], true), { 'src/a.ts': { out: ['-0:let x = 1;', '+0:let x = 2;', '+0:let y = 3;'] } });
+  assert.deepEqual(withLines({ 'src/a.ts': 'out' }, 'src/a.ts', sample, ['1:0'], true), {
+    'src/a.ts': { out: ['-0:let x = 1;', '+0:let x = 2;', '+0:let y = 3;'] },
+  });
   // A file gone from the changes loses its choice (not from a cut list); after a commit, what's left of a file in part is out.
   assert.deepEqual(pruned({ 'a.txt': 'out', 'gone.txt': 'out' }, files), { 'a.txt': 'out' });
   assert.deepEqual(pruned({ 'gone.txt': 'out' }, files, true), { 'gone.txt': 'out' });
@@ -211,10 +273,19 @@ test('every change is checked for the next commit until it’s left out: files w
 });
 
 test('Commit sends the files checked whole, a renamed one’s old path too, and a patch of a file’s lines checked', async () => {
-  const files = [file('a.txt', { worktree: 'M' }), file('out.txt', { worktree: 'M' }), file('b.txt', { staged: 'R', from: 'old-b.txt' }), file('src/a.ts', { worktree: 'M' }), file('c.txt', { conflict: 'bothModified' })];
+  const files = [
+    file('a.txt', { worktree: 'M' }),
+    file('out.txt', { worktree: 'M' }),
+    file('b.txt', { staged: 'R', from: 'old-b.txt' }),
+    file('src/a.ts', { worktree: 'M' }),
+    file('c.txt', { conflict: 'bothModified' }),
+  ];
   const choices = { 'out.txt': 'out' as const, 'src/a.ts': { out: ['+0:let y = 3;', '-0:gone'] } };
   const asked: string[] = [];
-  const sent = await selection(files, choices, async (f) => (asked.push(f.path), sample));
+  const sent = await selection(files, choices, async (f) => {
+    asked.push(f.path);
+    return sample;
+  });
   assert.deepEqual(asked, ['src/a.ts']);
   assert.deepEqual(sent.paths, ['a.txt', 'b.txt', 'old-b.txt']);
   assert.equal(sent.patches.length, 1);

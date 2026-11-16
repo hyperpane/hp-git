@@ -63,7 +63,10 @@ export type Choice = 'ours' | 'theirs' | 'both' | 'bothTheirsFirst';
 export function merged(blocks: Block[], choices: Map<number, Choice>, eol: string): string {
   const out: string[] = [];
   blocks.forEach((b, k) => {
-    if (b.t === 'text') return out.push(...b.lines);
+    if (b.t === 'text') {
+      out.push(...b.lines);
+      return;
+    }
     const c = choices.get(k);
     if (c === 'ours') out.push(...b.ours);
     else if (c === 'theirs') out.push(...b.theirs);

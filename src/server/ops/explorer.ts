@@ -18,7 +18,7 @@ import { type Repo, type Repos, whole } from '../lib/repo.ts';
 import { stage } from './stage.ts';
 
 /** The most paths one call looks at (Explorer sends at most this many). */
-export const PATHS_MAX = 2000;
+const PATHS_MAX = 2000;
 /** How long a repository's status is kept, and a folder outside any. */
 const STATUS_KEPT = 1000;
 const OUTSIDE_KEPT = 5000;
@@ -117,7 +117,10 @@ export function explorerOps({ repos, locked, changed }: Deps) {
         const files = await filesOf(g.repo);
         const changed = decorate(files, g.items);
         const rest = g.items.filter((i) => !changed[i.path]);
-        const ignored = await ignoredOf(g.repo, rest.map((i) => i.rel));
+        const ignored = await ignoredOf(
+          g.repo,
+          rest.map((i) => i.rel),
+        );
         Object.assign(out, decorate([], rest, ignored), changed);
       } catch {
         // A repository git can't read now: its rows stay plain.
@@ -157,7 +160,13 @@ export function explorerOps({ repos, locked, changed }: Deps) {
     if (!count) return { message: asked === 1 ? 'That isn’t in a Git repository.' : 'Those aren’t in a Git repository.', error: true };
     for (const g of groups) {
       try {
-        await locked(g.repo, () => stage(g.repo, g.items.map((i) => i.rel), false));
+        await locked(g.repo, () =>
+          stage(
+            g.repo,
+            g.items.map((i) => i.rel),
+            false,
+          ),
+        );
       } finally {
         statuses.delete(g.repo.root);
         await changed(g.repo, project).catch(() => {});

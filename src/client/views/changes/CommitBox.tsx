@@ -127,7 +127,13 @@ export function CommitBox() {
         signoff: signoff || undefined,
         coAuthors: draft.coAuthors.length ? draft.coAuthors : undefined,
         all: all || undefined,
-        only: including ? await selection(status.files, choices, (f) => api.diff({ path: f.path, ...(f.untracked ? { untracked: true } : { head: true }), full: true }).promise) : undefined,
+        only: including
+          ? await selection(
+              status.files,
+              choices,
+              (f) => api.diff({ path: f.path, ...(f.untracked ? { untracked: true } : { head: true }), full: true }).promise,
+            )
+          : undefined,
       }),
     );
     setBusy(false);
@@ -162,7 +168,13 @@ export function CommitBox() {
   if (op?.kind === 'rebase' || op?.kind === 'am' || op?.kind === 'bisect') return null;
 
   const branch = status.branch ?? (status.head ? `${shortSha(status.head)} (detached)` : 'a new branch');
-  const label = draft.amend ? `Amend ${amending ? shortSha(amending.sha) : 'last commit'}` : merging ? 'Commit Merge' : staged ? `Commit ${plural(staged, 'file')} to ${branch}` : `Commit to ${branch}`;
+  const label = draft.amend
+    ? `Amend ${amending ? shortSha(amending.sha) : 'last commit'}`
+    : merging
+      ? 'Commit Merge'
+      : staged
+        ? `Commit ${plural(staged, 'file')} to ${branch}`
+        : `Commit to ${branch}`;
 
   return (
     <div className="flex flex-none flex-col gap-1.5 border-t border-[var(--node-border)] p-2" onKeyDown={keyDown}>
@@ -183,9 +195,16 @@ export function CommitBox() {
         aria-label="Description"
         className="rounded-control git-scroll w-full resize-none border border-[var(--node-border)] bg-transparent px-2 py-1.5 text-xs leading-relaxed text-[var(--node-fg)] outline-none transition-colors duration-100 placeholder:text-[var(--node-muted)] hover:border-[color-mix(in_srgb,var(--node-fg)_24%,transparent)] focus:border-[var(--node-accent)]"
       />
-      {draft.coAuthors.length > 0 && <CoAuthorList coAuthors={draft.coAuthors} onRemove={(c) => setDraft({ coAuthors: draft.coAuthors.filter((x) => x !== c) })} />}
+      {draft.coAuthors.length > 0 && (
+        <CoAuthorList coAuthors={draft.coAuthors} onRemove={(c) => setDraft({ coAuthors: draft.coAuthors.filter((x) => x !== c) })} />
+      )}
       <div className="flex items-center gap-1">
-        <Chip on={draft.amend} disabled={!status.head || merging} onClick={() => setDraft({ amend: !draft.amend, ...(draft.amend ? { summary: '', description: '' } : {}) })} title="Change the last commit instead of making a new one">
+        <Chip
+          on={draft.amend}
+          disabled={!status.head || merging}
+          onClick={() => setDraft({ amend: !draft.amend, ...(draft.amend ? { summary: '', description: '' } : {}) })}
+          title="Change the last commit instead of making a new one"
+        >
           Amend
         </Chip>
         <Chip on={signoff} onClick={() => setDraft({ signoff: !signoff })} title="Add a Signed-off-by line">
@@ -196,7 +215,10 @@ export function CommitBox() {
           type="button"
           title="Add a co-author"
           aria-label="Add a co-author"
-          className={cn('rounded-control flex h-6 items-center gap-1 px-1.5 text-2xs text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]', styles.focusRing)}
+          className={cn(
+            'rounded-control flex h-6 items-center gap-1 px-1.5 text-2xs text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
+            styles.focusRing,
+          )}
           onClick={pickCoAuthor}
         >
           <UserPlus className="size-3.5" />
@@ -228,13 +250,7 @@ export function CommitBox() {
           , or commit them all ({keys('⌘↵')}).
         </div>
       )}
-      <Button
-        size="sm"
-        className="w-full min-w-0"
-        disabled={!ready}
-        onClick={() => commit()}
-        title={`${label} (${keys('⌘↵')})`}
-      >
+      <Button size="sm" className="w-full min-w-0" disabled={!ready} onClick={() => commit()} title={`${label} (${keys('⌘↵')})`}>
         <span className="truncate">{busy ? 'Committing' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label}</span>
       </Button>
     </div>

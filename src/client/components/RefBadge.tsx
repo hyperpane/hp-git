@@ -24,7 +24,11 @@ export function RefBadge({ refName, className }: { refName: Ref; className?: str
         current && 'ring-1 ring-inset',
         className,
       )}
-      style={{ color, background: `color-mix(in srgb, ${color} 16%, transparent)`, ['--tw-ring-color' as string]: `color-mix(in srgb, ${color} 55%, transparent)` }}
+      style={{
+        color,
+        background: `color-mix(in srgb, ${color} 16%, transparent)`,
+        ['--tw-ring-color' as string]: `color-mix(in srgb, ${color} 55%, transparent)`,
+      }}
     >
       <span className="truncate">{refName.kind === 'tag' ? `◆ ${refName.name}` : refName.name}</span>
     </span>

@@ -12,7 +12,6 @@ import type { Choices } from '../lib/include.ts';
 import type { GitApi } from './api.ts';
 
 export type Tab = 'changes' | 'history' | 'branches' | 'stashes' | 'tags';
-export const TABS: Tab[] = ['changes', 'history', 'branches', 'stashes', 'tags'];
 
 /** A view opened over the tabs, with a way back. */
 export type View =

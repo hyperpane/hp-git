@@ -81,11 +81,23 @@ export async function discard(repo: Repo, paths: unknown, trash: Trash) {
   }
   for (const name of restore) {
     const file = repo.file(name);
-    if (await lstat(file).then((s) => s.isFile(), () => false)) await copyToTrash(repo, file, trash);
+    if (
+      await lstat(file).then(
+        (s) => s.isFile(),
+        () => false,
+      )
+    )
+      await copyToTrash(repo, file, trash);
   }
   for (const name of gone) {
     const file = repo.file(name);
-    if (await lstat(file).then((s) => !s.isDirectory(), () => false)) await trash(file);
+    if (
+      await lstat(file).then(
+        (s) => !s.isDirectory(),
+        () => false,
+      )
+    )
+      await trash(file);
   }
   if (fromIndex.length) {
     await repo.run(['rm', '-q', '--cached', '-r', '-f', '--ignore-unmatch', '--pathspec-from-file=-', '--pathspec-file-nul'], { input: nulList(fromIndex) });

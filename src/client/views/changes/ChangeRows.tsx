@@ -85,7 +85,9 @@ export function DirRow({
         onDoubleClick={() => setClosed((c) => (open ? new Set([...c, `${it.side}:${it.path}`]) : new Set([...c].filter((x) => x !== `${it.side}:${it.path}`))))}
         onContextMenu={(e) => menu(e, it)}
       >
-        {it.side !== 'conflict' && <Checkbox {...inRow} checked={checked} label={folderLabel(it.side, checked)} onCheckedChange={() => toggle(it.side, it.files)} />}
+        {it.side !== 'conflict' && (
+          <Checkbox {...inRow} checked={checked} label={folderLabel(it.side, checked)} onCheckedChange={() => toggle(it.side, it.files)} />
+        )}
         <button
           type="button"
           tabIndex={-1}
@@ -128,10 +130,15 @@ export function FileRow({
       <div className={rowClass(isPicked)} style={{ paddingLeft: 6 + it.depth * 12 }} onClick={(e) => click(it, e)} onContextMenu={(e) => menu(e, it)}>
         <Checkbox {...inRow} checked={checked} label={fileLabel(it.side, checked, f.path)} onCheckedChange={() => toggle(it.side, [f])} />
         {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
-        {tree ? <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span> : <PathLabel path={f.path} from={it.side === 'unstaged' || it.side === 'untracked' ? undefined : f.from} />}
+        {tree ? (
+          <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span>
+        ) : (
+          <PathLabel path={f.path} from={it.side === 'unstaged' || it.side === 'untracked' ? undefined : f.from} />
+        )}
         {(f.additions || f.deletions) && it.side !== 'conflict' ? (
           <span className="flex-none text-[10px] tabular-nums opacity-80">
-            {!!f.additions && <span className="text-[var(--ansi-2)]">+{f.additions}</span>} {!!f.deletions && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
+            {!!f.additions && <span className="text-[var(--ansi-2)]">+{f.additions}</span>}{' '}
+            {!!f.deletions && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
           </span>
         ) : null}
         <StatusLetter letter={letterFor(it.side, f)} title={it.side === 'conflict' ? `Conflict: ${f.conflict}` : undefined} />

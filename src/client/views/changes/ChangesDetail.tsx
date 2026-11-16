@@ -31,7 +31,7 @@ export function ChangesDetail({ picked }: { picked: Pick[] }) {
       const changes = filesOf(chosen.filter(([s]) => s === 'changes').map(([, p]) => p));
       return (
         <Blank
-          title={plural(picked.length, 'file') + ' picked'}
+          title={`${plural(picked.length, 'file')} picked`}
           actions={
             changes.length > 0 && (
               <>
@@ -47,7 +47,7 @@ export function ChangesDetail({ picked }: { picked: Pick[] }) {
     }
     return (
       <Blank
-        title={plural(picked.length, 'file') + ' picked'}
+        title={`${plural(picked.length, 'file')} picked`}
         actions={
           <>
             {unstaged.length > 0 && <NodeButton onClick={() => stage(unstaged)}>Stage {unstaged.length}</NodeButton>}

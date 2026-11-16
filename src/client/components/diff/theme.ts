@@ -11,5 +11,4 @@ export const REMOVED = 'color-mix(in srgb, var(--ansi-1) 13%, transparent)';
 export const REMOVED_GUTTER = 'color-mix(in srgb, var(--ansi-1) 22%, transparent)';
 export const SELECTED = 'color-mix(in srgb, var(--node-accent) 30%, transparent)';
 export const HUNK = 'color-mix(in srgb, var(--node-accent) 8%, transparent)';
-export const EMPTY_SIDE =
-  'repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--node-fg) 4%, transparent) 4px 5px)';
+export const EMPTY_SIDE = 'repeating-linear-gradient(135deg, transparent 0 4px, color-mix(in srgb, var(--node-fg) 4%, transparent) 4px 5px)';

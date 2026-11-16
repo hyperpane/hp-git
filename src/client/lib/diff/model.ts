@@ -98,14 +98,19 @@ export function model(diff: Diff, expansions: Map<number, Expansion> = new Map()
     const e = expansions.get(gap.h);
     const above = e?.above ?? [];
     const below = e?.below ?? [];
-    above.forEach((text, k) => context(gap.from + k, text, gap.shift));
+    above.forEach((text, k) => {
+      context(gap.from + k, text, gap.shift);
+    });
     const hidden = gap.to === null ? null : gap.to - gap.from - above.length - below.length;
     if ((hidden === null && !e?.done) || (hidden !== null && hidden > 0)) {
       const row = { t: 'gap' as const, gap, hidden };
       unified.push(row);
       split.push(row);
     }
-    if (gap.to !== null) below.forEach((text, k) => context(gap.to! - below.length + k, text, gap.shift));
+    if (gap.to !== null)
+      below.forEach((text, k) => {
+        context(gap.to! - below.length + k, text, gap.shift);
+      });
   };
 
   diff.hunks.forEach((hunk, h) => {
@@ -178,7 +183,9 @@ export function model(diff: Diff, expansions: Map<number, Expansion> = new Map()
 /** The changed lines of a hunk. */
 export function changedLines(diff: Diff, h: number): LineKey[] {
   const out: LineKey[] = [];
-  diff.hunks[h]?.lines.forEach((l, i) => l.kind !== ' ' && out.push(keyOf(h, i)));
+  diff.hunks[h]?.lines.forEach((l, i) => {
+    if (l.kind !== ' ') out.push(keyOf(h, i));
+  });
   return out;
 }
 

@@ -19,7 +19,12 @@ export function LastCommit({ last, onUndo, onDismiss }: { last: { sha: string; s
         <Undo2 />
         Undo
       </NodeButton>
-      <button type="button" aria-label="Dismiss" className="rounded-chip flex size-5 items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)]" onClick={onDismiss}>
+      <button
+        type="button"
+        aria-label="Dismiss"
+        className="rounded-chip flex size-5 items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)]"
+        onClick={onDismiss}
+      >
         <X className="size-3" />
       </button>
     </div>
@@ -30,7 +35,10 @@ export function IdentityButton({ identity, onClick }: { identity: Identity; onCl
   return (
     <button
       type="button"
-      className={cn('rounded-chip -mx-0.5 flex min-w-0 items-center gap-1.5 px-0.5 text-2xs text-[var(--node-muted)] hover:text-[var(--node-fg)]', styles.focusRing)}
+      className={cn(
+        'rounded-chip -mx-0.5 flex min-w-0 items-center gap-1.5 px-0.5 text-2xs text-[var(--node-muted)] hover:text-[var(--node-fg)]',
+        styles.focusRing,
+      )}
       title="Who commits here: click to change"
       onClick={onClick}
     >
@@ -46,7 +54,17 @@ export function IdentityButton({ identity, onClick }: { identity: Identity; onCl
   );
 }
 
-export function SummaryField({ inputRef, summary, placeholder, onChange }: { inputRef: RefObject<HTMLInputElement | null>; summary: string; placeholder: string; onChange(summary: string): void }) {
+export function SummaryField({
+  inputRef,
+  summary,
+  placeholder,
+  onChange,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+  summary: string;
+  placeholder: string;
+  onChange(summary: string): void;
+}) {
   const remaining = 72 - summary.length;
   return (
     <div className="relative">
@@ -75,10 +93,19 @@ export function CoAuthorList({ coAuthors, onRemove }: { coAuthors: { name: strin
   return (
     <div className="flex flex-wrap gap-1">
       {coAuthors.map((c) => (
-        <span key={c.email} className="rounded-chip flex h-5 items-center gap-1 bg-[var(--node-hover)] ps-0.5 pe-0.5 text-2xs" title={`Co-authored-by: ${c.name} <${c.email}>`}>
+        <span
+          key={c.email}
+          className="rounded-chip flex h-5 items-center gap-1 bg-[var(--node-hover)] ps-0.5 pe-0.5 text-2xs"
+          title={`Co-authored-by: ${c.name} <${c.email}>`}
+        >
           <Avatar name={c.name} email={c.email} size={14} />
           <span className="max-w-32 truncate">{c.name}</span>
-          <button type="button" aria-label={`Remove ${c.name}`} className="rounded-chip flex size-4 items-center justify-center text-[var(--node-muted)] hover:text-[var(--node-fg)]" onClick={() => onRemove(c)}>
+          <button
+            type="button"
+            aria-label={`Remove ${c.name}`}
+            className="rounded-chip flex size-4 items-center justify-center text-[var(--node-muted)] hover:text-[var(--node-fg)]"
+            onClick={() => onRemove(c)}
+          >
             <X className="size-3" />
           </button>
         </span>
@@ -87,7 +114,19 @@ export function CoAuthorList({ coAuthors, onRemove }: { coAuthors: { name: strin
   );
 }
 
-export function Chip({ on, onClick, children, title, disabled }: { on: boolean; onClick(): void; children: React.ReactNode; title: string; disabled?: boolean }) {
+export function Chip({
+  on,
+  onClick,
+  children,
+  title,
+  disabled,
+}: {
+  on: boolean;
+  onClick(): void;
+  children: React.ReactNode;
+  title: string;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"

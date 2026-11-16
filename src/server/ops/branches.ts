@@ -11,7 +11,16 @@ import { splitRemote } from '../lib/remotes.ts';
 import type { Repo } from '../lib/repo.ts';
 
 export async function branches(repo: Repo, signal?: AbortSignal): Promise<Branches> {
-  const format = ['%(refname)', '%(objectname)', '%(upstream:short)', '%(upstream:track,nobracket)', '%(subject)', '%(committerdate:unix)', '%(authorname)', '%(HEAD)'].join('%1f');
+  const format = [
+    '%(refname)',
+    '%(objectname)',
+    '%(upstream:short)',
+    '%(upstream:track,nobracket)',
+    '%(subject)',
+    '%(committerdate:unix)',
+    '%(authorname)',
+    '%(HEAD)',
+  ].join('%1f');
   const hasHead = await repo.hasHead();
   const [out, merged, reflog, current] = await Promise.all([
     repo.text(['for-each-ref', `--format=${format}`, 'refs/heads', 'refs/remotes'], { signal }),
@@ -46,7 +55,10 @@ export async function branches(repo: Repo, signal?: AbortSignal): Promise<Branch
     }
   }
   // Remote names may have slashes: the longest known remote that prefixes it.
-  const remotes = (await repo.text(['remote'])).split('\n').filter(Boolean).sort((a, b) => b.length - a.length);
+  const remotes = (await repo.text(['remote']))
+    .split('\n')
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
   for (const r of remote) {
     const known = remotes.find((n) => r.name.startsWith(`${n}/`));
     if (known) {
@@ -106,7 +118,10 @@ export async function checkout(repo: Repo, r: { ref: unknown; create?: boolean; 
   await repo.run(['switch', '--detach', target]);
 }
 
-export async function branchAction(repo: Repo, r: { action: unknown; name?: unknown; from?: unknown; checkout?: boolean; to?: unknown; force?: boolean; upstream?: unknown }) {
+export async function branchAction(
+  repo: Repo,
+  r: { action: unknown; name?: unknown; from?: unknown; checkout?: boolean; to?: unknown; force?: boolean; upstream?: unknown },
+) {
   switch (r.action) {
     case 'create': {
       const name = await checkBranchName(repo, r.name);

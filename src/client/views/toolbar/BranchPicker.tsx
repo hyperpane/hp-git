@@ -40,7 +40,11 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
     const rest = branches.local.filter((b) => !b.current && !recent.includes(b.name) && match(b.name));
     if (rest.length) out.push({ t: 'head', label: 'Local' }, ...rest.map((b) => local(b.name)));
     const remote = branches.remote.filter((b) => match(b.name) && !locals.has(b.branch));
-    if (remote.length) out.push({ t: 'head', label: 'Remote' }, ...remote.slice(0, 200).map((b) => ({ t: 'branch' as const, name: b.name, remote: true, current: false, sub: `${ago(b.date)} · ${b.subject}` })));
+    if (remote.length)
+      out.push(
+        { t: 'head', label: 'Remote' },
+        ...remote.slice(0, 200).map((b) => ({ t: 'branch' as const, name: b.name, remote: true, current: false, sub: `${ago(b.date)} · ${b.subject}` })),
+      );
     return out;
   }, [branches, q]);
   const choices = rows.map((r, i) => (r.t === 'branch' ? i : -1)).filter((i) => i >= 0);
@@ -80,7 +84,10 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
         </div>
         <button
           type="button"
-          className={cn('rounded-control flex h-7 flex-none items-center gap-1 border border-[var(--node-border)] px-2 text-xs hover:bg-[var(--node-hover)]', styles.focusRing)}
+          className={cn(
+            'rounded-control flex h-7 flex-none items-center gap-1 border border-[var(--node-border)] px-2 text-xs hover:bg-[var(--node-hover)]',
+            styles.focusRing,
+          )}
           onClick={create}
           title="New branch from the current one"
         >
@@ -104,7 +111,10 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
                 key={`${r.remote}:${r.name}`}
                 type="button"
                 data-pick={i}
-                className={cn('rounded-chip flex h-9 w-full items-center gap-2 px-2 text-left', i === sel ? 'bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]')}
+                className={cn(
+                  'rounded-chip flex h-9 w-full items-center gap-2 px-2 text-left',
+                  i === sel ? 'bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]',
+                )}
                 onMouseEnter={() => setAt(choices.indexOf(i))}
                 onClick={() => choose(r)}
               >

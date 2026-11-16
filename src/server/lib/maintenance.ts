@@ -20,7 +20,11 @@ export async function writeCommitGraph(repo: Repo): Promise<boolean> {
   if (written.has(repo.commonDir)) return false;
   written.add(repo.commonDir);
   const info = path.join(repo.commonDir, 'objects', 'info');
-  const has = async (name: string) => stat(path.join(info, name)).then(() => true, () => false);
+  const has = async (name: string) =>
+    stat(path.join(info, name)).then(
+      () => true,
+      () => false,
+    );
   if ((await has('commit-graph')) || (await has('commit-graphs'))) return false;
   if ((await repo.config('core.commitGraph')) === 'false') return false;
   if (!(await repo.hasHead())) return false;

@@ -18,7 +18,8 @@ export function syncChoice(repo: Repo): { label: string; sub: string; icon: Luci
       icon: CloudUpload,
       run: () => addRemote(repo),
     };
-  if (s.unborn) return { label: `Fetch ${s.remote}`, sub: 'Commit first to publish', icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
+  if (s.unborn)
+    return { label: `Fetch ${s.remote}`, sub: 'Commit first to publish', icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
   if (s.detached) return { label: `Fetch ${s.remote}`, sub: fetched, icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
   if (!s.upstream || s.upstreamGone)
     return { label: 'Publish branch', sub: `Push ${s.branch} to ${s.remote}`, icon: CloudUpload, run: () => repo.startSync('publish', {}, 'Publishing') };
@@ -33,7 +34,7 @@ export function syncChoice(repo: Repo): { label: string; sub: string; icon: Luci
   return { label: `Fetch ${s.remote}`, sub: fetched, icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
 }
 
-export async function addRemote(repo: Repo) {
+async function addRemote(repo: Repo) {
   const result = await repo.host.ui.dialog<{ name: string; url: string }>('remote', {
     title: 'Add a remote',
     data: { name: repo.status.remotes.includes('origin') ? '' : 'origin' },
@@ -50,7 +51,11 @@ export function syncMenu(repo: Repo): (MenuEntry | null)[] {
     { label: `Fetch ${s.remote ?? ''}`.trim(), disabled: !s.remote || busy, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) },
     { label: 'Fetch Every Remote', disabled: s.remotes.length < 2 || busy, run: () => repo.startSync('fetch', { all: true }, 'Fetching every remote') },
     { label: 'Pull', disabled: !s.upstream || busy, run: async () => repo.outcome(await repo.startSync('pull', {}, `Pulling ${s.remote}`), 'Pulling') },
-    { label: s.upstream ? 'Push' : 'Publish Branch', disabled: !s.remote || !s.branch || busy, run: () => repo.startSync(s.upstream ? 'push' : 'publish', {}, s.upstream ? 'Pushing' : 'Publishing') },
+    {
+      label: s.upstream ? 'Push' : 'Publish Branch',
+      disabled: !s.remote || !s.branch || busy,
+      run: () => repo.startSync(s.upstream ? 'push' : 'publish', {}, s.upstream ? 'Pushing' : 'Publishing'),
+    },
     {
       label: 'Force Push (with Lease)',
       danger: true,
@@ -70,7 +75,10 @@ export function syncMenu(repo: Repo): (MenuEntry | null)[] {
       label: `Remove Remote ${r}…`,
       danger: true,
       run: async () => {
-        const ok = await repo.confirm(`Remove the remote ${r}?`, 'Its remote branches go from this repository. Nothing changes on the remote itself.', { confirm: 'Remove', destructive: true });
+        const ok = await repo.confirm(`Remove the remote ${r}?`, 'Its remote branches go from this repository. Nothing changes on the remote itself.', {
+          confirm: 'Remove',
+          destructive: true,
+        });
         if (ok) repo.run(() => repo.api.remote('remove', r), { done: `Removed ${r}` });
       },
     })),

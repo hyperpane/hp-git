@@ -19,7 +19,10 @@ export async function status(repo: Repo, o: { stats?: boolean; signal?: AbortSig
     readRemotes(repo),
     operation(repo.gitDir),
     repo.identity(),
-    stat(path.join(repo.commonDir, 'FETCH_HEAD')).then((s) => s.mtimeMs, () => null),
+    stat(path.join(repo.commonDir, 'FETCH_HEAD')).then(
+      (s) => s.mtimeMs,
+      () => null,
+    ),
   ]);
   const parsed = parseStatus(out.stdout);
   await mtimes(repo.root, parsed.files);

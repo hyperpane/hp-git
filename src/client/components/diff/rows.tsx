@@ -51,9 +51,20 @@ export function HunkRow({
           <button
             type="button"
             tabIndex={-1}
-            title={checking ? (all ? 'Leave this hunk out of the commit' : 'Commit all of this hunk') : all ? 'Unpick this hunk' : 'Pick every changed line of this hunk'}
+            title={
+              checking
+                ? all
+                  ? 'Leave this hunk out of the commit'
+                  : 'Commit all of this hunk'
+                : all
+                  ? 'Unpick this hunk'
+                  : 'Pick every changed line of this hunk'
+            }
             aria-label={checking ? (all ? 'Leave this hunk out' : 'Commit this hunk') : undefined}
-            className={cn('h-4 rounded-chip px-1 font-mono text-[10px] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]', (all || some) && 'text-[var(--node-accent)]')}
+            className={cn(
+              'h-4 rounded-chip px-1 font-mono text-[10px] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
+              (all || some) && 'text-[var(--node-accent)]',
+            )}
             onClick={onPick}
           >
             {all ? '■' : some ? '▣' : '□'}
@@ -79,17 +90,28 @@ export function HunkRow({
 }
 
 /** Unchanged lines folded above a hunk (or below the last one). */
-export function GapRow({ gap, hidden, withActions, onExpand }: { gap: Gap; hidden: number | null; withActions: boolean; onExpand?(gap: Gap, how: 'up' | 'down' | 'all'): void }) {
+export function GapRow({
+  gap,
+  hidden,
+  withActions,
+  onExpand,
+}: {
+  gap: Gap;
+  hidden: number | null;
+  withActions: boolean;
+  onExpand?(gap: Gap, how: 'up' | 'down' | 'all'): void;
+}) {
   return (
-    <div className="flex h-full items-center font-sans text-2xs text-[var(--node-muted)]" style={{ background: 'color-mix(in srgb, var(--node-fg) 3%, transparent)' }}>
+    <div
+      className="flex h-full items-center font-sans text-2xs text-[var(--node-muted)]"
+      style={{ background: 'color-mix(in srgb, var(--node-fg) 3%, transparent)' }}
+    >
       <div className="sticky left-0 flex h-full items-center gap-1 px-2">
         <Ellipsis className="size-3.5" />
         <span className="me-1">{hidden === null ? 'More of the file below' : `${plural(hidden, 'unchanged line')}`}</span>
         {withActions && onExpand && (
           <>
-            {gap.h > 0 && (
-              <GapButton title="Show 20 more lines below the hunk above" icon={ArrowDownToLine} onClick={() => onExpand(gap, 'down')} />
-            )}
+            {gap.h > 0 && <GapButton title="Show 20 more lines below the hunk above" icon={ArrowDownToLine} onClick={() => onExpand(gap, 'down')} />}
             {gap.to !== null && <GapButton title="Show 20 more lines above the hunk below" icon={ArrowUpToLine} onClick={() => onExpand(gap, 'up')} />}
             <GapButton title={hidden === null ? 'Show the rest of the file' : 'Show them all'} icon={UnfoldVertical} onClick={() => onExpand(gap, 'all')} />
           </>
@@ -140,7 +162,13 @@ export function Gutter({
         onPress(lineKey, e);
       }}
       onPointerEnter={() => lineKey && onEnter(lineKey)}
-      title={lineKey && canPick ? (checking ? `${out ? 'Commit' : 'Leave out'} this line (⇧ for a range, drag for several)` : 'Pick this line (⇧ for a range, drag for several)') : undefined}
+      title={
+        lineKey && canPick
+          ? checking
+            ? `${out ? 'Commit' : 'Leave out'} this line (⇧ for a range, drag for several)`
+            : 'Pick this line (⇧ for a range, drag for several)'
+          : undefined
+      }
       data-out={checking && lineKey ? String(!!out) : undefined}
     >
       <span className="pe-1.5 text-right text-[var(--node-muted)] tabular-nums" style={{ width }}>
@@ -151,7 +179,10 @@ export function Gutter({
           {now ?? ''}
         </span>
       )}
-      <span className="w-4 text-center" style={{ color: out ? 'var(--node-muted)' : kind === '+' ? 'var(--ansi-2)' : kind === '-' ? 'var(--ansi-1)' : undefined }}>
+      <span
+        className="w-4 text-center"
+        style={{ color: out ? 'var(--node-muted)' : kind === '+' ? 'var(--ansi-2)' : kind === '-' ? 'var(--ansi-1)' : undefined }}
+      >
         {selected ? '●' : kind === '+' || kind === '-' ? kind : ''}
       </span>
     </div>
@@ -161,13 +192,27 @@ export function Gutter({
 /** A line's code: its syntax colors and the words that changed. Its text
  * can be selected and copied (the window's text can't, but this is what
  * people want out of a diff); the gutter beside it picks lines. */
-export function CodeCell({ text, spans, words, kind, noNewline }: { text: string; spans: Span[] | undefined; words: ReturnType<Model['words']>; kind: Line['kind'] | 'ctx'; noNewline?: boolean }) {
+export function CodeCell({
+  text,
+  spans,
+  words,
+  kind,
+  noNewline,
+}: {
+  text: string;
+  spans: Span[] | undefined;
+  words: ReturnType<Model['words']>;
+  kind: Line['kind'] | 'ctx';
+  noNewline?: boolean;
+}) {
   return (
     <div className="flex-none cursor-text ps-1 pe-6 whitespace-pre select-text">
-      <span data-code>
-        {paint(text, spans, words, kind === '+' ? 'git-word-added' : 'git-word-removed')}
-      </span>
-      {noNewline && <span className="ms-2 text-[10px] text-[var(--node-muted)] italic select-none" title="No newline at end of file">⏎̸</span>}
+      <span data-code>{paint(text, spans, words, kind === '+' ? 'git-word-added' : 'git-word-removed')}</span>
+      {noNewline && (
+        <span className="ms-2 text-[10px] text-[var(--node-muted)] italic select-none" title="No newline at end of file">
+          ⏎̸
+        </span>
+      )}
     </div>
   );
 }

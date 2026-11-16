@@ -13,7 +13,7 @@ export function gitFallbacks(env: NodeJS.ProcessEnv = process.env, platform: Nod
     const w = path.win32;
     return [
       env.ProgramFiles && w.join(env.ProgramFiles, 'Git', 'cmd', 'git.exe'),
-      env['ProgramW6432'] && w.join(env['ProgramW6432'], 'Git', 'cmd', 'git.exe'),
+      env.ProgramW6432 && w.join(env.ProgramW6432, 'Git', 'cmd', 'git.exe'),
       env['ProgramFiles(x86)'] && w.join(env['ProgramFiles(x86)'], 'Git', 'cmd', 'git.exe'),
       env.LOCALAPPDATA && w.join(env.LOCALAPPDATA, 'Programs', 'Git', 'cmd', 'git.exe'),
       env.USERPROFILE && w.join(env.USERPROFILE, 'scoop', 'shims', 'git.exe'),

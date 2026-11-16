@@ -96,7 +96,12 @@ export function makeGit(options: Options = {}) {
       if (watches.poke(repo.root)) return;
       const out = await repo.exec(['rev-parse', '--abbrev-ref', 'HEAD', 'HEAD']);
       const [ref, head] = out.stdout.toString().trim().split('\n');
-      publish(repo, 'git.changed', { repo: repo.shownRoot, branch: !ref || ref === 'HEAD' ? null : ref, head: head && /^[0-9a-f]+$/.test(head) ? head : null }, project);
+      publish(
+        repo,
+        'git.changed',
+        { repo: repo.shownRoot, branch: !ref || ref === 'HEAD' ? null : ref, head: head && /^[0-9a-f]+$/.test(head) ? head : null },
+        project,
+      );
     }
 
     /** A call that changes the repository: queued, then the change told. */

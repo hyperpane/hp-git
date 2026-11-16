@@ -36,7 +36,19 @@ const CONFLICTS: Record<string, ConflictKind> = {
 /** `git status --porcelain=v2 --branch --show-stash -z`. */
 export function parseStatus(out: Buffer | string, max = FILES_MAX): Parsed {
   const text = typeof out === 'string' ? out : out.toString('utf8');
-  const s: Parsed = { branch: null, head: null, detached: false, unborn: false, upstream: null, upstreamGone: false, ahead: 0, behind: 0, stashes: 0, files: [], truncated: false };
+  const s: Parsed = {
+    branch: null,
+    head: null,
+    detached: false,
+    unborn: false,
+    upstream: null,
+    upstreamGone: false,
+    ahead: 0,
+    behind: 0,
+    stashes: 0,
+    files: [],
+    truncated: false,
+  };
   let hasAb = false;
   const fields = text.split('\0');
   const push = (f: FileStatus) => {

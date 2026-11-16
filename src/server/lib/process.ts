@@ -30,7 +30,7 @@ export interface RunOptions {
   /** More environment. */
   env?: Record<string, string | undefined>;
   /** Stdout as it comes; returning false stops git (the output is `cut`). */
-  onStdout?: (chunk: Buffer) => boolean | void;
+  onStdout?: (chunk: Buffer) => boolean | undefined;
   /** Stderr as it comes (progress). */
   onStderr?: (text: string) => void;
   /** Git's own options before the command (`-c x=y`). */

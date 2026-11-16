@@ -15,7 +15,12 @@ export function NewStash({ data }: { data: { count: number; untracked: number } 
     <Form ok="Stash" onSubmit={() => host.ui.closeDialog({ message: message.trim(), untracked, keepIndex })}>
       <Field>
         <FieldLabel>Message</FieldLabel>
-        <Input autoFocus value={message} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)} placeholder="What you were doing (optional)" />
+        <Input
+          autoFocus
+          value={message}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
+          placeholder="What you were doing (optional)"
+        />
       </Field>
       <div className="flex flex-col gap-2.5">
         <Check checked={untracked} onChange={setUntracked} hint={data.untracked ? `${data.untracked} new file${data.untracked === 1 ? '' : 's'}` : undefined}>

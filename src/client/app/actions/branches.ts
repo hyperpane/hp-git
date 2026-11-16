@@ -19,9 +19,15 @@ export async function createBranch(repo: Repo, from?: string, fromLabel?: string
     height: 230,
   });
   if (!result) return;
-  repo.run(() => (result.checkout ? repo.api.checkout(result.name, { create: true, from: result.from || undefined }) : repo.api.branch('create', { name: result.name, from: result.from || undefined })), {
-    done: result.checkout ? `Switched to the new branch ${result.name}` : `Created ${result.name}`,
-  });
+  repo.run(
+    () =>
+      result.checkout
+        ? repo.api.checkout(result.name, { create: true, from: result.from || undefined })
+        : repo.api.branch('create', { name: result.name, from: result.from || undefined }),
+    {
+      done: result.checkout ? `Switched to the new branch ${result.name}` : `Created ${result.name}`,
+    },
+  );
 }
 
 export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (MenuEntry | null)[] {
@@ -39,7 +45,9 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
       label: `Merge into ${into}…`,
       disabled: current,
       run: async () => {
-        const ok = await repo.confirm(`Merge ${b.name} into ${into}?`, `Its commits join ${into}; conflicts, if any, stop it for you to resolve`, { confirm: 'Merge' });
+        const ok = await repo.confirm(`Merge ${b.name} into ${into}?`, `Its commits join ${into}; conflicts, if any, stop it for you to resolve`, {
+          confirm: 'Merge',
+        });
         if (ok) repo.outcome(await repo.run(() => api.merge(b.name)), 'Merging');
       },
     },
@@ -71,14 +79,24 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
           {
             label: local?.upstream ? `Upstream: ${local.upstream}…` : 'Set Upstream',
             run: async () => {
-              const to = await repo.prompt(`The upstream of ${b.name}`, 'Remote branch (empty: none)', local?.upstream ?? `${status.remote ?? 'origin'}/${b.name}`);
+              const to = await repo.prompt(
+                `The upstream of ${b.name}`,
+                'Remote branch (empty: none)',
+                local?.upstream ?? `${status.remote ?? 'origin'}/${b.name}`,
+              );
               if (to === null) return;
               repo.run(() => api.branch('setUpstream', { name: b.name, upstream: to.trim() || null }));
             },
           },
           ...(local?.upstream
             ? [{ label: `Push`, disabled: !current, run: () => repo.startSync('push', {}, 'Pushing') }]
-            : [{ label: `Publish to ${status.remote ?? 'the remote'}`, disabled: !current || !status.remote, run: () => repo.startSync('publish', {}, 'Publishing') }]),
+            : [
+                {
+                  label: `Publish to ${status.remote ?? 'the remote'}`,
+                  disabled: !current || !status.remote,
+                  run: () => repo.startSync('publish', {}, 'Publishing'),
+                },
+              ]),
           null,
           {
             label: 'Delete',
@@ -88,7 +106,9 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
               const unmerged = local && !local.merged;
               const ok = await repo.confirm(
                 `Delete ${b.name}?`,
-                unmerged ? `${b.name} isn't merged into ${into}: deleting it loses its commits (they stay in the reflog for a while)` : `It's merged into ${into}, so nothing is lost`,
+                unmerged
+                  ? `${b.name} isn't merged into ${into}: deleting it loses its commits (they stay in the reflog for a while)`
+                  : `It's merged into ${into}, so nothing is lost`,
                 { confirm: 'Delete', destructive: true },
               );
               if (!ok) return;
@@ -98,7 +118,11 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
               } catch (e) {
                 // Not merged after all (HEAD moved since the list was read): ask again.
                 if (unmerged || !/fully merged/i.test((e as Error).message)) return repo.toast((e as Error).message, { error: true });
-                const sure = await repo.confirm(`${b.name} isn't merged into ${into}`, 'Deleting it loses its commits (they stay in the reflog for a while). Delete it anyway?', { confirm: 'Delete Anyway', destructive: true });
+                const sure = await repo.confirm(
+                  `${b.name} isn't merged into ${into}`,
+                  'Deleting it loses its commits (they stay in the reflog for a while). Delete it anyway?',
+                  { confirm: 'Delete Anyway', destructive: true },
+                );
                 if (sure) await repo.run(() => api.branch('delete', { name: b.name, force: true }), { done: `Deleted ${b.name}` });
               } finally {
                 repo.bump();
@@ -111,7 +135,11 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
             label: `Delete ${b.name} on the Remote`,
             danger: true,
             run: async () => {
-              const ok = await repo.confirm(`Delete ${b.name} on the remote?`, `The branch goes from ${b.name.slice(0, b.name.indexOf('/'))} for everyone. Local branches stay.`, { confirm: 'Delete', destructive: true });
+              const ok = await repo.confirm(
+                `Delete ${b.name} on the remote?`,
+                `The branch goes from ${b.name.slice(0, b.name.indexOf('/'))} for everyone. Local branches stay.`,
+                { confirm: 'Delete', destructive: true },
+              );
               if (ok) repo.startSync('deleteRemoteBranch', { name: b.name }, 'Deleting');
             },
           },

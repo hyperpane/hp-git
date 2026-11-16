@@ -163,7 +163,13 @@ test('clones with progress; a cancelled clone leaves nothing behind', async () =
   const nowhere = path.join(await folder(), 'never');
   const failed = await run({ op: 'clone', url: pathToFileURL(path.join(nowhere, 'missing.git')).href, into: nowhere });
   assert.equal(failed.error, "The remote repository isn't there, or this server's account can't see it.");
-  assert.equal(await stat(nowhere).then(() => true, () => false), false);
+  assert.equal(
+    await stat(nowhere).then(
+      () => true,
+      () => false,
+    ),
+    false,
+  );
 });
 
 /** An HTTP remote: git http-backend for `root`, behind Basic auth for ada:s3cret. */
@@ -236,7 +242,13 @@ test('credentials: prompts come to the subscription; answered, the clone works; 
       await g.call({ op: 'answer', id: e.id, value: e.kind === 'username' ? 'ada' : 's3cret' });
     });
     assert.equal(done.error, null);
-    assert.deepEqual(prompts.map((p) => [p.kind, p.secret]), [['username', false], ['password', true]]);
+    assert.deepEqual(
+      prompts.map((p) => [p.kind, p.secret]),
+      [
+        ['username', false],
+        ['password', true],
+      ],
+    );
     assert.match(prompts[0].prompt, /^Username for 'http:\/\/127\.0\.0\.1:\d+':$/);
     assert.equal(await readFile(path.join(into, 'a.txt'), 'utf8'), 'a\n');
     assert.ok(server.seen.some((a) => a.startsWith('Basic ')));
@@ -281,7 +293,15 @@ test('a sync cancelled while it waits for an answer ends at once', { skip: ASKPA
       if (e.type === 'prompt') s.cancel();
     });
     assert.equal(clone.error, null);
-    await until(() => stat(into).then(() => false, () => true), 3000, 'the folder to go');
+    await until(
+      () =>
+        stat(into).then(
+          () => false,
+          () => true,
+        ),
+      3000,
+      'the folder to go',
+    );
     // Git (and its helpers) are stopped, and nothing keeps the server up.
     await until(() => g.plugin.busy?.() === false, 3000, 'git to stop');
   } finally {
@@ -305,16 +325,24 @@ test('fetches by itself while watched (autoFetch), quietly; a failure shows in t
   const w = stream<Status>(p.plugin, { op: 'watch', repo: dir });
   let s = await w.next();
   assert.equal(s.behind, 0);
-  await until(async () => {
-    s = await w.next();
-    return s.behind === 1;
-  }, 10_000, 'the fetch');
+  await until(
+    async () => {
+      s = await w.next();
+      return s.behind === 1;
+    },
+    10_000,
+    'the fetch',
+  );
   // The remote gone: the next fetch fails, and says so.
   sh(dir, 'remote', 'set-url', 'origin', pathToFileURL(path.join(other, 'missing.git')).href);
-  await until(async () => {
-    s = await w.next();
-    return !!s.fetchError;
-  }, 10_000, 'the failed fetch');
+  await until(
+    async () => {
+      s = await w.next();
+      return !!s.fetchError;
+    },
+    10_000,
+    'the failed fetch',
+  );
   assert.equal(s.fetchError, "The remote repository isn't there, or this server's account can't see it.");
   w.cancel();
 });

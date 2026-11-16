@@ -8,7 +8,9 @@ import { US } from '../lib/commits.ts';
 import type { Repo } from '../lib/repo.ts';
 
 export async function tags(repo: Repo, signal?: AbortSignal): Promise<Tag[]> {
-  const format = ['%(refname:strip=2)', '%(objecttype)', '%(objectname)', '%(*objectname)', '%(contents:subject)', '%(taggername)', '%(creatordate:unix)'].join('%1f');
+  const format = ['%(refname:strip=2)', '%(objecttype)', '%(objectname)', '%(*objectname)', '%(contents:subject)', '%(taggername)', '%(creatordate:unix)'].join(
+    '%1f',
+  );
   const out = await repo.text(['for-each-ref', '--sort=-creatordate', `--format=${format}`, 'refs/tags'], { signal });
   const list: Tag[] = [];
   for (const line of out.split('\n')) {

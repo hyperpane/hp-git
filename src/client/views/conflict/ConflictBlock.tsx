@@ -24,7 +24,10 @@ export function ConflictBlock({
 }) {
   return (
     <div className="rounded-surface my-2 overflow-hidden border border-[color-mix(in_srgb,var(--ansi-9)_40%,var(--node-border))] font-sans" data-block={number}>
-      <div className="flex h-7 items-center gap-1 border-b border-[var(--node-border)] px-2 text-2xs" style={{ background: 'color-mix(in srgb, var(--ansi-9) 7%, transparent)' }}>
+      <div
+        className="flex h-7 items-center gap-1 border-b border-[var(--node-border)] px-2 text-2xs"
+        style={{ background: 'color-mix(in srgb, var(--ansi-9) 7%, transparent)' }}
+      >
         <span className="font-semibold">Conflict {number}</span>
         <span className="text-[var(--node-muted)]">line {b.at}</span>
         <span className="flex-1" />
@@ -42,9 +45,21 @@ export function ConflictBlock({
         </Pick>
       </div>
       <div className={cn('grid', b.base ? 'grid-cols-3' : 'grid-cols-2')} style={{ fontFamily: MONO }}>
-        <Side title={`Ours · ${b.oursLabel || ours}`} lines={b.ours} color="var(--ansi-4)" taken={choice === 'ours' || choice === 'both' || choice === 'bothTheirsFirst'} dropped={choice === 'theirs'} />
+        <Side
+          title={`Ours · ${b.oursLabel || ours}`}
+          lines={b.ours}
+          color="var(--ansi-4)"
+          taken={choice === 'ours' || choice === 'both' || choice === 'bothTheirsFirst'}
+          dropped={choice === 'theirs'}
+        />
         {b.base && <Side title="Base" lines={b.base} color="var(--node-muted)" taken={false} dropped={!!choice} />}
-        <Side title={`Theirs · ${b.theirsLabel || theirs}`} lines={b.theirs} color="var(--ansi-5)" taken={choice === 'theirs' || choice === 'both' || choice === 'bothTheirsFirst'} dropped={choice === 'ours'} />
+        <Side
+          title={`Theirs · ${b.theirsLabel || theirs}`}
+          lines={b.theirs}
+          color="var(--ansi-5)"
+          taken={choice === 'theirs' || choice === 'both' || choice === 'bothTheirsFirst'}
+          dropped={choice === 'ours'}
+        />
       </div>
     </div>
   );
@@ -53,12 +68,19 @@ export function ConflictBlock({
 function Side({ title, lines, color, taken, dropped }: { title: string; lines: string[]; color: string; taken: boolean; dropped: boolean }) {
   return (
     <div className={cn('min-w-0 border-e border-[var(--node-border)] last:border-e-0', dropped && 'opacity-45')}>
-      <div className="flex h-5 items-center gap-1 px-2 font-sans text-[10px] font-semibold" style={{ color, background: `color-mix(in srgb, ${color} 10%, transparent)` }}>
+      <div
+        className="flex h-5 items-center gap-1 px-2 font-sans text-[10px] font-semibold"
+        style={{ color, background: `color-mix(in srgb, ${color} 10%, transparent)` }}
+      >
         <span className="truncate">{title}</span>
         {taken && <Check className="size-3 flex-none" />}
       </div>
       <div className="git-scroll overflow-x-auto py-0.5" style={{ background: taken ? `color-mix(in srgb, ${color} 9%, transparent)` : undefined }}>
-        {lines.length ? lines.map((l, n) => <Code key={n} text={l} />) : <div className="px-2 font-sans text-2xs text-[var(--node-muted)] italic">(nothing)</div>}
+        {lines.length ? (
+          lines.map((l, n) => <Code key={n} text={l} />)
+        ) : (
+          <div className="px-2 font-sans text-2xs text-[var(--node-muted)] italic">(nothing)</div>
+        )}
       </div>
     </div>
   );

@@ -44,7 +44,10 @@ test('lists branches: local with upstream and ahead/behind, remote, merged, rece
   assert.equal(main.subject, 'Ahead');
   assert.equal(b.local.find((x) => x.name === 'unmerged')!.merged, false);
   assert.equal(b.local.find((x) => x.name === 'merged-one')!.merged, true);
-  assert.deepEqual(b.remote.map((r) => [r.name, r.remote, r.branch]), [['origin/main', 'origin', 'main']]);
+  assert.deepEqual(
+    b.remote.map((r) => [r.name, r.remote, r.branch]),
+    [['origin/main', 'origin', 'main']],
+  );
   assert.deepEqual(b.recent, ['main', 'unmerged']);
 });
 
@@ -77,7 +80,9 @@ test('checks out: a branch, a new one, a remote one (tracked), a commit (detache
   // A change in the way is said plainly.
   await p.call({ op: 'checkout', repo: dir, ref: 'main' });
   await write(dir, { 'only-remote.txt': 'mine\n' });
-  await assert.rejects(p.call({ op: 'checkout', repo: dir, ref: 'from-remote' }), { message: /^New files here would be overwritten \(only-remote\.txt\)|^Your changes/ });
+  await assert.rejects(p.call({ op: 'checkout', repo: dir, ref: 'from-remote' }), {
+    message: /^New files here would be overwritten \(only-remote\.txt\)|^Your changes/,
+  });
 });
 
 test('creates, renames, deletes (unmerged needs force) and sets upstreams of branches', async () => {
@@ -90,9 +95,13 @@ test('creates, renames, deletes (unmerged needs force) and sets upstreams of bra
   await write(dir, { 'b.txt': 'b\n' });
   commitAll(dir, 'Only on three');
   sh(dir, 'switch', '-q', 'main');
-  await assert.rejects(g.call({ op: 'branch', repo: dir, action: 'delete', name: 'three' }), { message: "This branch isn't fully merged: deleting it loses its commits." });
+  await assert.rejects(g.call({ op: 'branch', repo: dir, action: 'delete', name: 'three' }), {
+    message: "This branch isn't fully merged: deleting it loses its commits.",
+  });
   await g.call({ op: 'branch', repo: dir, action: 'delete', name: 'three', force: true });
-  await assert.rejects(g.call({ op: 'branch', repo: dir, action: 'delete', name: 'main' }), { message: "This is the branch you're on: switch to another one first." });
+  await assert.rejects(g.call({ op: 'branch', repo: dir, action: 'delete', name: 'main' }), {
+    message: "This is the branch you're on: switch to another one first.",
+  });
   await g.call({ op: 'branch', repo: dir, action: 'setUpstream', upstream: 'two' });
   assert.equal(sh(dir, 'config', 'branch.main.merge').trim(), 'refs/heads/two');
   await g.call({ op: 'branch', repo: dir, action: 'setUpstream', upstream: null });
@@ -117,13 +126,18 @@ test('a merge with conflicts: the operation, ours/theirs/text resolutions, conti
   // Continuing too soon, marking with markers left in: refused.
   await assert.rejects(g.call({ op: 'operation', repo: dir, action: 'continue' }), { message: 'Some files still have conflicts. Resolve them first.' });
   await assert.rejects(g.call({ op: 'resolve', repo: dir, path: 'a.txt', side: 'mark' }), { message: 'a.txt still has conflict markers.' });
-  await assert.rejects(g.call({ op: 'resolve', repo: dir, path: '../a.txt', side: 'text', text: 'x' }), { message: "../a.txt isn't a path in the repository." });
+  await assert.rejects(g.call({ op: 'resolve', repo: dir, path: '../a.txt', side: 'text', text: 'x' }), {
+    message: "../a.txt isn't a path in the repository.",
+  });
   // The merged text, block by block, written and marked; the old copy to the Trash.
   const before = (await trashed(g.trash)).length;
   await g.call({ op: 'resolve', repo: dir, path: 'a.txt', side: 'text', text: 'one\nMAIN and TOPIC\nthree\n', mark: true });
   assert.equal((await trashed(g.trash)).length, before + 1);
   s = await st(dir);
-  assert.deepEqual(s.files.map((f) => [f.path, f.staged, f.conflict]), [['a.txt', 'M', null]]);
+  assert.deepEqual(
+    s.files.map((f) => [f.path, f.staged, f.conflict]),
+    [['a.txt', 'M', null]],
+  );
   assert.deepEqual(await g.call({ op: 'operation', repo: dir, action: 'continue' }), { conflicts: false });
   s = await st(dir);
   assert.equal(s.operation, null);
@@ -147,7 +161,10 @@ test('ours, theirs, a side that deleted the file, and abort', async () => {
   assert.equal((await g.call<Outcome>({ op: 'merge', repo: dir, ref: 'topic' })).conflicts, true);
   assert.equal((await st(dir)).files[0].conflict, 'deletedByThem');
   await g.call({ op: 'resolve', repo: dir, path: 'a.txt', side: 'theirs' });
-  assert.deepEqual((await st(dir)).files.map((f) => [f.path, f.staged]), [['a.txt', 'D']]);
+  assert.deepEqual(
+    (await st(dir)).files.map((f) => [f.path, f.staged]),
+    [['a.txt', 'D']],
+  );
   await g.call({ op: 'operation', repo: dir, action: 'abort' });
   await assert.rejects(g.call({ op: 'operation', repo: dir, action: 'abort' }), { message: 'Nothing is under way to abort or continue.' });
 });
@@ -206,7 +223,10 @@ test('cherry-pick (with a conflict, continued), revert, reset soft/mixed/hard', 
   const head = sh(dir, 'rev-parse', 'HEAD').trim();
   await g.call({ op: 'reset', repo: dir, sha: 'HEAD~1', mode: 'soft' });
   // The revert's change, staged.
-  assert.deepEqual((await st(dir)).files.map((f) => [f.path, f.staged]), [['clean.txt', 'D']]);
+  assert.deepEqual(
+    (await st(dir)).files.map((f) => [f.path, f.staged]),
+    [['clean.txt', 'D']],
+  );
   await g.call({ op: 'reset', repo: dir, sha: head, mode: 'mixed' });
   await write(dir, { 'a.txt': 'dirty\n' });
   await g.call({ op: 'reset', repo: dir, sha: 'HEAD~2', mode: 'hard' });
@@ -224,7 +244,13 @@ test('stashes: push (with untracked, a message), list, show, apply, pop with con
   const [s] = await g.call<Stash[]>({ op: 'stashes', repo: dir });
   assert.deepEqual([s.index, s.message, s.branch], [0, 'Work in progress', 'main']);
   const shown = await g.call<CommitDetail>({ op: 'stash', repo: dir, action: 'show', index: 0 });
-  assert.deepEqual(shown.files.map((f) => [f.path, f.status, f.untracked ?? false]), [['a.txt', 'M', false], ['new.txt', 'A', true]]);
+  assert.deepEqual(
+    shown.files.map((f) => [f.path, f.status, f.untracked ?? false]),
+    [
+      ['a.txt', 'M', false],
+      ['new.txt', 'A', true],
+    ],
+  );
   const d = await g.call<Diff>({ op: 'diff', repo: dir, path: 'new.txt', commit: 'stash@{0}^3' });
   assert.equal(d.status, 'A');
   assert.deepEqual(await g.call({ op: 'stash', repo: dir, action: 'apply', index: 0 }), { conflicts: false });
@@ -260,7 +286,10 @@ test('tags: create (annotated), list, delete; remotes: add, rename, set URL, rem
   await assert.rejects(g.call({ op: 'tag', repo: dir, action: 'create', name: 'light' }), { message: "There's a tag called light already." });
   await assert.rejects(g.call({ op: 'tag', repo: dir, action: 'create', name: 'bad name' }), { message: "“bad name” isn't a valid tag name." });
   await g.call({ op: 'tag', repo: dir, action: 'delete', name: 'light' });
-  assert.deepEqual((await g.call<Tag[]>({ op: 'tags', repo: dir })).map((t) => t.name), ['v1.0']);
+  assert.deepEqual(
+    (await g.call<Tag[]>({ op: 'tags', repo: dir })).map((t) => t.name),
+    ['v1.0'],
+  );
   await g.call({ op: 'remote', repo: dir, action: 'add', name: 'origin', url: 'https://example.com/a.git' });
   await g.call({ op: 'remote', repo: dir, action: 'rename', name: 'origin', to: 'upstream' });
   await g.call({ op: 'remote', repo: dir, action: 'setUrl', name: 'upstream', url: 'https://example.com/b.git' });

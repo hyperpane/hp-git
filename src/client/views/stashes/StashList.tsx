@@ -14,7 +14,17 @@ import { ago, longDate, plural } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { rowClass } from '../../lib/rows.ts';
 
-export function StashList({ stashes, error, picked, onPick }: { stashes: Stash[] | null; error: string | null; picked: number | null; onPick: React.Dispatch<React.SetStateAction<number | null>> }) {
+export function StashList({
+  stashes,
+  error,
+  picked,
+  onPick,
+}: {
+  stashes: Stash[] | null;
+  error: string | null;
+  picked: number | null;
+  onPick: React.Dispatch<React.SetStateAction<number | null>>;
+}) {
   const repo = useRepo();
   const list = useRef<VirtualHandle>(null);
   const at = stashes?.findIndex((s) => s.index === picked) ?? -1;
@@ -78,7 +88,12 @@ export function StashList({ stashes, error, picked, onPick }: { stashes: Stash[]
             const s = stashes[n];
             return (
               <div className="h-full px-1 py-px" data-stash={s.index}>
-                <div className={rowClass(s.index === picked)} onClick={() => onPick(s.index)} onContextMenu={(e) => menu(e, s)} title={`${s.message}\n${longDate(s.date)}`}>
+                <div
+                  className={rowClass(s.index === picked)}
+                  onClick={() => onPick(s.index)}
+                  onContextMenu={(e) => menu(e, s)}
+                  title={`${s.message}\n${longDate(s.date)}`}
+                >
                   <Archive className="size-3.5 flex-none text-[var(--node-muted)]" />
                   <div className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="truncate">{s.message}</span>

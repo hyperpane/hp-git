@@ -45,14 +45,19 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
       basenameOf(path),
       b.lines.map((l) => (l.text.endsWith('\r') ? l.text.slice(0, -1) : l.text)),
       ac.signal,
-    ).then((s) => !ac.signal.aborted && setSpans(s), () => {});
+    ).then(
+      (s) => !ac.signal.aborted && setSpans(s),
+      () => {},
+    );
     return () => ac.abort();
   }, [b, path]);
 
   // Ages, for the shading: from the oldest commit here to the newest.
   const ages = useMemo(() => {
     if (!b) return { min: 0, max: 1 };
-    const dates = Object.values(b.commits).map((c) => c.date).filter(Boolean);
+    const dates = Object.values(b.commits)
+      .map((c) => c.date)
+      .filter(Boolean);
     return { min: Math.min(...dates), max: Math.max(...dates) };
   }, [b]);
 
@@ -76,7 +81,11 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
     const uncommitted = NONE.test(sha);
     const items: (MenuEntry | null)[] = [
       { label: 'Show This Commit', disabled: uncommitted, run: () => repo.open({ kind: 'commit', sha }) },
-      { label: 'Blame Before This Commit', disabled: !c?.previous, run: () => c?.previous && repo.open({ kind: 'blame', path: c.previous.path, rev: c.previous.sha }) },
+      {
+        label: 'Blame Before This Commit',
+        disabled: !c?.previous,
+        run: () => c?.previous && repo.open({ kind: 'blame', path: c.previous.path, rev: c.previous.sha }),
+      },
       null,
       { label: 'Copy SHA', disabled: uncommitted, run: () => copy(sha, repo.toast) },
     ];
@@ -95,7 +104,10 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
         </span>
         <span className="flex items-center gap-1">
           older
-          <span className="h-2 w-16 rounded-full" style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--node-accent) 22%, transparent), var(--node-accent))' }} />
+          <span
+            className="h-2 w-16 rounded-full"
+            style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--node-accent) 22%, transparent), var(--node-accent))' }}
+          />
           newer
         </span>
       </div>
@@ -115,10 +127,18 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
           const uncommitted = NONE.test(l.sha);
           const lit = hover === l.sha;
           return (
-            <div className="flex h-full" style={{ background: lit ? 'var(--node-hover)' : undefined }} onMouseEnter={() => setHover(l.sha)} onContextMenu={(e) => menu(e, l.sha)}>
+            <div
+              className="flex h-full"
+              style={{ background: lit ? 'var(--node-hover)' : undefined }}
+              onMouseEnter={() => setHover(l.sha)}
+              onContextMenu={(e) => menu(e, l.sha)}
+            >
               <div
                 className="sticky left-0 z-[1] flex h-full w-[260px] flex-none items-center gap-1.5 overflow-hidden border-e border-[var(--node-border)] ps-2 pe-1 font-sans text-2xs"
-                style={{ background: lit ? 'linear-gradient(var(--node-hover), var(--node-hover)), var(--node-bg)' : 'var(--node-bg)', borderTop: first && n ? '1px solid var(--node-border)' : undefined }}
+                style={{
+                  background: lit ? 'linear-gradient(var(--node-hover), var(--node-hover)), var(--node-bg)' : 'var(--node-bg)',
+                  borderTop: first && n ? '1px solid var(--node-border)' : undefined,
+                }}
                 onClick={() => !uncommitted && repo.open({ kind: 'commit', sha: l.sha })}
                 title={c ? `${c.summary}\n${c.author} <${c.email}> · ${longDate(c.date)}\n${l.sha}` : l.sha}
               >
@@ -135,7 +155,10 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
                     <span className="font-mono">{shortSha(l.sha)}</span>
                   ))}
               </div>
-              <span className="sticky left-[260px] z-[1] h-full w-[3px] flex-none" style={{ background: c && !uncommitted ? shade(c.date) : 'var(--ansi-3)' }} />
+              <span
+                className="sticky left-[260px] z-[1] h-full w-[3px] flex-none"
+                style={{ background: c && !uncommitted ? shade(c.date) : 'var(--ansi-3)' }}
+              />
               <span className="flex-none pe-2 ps-2 text-right text-[var(--node-muted)] tabular-nums select-none" style={{ width: `${digits + 2}ch` }}>
                 {n + 1}
               </span>

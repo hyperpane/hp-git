@@ -28,13 +28,3 @@ export function longDate(ms: number): string {
   if (!ms) return '';
   return new Date(ms).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
-
-/** A short date for a column: the time today, the day this year, else the year too. */
-export function shortDate(ms: number): string {
-  if (!ms) return '';
-  const d = new Date(ms);
-  const now = new Date();
-  if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}

@@ -41,7 +41,11 @@ export function Overlay({ view }: { view: View }) {
         <ToolButton label={`Back (${keys('⌘[')})`} icon={ArrowLeft} onClick={repo.back} />
         <ToolButton label={`Forward (${keys('⌘]')})`} icon={ArrowRight} disabled={!repo.canForward} onClick={repo.forward} />
         <nav className="flex min-w-0 flex-1 items-center gap-1 text-xs" aria-label="Where you are">
-          <button type="button" className="rounded-chip flex-none px-1 text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]" onClick={() => repo.setTab(repo.tab)}>
+          <button
+            type="button"
+            className="rounded-chip flex-none px-1 text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+            onClick={() => repo.setTab(repo.tab)}
+          >
             {tabLabel}
           </button>
           <ChevronRight className="size-3 flex-none text-[var(--node-muted)]" />

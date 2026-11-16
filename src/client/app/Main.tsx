@@ -56,7 +56,13 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
   const [stash, setStash] = useState<number | null>(null);
   const [tag, setTag] = useState<string | null>(null);
   const [pickerWants, setPickerWants] = useState(false);
-  const filters = { changes: useRef<HTMLInputElement>(null), history: useRef<HTMLInputElement>(null), branches: useRef<HTMLInputElement>(null), stashes: useRef<HTMLInputElement>(null), tags: useRef<HTMLInputElement>(null) };
+  const filters = {
+    changes: useRef<HTMLInputElement>(null),
+    history: useRef<HTMLInputElement>(null),
+    branches: useRef<HTMLInputElement>(null),
+    stashes: useRef<HTMLInputElement>(null),
+    tags: useRef<HTMLInputElement>(null),
+  };
   const branches = useBranches(repo, tab === 'branches' || pickerWants);
   const stashes = useStashes(repo, tab === 'stashes');
   const tags = useTags(repo, tab === 'tags');
@@ -113,7 +119,11 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
     right = <ChangesDetail picked={picked} />;
   } else if (tab === 'history') {
     left = <HistoryList selected={commit} onSelect={setCommit} filterRef={filters.history} />;
-    right = commit ? <CommitDetails key={commit} id={commit} load={() => repo.api.show(commit)} place="history" /> : <Blank icon={GitCommitHorizontal}>Pick a commit</Blank>;
+    right = commit ? (
+      <CommitDetails key={commit} id={commit} load={() => repo.api.show(commit)} place="history" />
+    ) : (
+      <Blank icon={GitCommitHorizontal}>Pick a commit</Blank>
+    );
   } else if (tab === 'branches') {
     left = <BranchList branches={branches.branches} error={branches.error} picked={branch} onPick={setBranch} filterRef={filters.branches} />;
     right = <BranchDetail pick={branch} branches={branches.branches} />;
@@ -127,7 +137,15 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
 
   return (
     <div className="flex h-full min-h-0 flex-col text-xs text-[var(--node-fg)] select-none" data-git={repo.root}>
-      <Toolbar found={found} onRepo={(r) => host.win.setData('repo', r)} onChooseFolder={onChooseFolder} sidebar={sidebar} onSidebar={() => setSidebar(!sidebar)} branches={branches.branches} wantBranches={setPickerWants} />
+      <Toolbar
+        found={found}
+        onRepo={(r) => host.win.setData('repo', r)}
+        onChooseFolder={onChooseFolder}
+        sidebar={sidebar}
+        onSidebar={() => setSidebar(!sidebar)}
+        branches={branches.branches}
+        wantBranches={setPickerWants}
+      />
       <OperationBar />
       {repo.view ? (
         <Overlay view={repo.view} />
@@ -136,7 +154,13 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
           {!sidebar && (
             <div className="flex w-9 flex-none flex-col items-center gap-0.5 border-e border-[var(--node-border)] py-1">
               {tabs.map((t) => (
-                <ToolButton key={t.value} label={`${t.label} (${keys(`⌃${TABS_ORDER.indexOf(t.value) + 1}`)})`} icon={t.icon!} active={tab === t.value} onClick={() => setTab(t.value)} />
+                <ToolButton
+                  key={t.value}
+                  label={`${t.label} (${keys(`⌃${TABS_ORDER.indexOf(t.value) + 1}`)})`}
+                  icon={t.icon!}
+                  active={tab === t.value}
+                  onClick={() => setTab(t.value)}
+                />
               ))}
             </div>
           )}
