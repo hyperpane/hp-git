@@ -29,7 +29,7 @@ export function PickedBar({
       )}
       {actions.discard && (
         <NodeButton disabled={busy} variant="danger" onClick={() => onRun(actions.discard)}>
-          {actions.discard.label}…
+          {actions.discard.label}
         </NodeButton>
       )}
       <NodeButton className="border-transparent" onClick={onClear} title={`Clear (${keyLabel('⎋')})`}>

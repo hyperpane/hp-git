@@ -66,7 +66,7 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
   }, [b, line]);
 
   if (state.error) return <NodeMessage error>{state.error}</NodeMessage>;
-  if (!b) return <NodeMessage>Blaming {path}…</NodeMessage>;
+  if (!b) return <NodeMessage>Blaming {path}</NodeMessage>;
 
   const shade = (date: number) => {
     const t = ages.max > ages.min ? (date - ages.min) / (ages.max - ages.min) : 1;

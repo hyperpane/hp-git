@@ -19,7 +19,7 @@ export function RepoWindow({ host, root, server, found, onChooseFolder }: { host
         <span className="text-[var(--ansi-1)]">{error}</span>
       </Blank>
     ) : (
-      <NodeMessage>Reading {basenameOf(root)}…</NodeMessage>
+      <NodeMessage>Reading {basenameOf(root)}</NodeMessage>
     );
   return (
     <RepoProvider value={repo}>

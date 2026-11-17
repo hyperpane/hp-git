@@ -50,7 +50,7 @@ export function explain(stderr: string, stdout = ''): string {
     return `New files here would be overwritten${list ? ` (${list})` : ''}. Move them, or commit them first.`;
   }
   if (has('please tell me who you are') || has('author identity unknown') || has('empty ident name')) {
-    return 'Git doesn\'t know who you are on this server yet. Set your name and email: git config --global user.name "…" and user.email "…".';
+    return 'Git doesn\'t know who you are on this server yet. Set your name and email: git config --global user.name "Your Name" and user.email "you@example.com"';
   }
   if (has('index.lock') && has('file exists')) {
     return 'Another git command is running in this repository (.git/index.lock is there). If none is, delete that file.';

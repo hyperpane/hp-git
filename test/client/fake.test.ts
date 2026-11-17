@@ -171,7 +171,7 @@ test('sync: Push ↑2 with progress; a password asked through the app; then Fetc
   w.app.answers['ui.dialog'] = (a: { view: string }) => (a.view === 'credentials' ? 'hunter2' : null);
   sync!.send({ type: 'progress', phase: 'Writing objects', percent: 42, text: 'Writing objects: 42% (2/5)' } satisfies SyncEvent);
   await until(() => w.root.textContent!.includes('Writing objects 42%'), 5000, 'the progress');
-  assert.match(w.root.textContent!, /Pushing to origin…/);
+  assert.match(w.root.textContent!, /Pushing to origin/);
   sync!.send({ type: 'prompt', id: 'p1', prompt: "Password for 'https://ada@example.com':", secret: true, kind: 'password' } satisfies SyncEvent);
   await until(() => answered, 5000, 'the answer');
   assert.deepEqual(answered, { op: 'answer', repo: ROOT, id: 'p1', value: 'hunter2' });

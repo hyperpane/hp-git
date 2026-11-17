@@ -85,7 +85,7 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
         <div className="flex w-80 max-w-full flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="min-w-0 flex-1 truncate text-left">
-              Cloning… {cloning.phase}
+              Cloning: {cloning.phase}
               {cloning.percent !== null ? ` ${Math.round(cloning.percent)}%` : ''}
             </span>
             <NodeButton onClick={cloning.cancel}>

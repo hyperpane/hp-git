@@ -42,7 +42,7 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
       run: () => repo.run(() => api.checkout(b.name)),
     },
     {
-      label: `Merge into ${into}…`,
+      label: `Merge into ${into}`,
       disabled: current,
       run: async () => {
         const ok = await repo.confirm(`Merge ${b.name} into ${into}?`, `Its commits join ${into}; conflicts, if any, stop it for you to resolve`, {
@@ -52,7 +52,7 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
       },
     },
     {
-      label: `Rebase ${into} onto ${b.name}…`,
+      label: `Rebase ${into} onto ${b.name}`,
       disabled: current || status.detached,
       run: async () => {
         const ok = await repo.confirm(
@@ -77,7 +77,7 @@ export function branchActions(repo: Repo, b: BranchPick, local?: LocalBranch): (
             },
           },
           {
-            label: local?.upstream ? `Upstream: ${local.upstream}…` : 'Set Upstream',
+            label: local?.upstream ? `Upstream: ${local.upstream}` : 'Set Upstream',
             run: async () => {
               const to = await repo.prompt(
                 `The upstream of ${b.name}`,

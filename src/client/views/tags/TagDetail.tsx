@@ -27,7 +27,7 @@ export function TagDetail({ tag }: { tag: Tag | null }) {
             <span className="min-w-0 flex-1 truncate text-sm font-semibold">{tag.name}</span>
             {actions.slice(0, 2).map((a) => (
               <NodeButton key={a.label} disabled={a.disabled} onClick={a.run}>
-                {a.label.replace(/…$/, '')}
+                {a.label}
               </NodeButton>
             ))}
             <NodeButton variant="danger" onClick={actions[3].run}>

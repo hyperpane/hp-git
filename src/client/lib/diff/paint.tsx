@@ -5,13 +5,12 @@ import type { ReactNode } from 'react';
 import type { Span } from './highlight.ts';
 import type { Range } from './words.ts';
 
-/** Past this, a line is cut (with …): wider than anything on screen. */
+/** Past this, a line is cut: wider than anything on screen. */
 const MAX_SHOWN = 4000;
 
 export function paint(text: string, spans: Span[] | undefined, words: Range[] | null | undefined, wordClass: string): ReactNode {
-  const cut = text.length > MAX_SHOWN;
-  const t = cut ? text.slice(0, MAX_SHOWN) : text;
-  if (!spans?.length && !words?.length) return cut ? `${t}…` : t || ' ';
+  const t = text.length > MAX_SHOWN ? text.slice(0, MAX_SHOWN) : text;
+  if (!spans?.length && !words?.length) return t || ' ';
   // Every place a style starts or stops.
   const stops = new Set<number>([0, t.length]);
   for (const [a, b] of spans ?? []) {
@@ -43,6 +42,5 @@ export function paint(text: string, spans: Span[] | undefined, words: Range[] | 
         </span>,
       );
   }
-  if (cut) out.push('…');
   return out;
 }

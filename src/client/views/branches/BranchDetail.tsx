@@ -41,7 +41,7 @@ export function BranchDetail({ pick, branches }: { pick: BranchPick | null; bran
           <span className="min-w-0 flex-1 truncate text-sm font-semibold">{b.name}</span>
           {main.map((a) => (
             <NodeButton key={a.label} onClick={a.run}>
-              {a.label.replace(/…$/, '')}
+              {a.label}
             </NodeButton>
           ))}
           <NodeButton onClick={more}>More</NodeButton>

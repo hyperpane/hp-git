@@ -32,7 +32,7 @@ export function StashDetail({ stash }: { stash: Stash | null }) {
           </span>
           {actions.map((a) => (
             <NodeButton key={a.label} onClick={a.run} variant={a.danger ? 'danger' : 'default'}>
-              {a.label.replace(/…$/, '')}
+              {a.label}
             </NodeButton>
           ))}
         </div>

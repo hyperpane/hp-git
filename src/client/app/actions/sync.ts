@@ -72,7 +72,7 @@ export function syncMenu(repo: Repo): (MenuEntry | null)[] {
     null,
     { label: 'Add Remote', run: () => addRemote(repo) },
     ...s.remotes.map((r) => ({
-      label: `Remove Remote ${r}…`,
+      label: `Remove Remote ${r}`,
       danger: true,
       run: async () => {
         const ok = await repo.confirm(`Remove the remote ${r}?`, 'Its remote branches go from this repository. Nothing changes on the remote itself.', {

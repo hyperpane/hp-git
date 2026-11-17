@@ -42,8 +42,8 @@ export function fileMenu(
         ]
       : []),
     ...(staged.length ? [{ label: staged.length > 1 ? `Unstage ${plural(staged.length, 'File')}` : 'Unstage', run: () => unstage(staged) }] : []),
-    { label: files.length > 1 ? `Discard Changes to ${plural(files.length, 'File')}…` : 'Discard Changes', danger: true, run: () => discard(files) },
-    { label: files.length > 1 ? `Stash ${plural(files.length, 'File')}…` : 'Stash This File', run: () => stashFiles(files) },
+    { label: files.length > 1 ? `Discard Changes to ${plural(files.length, 'File')}` : 'Discard Changes', danger: true, run: () => discard(files) },
+    { label: files.length > 1 ? `Stash ${plural(files.length, 'File')}` : 'Stash This File', run: () => stashFiles(files) },
     null,
     ...(one?.untracked
       ? [
