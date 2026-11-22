@@ -3,6 +3,7 @@
 
 import type { Host } from '@hyperpane/sdk/client';
 import { NodeButton, NodeMessage } from '@hyperpane/ui';
+import { TriangleAlert } from 'lucide-react';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
 import { basenameOf } from '../lib/paths.ts';
@@ -15,8 +16,8 @@ export function RepoWindow({ host, root, server, found, onChooseFolder }: { host
   const { repo, error } = useRepoState(host, root, server, windowId);
   if (!repo)
     return error ? (
-      <Blank title="Git can’t read this repository" actions={<NodeButton onClick={onChooseFolder}>Open Another Folder</NodeButton>}>
-        <span className="text-[var(--ansi-1)]">{error}</span>
+      <Blank icon={TriangleAlert} error title="Git can’t read this repository" actions={<NodeButton onClick={onChooseFolder}>Open Another Folder</NodeButton>}>
+        {error}
       </Blank>
     ) : (
       <NodeMessage>Reading {basenameOf(root)}</NodeMessage>

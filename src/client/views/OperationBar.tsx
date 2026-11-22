@@ -48,7 +48,7 @@ export function OperationBar() {
   };
   return (
     <div
-      className="flex min-h-9 flex-none flex-wrap items-center gap-x-2 gap-y-1 border-b border-[var(--node-border)] px-3 py-1"
+      className="flex min-h-10 flex-none flex-wrap items-center gap-x-2 gap-y-1 border-b border-[var(--node-border)] ps-3 pe-2.5 py-1.5"
       style={{ background: 'color-mix(in srgb, var(--ansi-3) 12%, transparent)' }}
       data-operation={op.kind}
     >
@@ -60,23 +60,11 @@ export function OperationBar() {
           Continue
         </NodeButton>
       )}
-      {op.kind === 'rebase' && (
-        <button
-          type="button"
-          className="rounded-control h-6 touch:h-9 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
-          onClick={() => go('skip')}
-        >
-          Skip Commit
-        </button>
-      )}
+      {op.kind === 'rebase' && <NodeButton onClick={() => go('skip')}>Skip Commit</NodeButton>}
       {op.kind !== 'bisect' && (
-        <button
-          type="button"
-          className="rounded-control h-6 touch:h-9 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
-          onClick={() => go('abort')}
-        >
+        <NodeButton variant="ghost" onClick={() => go('abort')}>
           Abort
-        </button>
+        </NodeButton>
       )}
     </div>
   );

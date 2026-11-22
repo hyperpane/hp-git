@@ -3,7 +3,7 @@
 // picked tag's commit on the right.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, Search, Tag as TagIcon } from 'lucide-react';
+import { Plus, Search, Tag as TagIcon, TriangleAlert } from 'lucide-react';
 import { keys } from '@hyperpane/sdk/client';
 import { NodeButton, NodeInput, NodeMessage, ToolButton, menuItems } from '@hyperpane/ui';
 import type { Tag } from '../../../shared/index.ts';
@@ -64,12 +64,12 @@ export function TagList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
+          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput
             ref={filterRef}
-            className="w-full ps-6"
+            className="w-full ps-7"
             placeholder={`Filter tags (${keys('⌘F')})`}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -83,7 +83,9 @@ export function TagList({
         <ToolButton label="New tag" icon={Plus} disabled={!repo.status.head} onClick={() => createTag(repo)} />
       </div>
       {error && !tags ? (
-        <NodeMessage error>{error}</NodeMessage>
+        <Blank icon={TriangleAlert} error title="Tags can’t be listed">
+          {error}
+        </Blank>
       ) : !tags ? (
         <NodeMessage>Loading</NodeMessage>
       ) : !shown.length ? (
@@ -98,7 +100,7 @@ export function TagList({
         <VirtualList
           ref={list}
           count={shown.length}
-          rowHeight={36}
+          rowHeight={40}
           className="group/list git-scroll py-1"
           tabIndex={0}
           role="listbox"
@@ -120,12 +122,12 @@ export function TagList({
                   <TagIcon className="size-3.5 flex-none text-[var(--ansi-3)]" />
                   <div className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="truncate font-medium">{t.name}</span>
-                    <span className="truncate text-[10px] text-[var(--node-muted)]">
+                    <span className="truncate text-2xs text-[var(--node-muted)]">
                       {shortSha(t.sha)}
                       {t.annotated ? ` · ${t.message?.split('\n')[0] ?? ''}` : ' · lightweight'}
                     </span>
                   </div>
-                  <span className="flex-none text-[10px] text-[var(--node-muted)]">{ago(t.date)}</span>
+                  <span className="flex-none text-2xs text-[var(--node-muted)]">{ago(t.date)}</span>
                 </div>
               </div>
             );
@@ -133,7 +135,7 @@ export function TagList({
         />
       )}
       {tags && tags.length > 0 && (
-        <div className="flex h-6 flex-none items-center border-t border-[var(--node-border)] px-2 text-2xs text-[var(--node-muted)]">
+        <div className="flex h-7 flex-none items-center border-t border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
           {plural(tags.length, 'tag')}
         </div>
       )}

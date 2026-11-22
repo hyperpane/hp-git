@@ -3,7 +3,7 @@
 // commit's change to it beside them (or alone, in a narrow window).
 
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { FileClock } from 'lucide-react';
+import { FileClock, GitCommitHorizontal, TriangleAlert } from 'lucide-react';
 import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { FileCommit } from '../../shared/index.ts';
 import { commitMenu } from '../app/actions/commits.ts';
@@ -73,9 +73,20 @@ export function FileHistory({ path }: { path: string }) {
     e.stopPropagation();
   };
 
-  if (error && !commits.length) return <NodeMessage error>{error}</NodeMessage>;
+  if (error && !commits.length)
+    return (
+      <Blank icon={TriangleAlert} error title="The history can’t be read">
+        {error}
+      </Blank>
+    );
   if (!commits.length)
-    return loading ? <NodeMessage>Loading the history of {path}</NodeMessage> : <Blank icon={FileClock}>No commit has touched {path}.</Blank>;
+    return loading ? (
+      <NodeMessage>Loading the history of {path}</NodeMessage>
+    ) : (
+      <Blank icon={FileClock} title="No history">
+        No commit has touched {path}.
+      </Blank>
+    );
   return (
     <ListDetail
       id="fileHistory"
@@ -89,7 +100,7 @@ export function FileHistory({ path }: { path: string }) {
       title={c ? c.subject : undefined}
       first={
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex h-8 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-2.5 text-2xs text-[var(--node-muted)]">
+          <div className="flex h-9 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
             <FileClock className="size-3.5" />
             {commits.length}
             {more ? '+' : ''} commits
@@ -125,7 +136,7 @@ export function FileHistory({ path }: { path: string }) {
                     <Authors commit={x} size={20} max={2} />
                     <div className="flex min-w-0 flex-1 flex-col leading-tight">
                       <span className="truncate">{x.subject}</span>
-                      <span className="flex min-w-0 items-center gap-1 text-[10px] text-[var(--node-muted)]">
+                      <span className="flex min-w-0 items-center gap-1 text-2xs text-[var(--node-muted)]">
                         <span className="font-mono">{shortSha(x.sha)}</span>
                         <span className="truncate">
                           {authorNames(x)} · {ago(x.date)}
@@ -141,7 +152,15 @@ export function FileHistory({ path }: { path: string }) {
           />
         </div>
       }
-      second={c ? <DiffPane key={c.sha} request={{ path: c.path, oldPath: c.from, commit: c.sha }} newRev={c.sha} /> : <Blank>Pick a commit</Blank>}
+      second={
+        c ? (
+          <DiffPane key={c.sha} request={{ path: c.path, oldPath: c.from, commit: c.sha }} newRev={c.sha} />
+        ) : (
+          <Blank icon={GitCommitHorizontal} title="No commit picked">
+            Pick one to see how it changed the file.
+          </Blank>
+        )
+      }
     />
   );
 }

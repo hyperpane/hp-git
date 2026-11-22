@@ -12,7 +12,12 @@ import { CommitDetails } from '../commit/CommitDetails.tsx';
 
 export function TagDetail({ tag }: { tag: Tag | null }) {
   const repo = useRepo();
-  if (!tag) return <Blank icon={TagIcon}>Pick a tag</Blank>;
+  if (!tag)
+    return (
+      <Blank icon={TagIcon} title="No tag picked">
+        Pick one to see the commit it names.
+      </Blank>
+    );
   const actions = tagActions(repo, tag);
   return (
     <CommitDetails
@@ -21,8 +26,8 @@ export function TagDetail({ tag }: { tag: Tag | null }) {
       place="tag"
       load={() => repo.api.show(tag.sha)}
       top={() => (
-        <div className="flex flex-none flex-col gap-1 border-b border-[var(--node-border)] px-3 py-2">
-          <div className="flex items-center gap-1.5 max-sm:flex-wrap">
+        <div className="flex flex-none flex-col gap-2 border-b border-[var(--node-border)] p-3">
+          <div className="flex items-center gap-2 max-sm:flex-wrap">
             <TagIcon className="size-3.5 text-[var(--ansi-3)]" />
             <span className="min-w-0 flex-1 truncate text-sm font-semibold max-sm:basis-[calc(100%-1.5rem)]">{tag.name}</span>
             {actions.slice(0, 2).map((a) => (

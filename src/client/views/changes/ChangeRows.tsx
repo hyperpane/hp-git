@@ -40,7 +40,7 @@ export function SectionRow({
   unstage(files: FileStatus[]): unknown;
 }) {
   return (
-    <div className="h-full ps-1 pe-1.5" onContextMenu={(e) => e.preventDefault()}>
+    <div className="h-full px-1" onContextMenu={(e) => e.preventDefault()}>
       <SectionHeader label={SIDE_LABEL[it.side]} count={it.count} open={open} onToggle={() => click(it, { shiftKey: false, metaKey: false, ctrlKey: false })}>
         {it.side === 'conflict' ? (
           <TriangleAlert className="size-3.5 text-[var(--ansi-9)]" />
@@ -48,7 +48,7 @@ export function SectionRow({
           <button
             type="button"
             tabIndex={-1}
-            className="rounded-chip px-1 text-2xs font-medium tracking-normal normal-case touch:px-2 touch:py-1.5 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+            className="rounded-chip h-5 px-1.5 text-2xs font-medium transition-colors duration-100 touch:h-8 touch:px-2 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
             onClick={() => (it.side === 'staged' ? unstage(files) : stage(files))}
           >
             {it.side === 'staged' ? 'Unstage all' : 'Stage all'}
@@ -80,7 +80,7 @@ export function DirRow({
     <div className="group/list h-full px-1">
       <div
         className={rowClass(false)}
-        style={{ paddingLeft: 6 + it.depth * 12 }}
+        style={{ paddingLeft: 8 + it.depth * 12 }}
         onClick={(e) => click(it, e)}
         onDoubleClick={() => setClosed((c) => (open ? new Set([...c, `${it.side}:${it.path}`]) : new Set([...c].filter((x) => x !== `${it.side}:${it.path}`))))}
         onContextMenu={(e) => menu(e, it)}
@@ -127,7 +127,7 @@ export function FileRow({
   const Icon = fileIcon(basenameOf(f.path));
   return (
     <div className="h-full px-1" data-file={f.path} data-side={it.side}>
-      <div className={rowClass(isPicked)} style={{ paddingLeft: 6 + it.depth * 12 }} onClick={(e) => click(it, e)} onContextMenu={(e) => menu(e, it)}>
+      <div className={rowClass(isPicked)} style={{ paddingLeft: 8 + it.depth * 12 }} onClick={(e) => click(it, e)} onContextMenu={(e) => menu(e, it)}>
         <Checkbox {...inRow} checked={checked} label={fileLabel(it.side, checked, f.path)} onCheckedChange={() => toggle(it.side, [f])} />
         {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
         {tree ? (
@@ -136,7 +136,7 @@ export function FileRow({
           <PathLabel path={f.path} from={it.side === 'unstaged' || it.side === 'untracked' ? undefined : f.from} />
         )}
         {(f.additions || f.deletions) && it.side !== 'conflict' ? (
-          <span className="flex-none text-[10px] tabular-nums opacity-80">
+          <span className="flex-none text-2xs tabular-nums">
             {!!f.additions && <span className="text-[var(--ansi-2)]">+{f.additions}</span>}{' '}
             {!!f.deletions && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
           </span>

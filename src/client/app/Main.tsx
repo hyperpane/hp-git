@@ -139,7 +139,9 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
     right = commit ? (
       <CommitDetails key={commit} id={commit} load={() => repo.api.show(commit)} place="history" />
     ) : (
-      <Blank icon={GitCommitHorizontal}>Pick a commit</Blank>
+      <Blank icon={GitCommitHorizontal} title="No commit picked">
+        Pick one in the list to see what it changed.
+      </Blank>
     );
   } else if (tab === 'branches') {
     left = <BranchList branches={branches.branches} error={branches.error} picked={branch} onPick={setBranch} onOpen={opens} filterRef={filters.branches} />;
@@ -193,7 +195,8 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
             backLabel={tab[0].toUpperCase() + tab.slice(1)}
             first={
               <div className="flex min-h-0 flex-1 flex-col">
-                <Tabs items={tabs} value={tab} onValueChange={setTab} fill label="Views" />
+                {/* As tall as the bar over a diff or a commit beside it: their lines meet. */}
+                <Tabs items={tabs} value={tab} onValueChange={setTab} fill label="Views" className="h-9" />
                 {left}
               </div>
             }

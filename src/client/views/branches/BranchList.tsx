@@ -3,7 +3,7 @@
 // behind, then the remote branches.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Cloud, GitBranch, Plus, Search } from 'lucide-react';
+import { Cloud, GitBranch, Plus, Search, TriangleAlert } from 'lucide-react';
 import { keys } from '@hyperpane/sdk/client';
 import { NodeInput, NodeMessage, ToolButton, cn, menuItems } from '@hyperpane/ui';
 import type { Branches, LocalBranch, RemoteBranch } from '../../../shared/index.ts';
@@ -104,15 +104,20 @@ export function BranchList({
     e.stopPropagation();
   };
 
-  if (error && !branches) return <NodeMessage error>{error}</NodeMessage>;
+  if (error && !branches)
+    return (
+      <Blank icon={TriangleAlert} error title="Branches can’t be listed">
+        {error}
+      </Blank>
+    );
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
+          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput
             ref={filterRef}
-            className="w-full ps-6"
+            className="w-full ps-7"
             placeholder={`Filter branches (${keys('⌘F')})`}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -128,12 +133,14 @@ export function BranchList({
       {!branches ? (
         <NodeMessage>Loading</NodeMessage>
       ) : !rows.length ? (
-        <Blank>{filter ? 'No branch matches' : 'No branches yet: make the first commit'}</Blank>
+        <Blank icon={filter ? Search : GitBranch} title={filter ? 'No matches' : 'No branches yet'}>
+          {filter ? `No branch matches “${filter}”.` : 'Make the first commit to start one.'}
+        </Blank>
       ) : (
         <VirtualList
           ref={list}
           count={rows.length}
-          rowHeight={36}
+          rowHeight={40}
           rowKey={(n) => keyOf(rows[n])}
           className="group/list git-scroll py-1"
           tabIndex={0}
@@ -144,7 +151,7 @@ export function BranchList({
             const r = rows[n];
             if (r.t === 'section')
               return (
-                <div className="flex h-full items-end px-1.5 pb-1">
+                <div className="flex h-full items-end px-1 pb-0.5">
                   <SectionHeader label={r.label} count={r.count} className="h-5" />
                 </div>
               );
@@ -169,19 +176,19 @@ export function BranchList({
                   )}
                   <div className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="flex min-w-0 items-center gap-1.5">
-                      <span className={cn('truncate', current && 'font-semibold')}>{r.b.name}</span>
-                      {current && <span className="flex-none text-[10px] text-[var(--node-accent)]">current</span>}
-                      {r.t === 'local' && r.recent && <span className="flex-none text-[10px] text-[var(--node-muted)]">recent</span>}
-                      {r.t === 'local' && r.b.gone && <span className="flex-none text-[10px] text-[var(--ansi-3)]">upstream gone</span>}
+                      <span className={cn('truncate', current && 'font-medium')}>{r.b.name}</span>
+                      {current && <span className="flex-none text-2xs text-[var(--node-accent)]">current</span>}
+                      {r.t === 'local' && r.recent && <span className="flex-none text-2xs text-[var(--node-muted)]">recent</span>}
+                      {r.t === 'local' && r.b.gone && <span className="flex-none text-2xs text-[var(--ansi-3)]">upstream gone</span>}
                     </span>
-                    <span className="truncate text-[10px] text-[var(--node-muted)]">
+                    <span className="truncate text-2xs text-[var(--node-muted)]">
                       {r.t === 'local' && r.b.upstream ? `${r.b.upstream} · ` : ''}
                       {r.b.subject}
                     </span>
                   </div>
                   <div className="flex flex-none flex-col items-end gap-0.5 leading-tight">
                     {r.t === 'local' && <AheadBehind ahead={r.b.ahead} behind={r.b.behind} />}
-                    <span className="text-[10px] text-[var(--node-muted)] tabular-nums">{ago(r.b.date)}</span>
+                    <span className="text-2xs text-[var(--node-muted)] tabular-nums">{ago(r.b.date)}</span>
                   </div>
                 </div>
               </div>

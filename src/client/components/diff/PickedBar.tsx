@@ -20,7 +20,7 @@ export function PickedBar({
   onClear(): void;
 }) {
   return (
-    <div className="rounded-surface shadow-popover absolute bottom-3 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-2 border border-[var(--node-border)] bg-[var(--node-bg)] py-1 ps-3 pe-1 text-xs whitespace-nowrap motion-safe:animate-[ax-fade-in_150ms_ease-out]">
+    <div className="rounded-surface shadow-popover absolute bottom-3 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-2 border border-[var(--border)] bg-[var(--popover)] p-1 ps-3 text-xs whitespace-nowrap motion-safe:animate-[ax-fade-in_150ms_ease-out]">
       <span className="text-[var(--node-muted)]">{plural(n, 'line')} picked</span>
       {actions.primary && (
         <NodeButton disabled={busy} variant="primary" onClick={() => onRun(actions.primary)}>
@@ -32,7 +32,7 @@ export function PickedBar({
           {actions.discard.label}
         </NodeButton>
       )}
-      <NodeButton className="border-transparent" onClick={onClear} title={`Clear (${keyLabel('⎋')})`}>
+      <NodeButton variant="ghost" onClick={onClear} title={`Clear (${keyLabel('⎋')})`}>
         Clear
       </NodeButton>
     </div>

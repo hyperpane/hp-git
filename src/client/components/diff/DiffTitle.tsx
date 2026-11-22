@@ -8,7 +8,7 @@ export function DiffTitle({ diff, path }: { diff: Diff | undefined; path: string
   return (
     <>
       {diff && <StatusLetter letter={diff.status} />}
-      <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate" title={path}>
+      <span className="flex min-w-0 flex-1 items-center gap-1.5 truncate ps-0.5" title={path}>
         {diff?.oldPath && diff.oldPath !== path && (
           <>
             <span className="truncate text-[var(--node-muted)]">{diff.oldPath}</span>
@@ -24,7 +24,7 @@ export function DiffTitle({ diff, path }: { diff: Diff | undefined; path: string
         )}
       </span>
       {diff && !diff.binary && (diff.additions > 0 || diff.deletions > 0) && (
-        <span className="flex-none text-2xs tabular-nums">
+        <span className="flex-none pe-1 text-2xs tabular-nums">
           <span className="text-[var(--ansi-2)]">+{diff.additions.toLocaleString('en-US')}</span>{' '}
           <span className="text-[var(--ansi-1)]">−{diff.deletions.toLocaleString('en-US')}</span>
         </span>

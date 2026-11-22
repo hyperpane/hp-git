@@ -3,7 +3,7 @@
 // or not); a stash's files and diffs on the right, to apply, pop or drop.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useRef } from 'react';
-import { Archive, Plus } from 'lucide-react';
+import { Archive, Plus, TriangleAlert } from 'lucide-react';
 import { NodeButton, NodeMessage, ToolButton, menuItems } from '@hyperpane/ui';
 import type { Stash } from '../../../shared/index.ts';
 import { stashActions, stashNow } from '../../app/actions/stashes.ts';
@@ -59,12 +59,14 @@ export function StashList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] ps-2.5 pe-1.5 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-10 flex-none items-center gap-1 ps-3 pe-2.5 text-2xs text-[var(--node-muted)] touch:h-12">
         <span className="flex-1">{stashes ? plural(stashes.length, 'stash', 'stashes') : ''}</span>
         <ToolButton label="Stash the changes" icon={Plus} onClick={() => stashNow(repo)} disabled={!repo.status.files.length} />
       </div>
       {error && !stashes ? (
-        <NodeMessage error>{error}</NodeMessage>
+        <Blank icon={TriangleAlert} error title="Stashes can’t be listed">
+          {error}
+        </Blank>
       ) : !stashes ? (
         <NodeMessage>Loading</NodeMessage>
       ) : !stashes.length ? (
@@ -81,7 +83,7 @@ export function StashList({
         <VirtualList
           ref={list}
           count={stashes.length}
-          rowHeight={36}
+          rowHeight={40}
           className="group/list git-scroll py-1"
           tabIndex={0}
           role="listbox"
@@ -103,12 +105,12 @@ export function StashList({
                   <Archive className="size-3.5 flex-none text-[var(--node-muted)]" />
                   <div className="flex min-w-0 flex-1 flex-col leading-tight">
                     <span className="truncate">{s.message}</span>
-                    <span className="truncate text-[10px] text-[var(--node-muted)]">
+                    <span className="truncate text-2xs text-[var(--node-muted)]">
                       stash@{`{${s.index}}`}
                       {s.branch ? ` · on ${s.branch}` : ''}
                     </span>
                   </div>
-                  <span className="flex-none text-[10px] text-[var(--node-muted)]">{ago(s.date)}</span>
+                  <span className="flex-none text-2xs text-[var(--node-muted)]">{ago(s.date)}</span>
                 </div>
               </div>
             );

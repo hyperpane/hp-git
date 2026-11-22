@@ -2,6 +2,7 @@
 // and the picked one's diff beside them (or alone, in a narrow window).
 
 import { useEffect, useState } from 'react';
+import { FileDiff, TriangleAlert } from 'lucide-react';
 import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { ChangedFile } from '../../../shared/index.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -31,9 +32,19 @@ export function FilesBetween({ from, to, place = 'between' }: { from: string; to
   useEffect(() => {
     if (files) setFile((cur) => (cur && files.some((f) => f.path === cur) ? cur : (files[0]?.path ?? null)));
   }, [files]);
-  if (state.key === key && state.error) return <NodeMessage error>{state.error}</NodeMessage>;
+  if (state.key === key && state.error)
+    return (
+      <Blank icon={TriangleAlert} error title="The files can’t be compared">
+        {state.error}
+      </Blank>
+    );
   if (!files) return <NodeMessage>Comparing</NodeMessage>;
-  if (!files.length) return <Blank>No files differ</Blank>;
+  if (!files.length)
+    return (
+      <Blank icon={FileDiff} title="No differences">
+        No files differ.
+      </Blank>
+    );
   const picked = files.find((f) => f.path === file) ?? null;
   return (
     <ListDetail
@@ -51,7 +62,9 @@ export function FilesBetween({ from, to, place = 'between' }: { from: string; to
         picked ? (
           <DiffPane key={`${key}:${picked.path}`} request={{ path: picked.path, oldPath: picked.from, from, to }} newRev={to} />
         ) : (
-          <Blank>Pick a file</Blank>
+          <Blank icon={FileDiff} title="No file picked">
+            Pick one to see its diff.
+          </Blank>
         )
       }
     />

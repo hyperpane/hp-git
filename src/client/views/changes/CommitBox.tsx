@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import { keys, mod } from '@hyperpane/sdk/client';
-import { Button, cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
+import { NodeButton, menuItems, type MenuEntry } from '@hyperpane/ui';
 import type { Author } from '../../../shared/index.ts';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -177,7 +177,7 @@ export function CommitBox() {
         : `Commit to ${branch}`;
 
   return (
-    <div className="flex flex-none flex-col gap-1.5 border-t border-[var(--node-border)] p-2" onKeyDown={keyDown}>
+    <div className="flex flex-none flex-col gap-2 border-t border-[var(--node-border)] p-3 max-sm:p-2" onKeyDown={keyDown}>
       {last && <LastCommit last={last} onUndo={undo} onDismiss={() => setLast(null)} />}
       <IdentityButton identity={status.identity} onClick={editIdentity} />
       <SummaryField
@@ -193,7 +193,8 @@ export function CommitBox() {
         rows={draft.description.split('\n').length > 2 ? 5 : 3}
         onChange={(e) => setDraft({ description: e.target.value })}
         aria-label="Description"
-        className="rounded-control git-scroll w-full resize-none border border-[var(--node-border)] bg-transparent px-2 py-1.5 text-xs leading-relaxed text-[var(--node-fg)] outline-none transition-colors duration-100 placeholder:text-[var(--node-muted)] hover:border-[color-mix(in_srgb,var(--node-fg)_24%,transparent)] focus:border-[var(--node-accent)]"
+        // The kit's field, filled (it has no text area of its own for a window).
+        className="rounded-control git-scroll w-full resize-none border border-transparent bg-[color-mix(in_srgb,var(--node-fg)_6%,transparent)] px-2 py-1.5 text-xs leading-relaxed text-[var(--node-fg)] outline-none transition-[border-color,box-shadow] duration-100 placeholder:text-[var(--node-muted)] hover:bg-[color-mix(in_srgb,var(--node-fg)_9%,transparent)] focus:border-[var(--node-accent)] focus:bg-transparent focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--node-accent)_22%,transparent)] touch:text-sm"
       />
       {draft.coAuthors.length > 0 && (
         <CoAuthorList coAuthors={draft.coAuthors} onRemove={(c) => setDraft({ coAuthors: draft.coAuthors.filter((x) => x !== c) })} />
@@ -211,19 +212,16 @@ export function CommitBox() {
           Sign off
         </Chip>
         <span className="flex-1" />
-        <button
-          type="button"
+        <NodeButton
+          variant="ghost"
           title="Add a co-author"
           aria-label="Add a co-author"
-          className={cn(
-            'rounded-control flex h-6 items-center gap-1 px-1.5 text-2xs text-[var(--node-muted)] touch:h-9 transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
-            styles.focusRing,
-          )}
+          className="px-2 font-normal text-[var(--node-muted)] hover:text-[var(--node-fg)]"
           onClick={pickCoAuthor}
         >
-          <UserPlus className="size-3.5" />
+          <UserPlus />
           Co-author
-        </button>
+        </NodeButton>
       </div>
       {draft.amend && amending && (
         <div className="truncate text-2xs text-[var(--ansi-3)]" title={amending.subject}>
@@ -250,9 +248,9 @@ export function CommitBox() {
           , or commit them all ({keys('⌘↵')}).
         </div>
       )}
-      <Button size="sm" className="w-full min-w-0" disabled={!ready} onClick={() => commit()} title={`${label} (${keys('⌘↵')})`}>
+      <NodeButton variant="primary" className="h-8 w-full min-w-0 touch:h-10" disabled={!ready} onClick={() => commit()} title={`${label} (${keys('⌘↵')})`}>
         <span className="truncate">{busy ? 'Committing' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label}</span>
-      </Button>
+      </NodeButton>
     </div>
   );
 }

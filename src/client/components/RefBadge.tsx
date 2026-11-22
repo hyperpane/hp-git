@@ -20,7 +20,7 @@ export function RefBadge({ refName, className }: { refName: Ref; className?: str
     <span
       title={`${refName.kind === 'remote' ? 'Remote branch' : refName.kind === 'tag' ? 'Tag' : refName.kind === 'head' ? 'HEAD' : refName.kind === 'stash' ? 'Stash' : 'Branch'} ${refName.name}${refName.current ? ' (checked out)' : ''}`}
       className={cn(
-        'rounded-chip inline-flex h-4 max-w-40 flex-none items-center truncate px-1 text-[10px] leading-4 font-medium',
+        'rounded-chip inline-flex h-4 max-w-40 flex-none items-center truncate px-1 text-2xs leading-4 font-medium',
         current && 'ring-1 ring-inset',
         className,
       )}

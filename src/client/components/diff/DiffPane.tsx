@@ -7,7 +7,7 @@
 // and the file's history and blame are in its More menu only.
 
 import { type MouseEvent as ReactMouseEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { Columns2, FileClock, MoreHorizontal, Pilcrow, Rows3, ScanSearch } from 'lucide-react';
+import { Binary, Columns2, FileClock, FileWarning, MoreHorizontal, Pilcrow, Rows3, ScanSearch, TriangleAlert } from 'lucide-react';
 import { formatSize } from '@hyperpane/sdk/client';
 import { NodeButton, NodeMessage, ToolButton, cn, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
 import type { Diff } from '../../../shared/index.ts';
@@ -164,7 +164,12 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
   };
 
   let body: ReactNode;
-  if (error) body = <NodeMessage error>{error}</NodeMessage>;
+  if (error)
+    body = (
+      <Blank icon={TriangleAlert} error title="The diff can’t be shown">
+        {error}
+      </Blank>
+    );
   else if (!diff) body = <NodeMessage>Loading the diff</NodeMessage>;
   else if (diff.image) body = <ImageDiff diff={diff} />;
   else if (diff.submodule)
@@ -176,12 +181,12 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
     );
   else if (diff.tooLarge)
     body = (
-      <Blank title="This diff is big" actions={<NodeButton onClick={() => setFull(true)}>Show It Anyway</NodeButton>}>
+      <Blank icon={FileWarning} title="This diff is big" actions={<NodeButton onClick={() => setFull(true)}>Show It Anyway</NodeButton>}>
         Its changes come to {formatSize(diff.size)}
         {diff.additions + diff.deletions > 0 ? ` (${(diff.additions + diff.deletions).toLocaleString('en-US')} lines)` : ''}. Showing it may take a moment.
       </Blank>
     );
-  else if (diff.binary) body = <Blank title="Binary file">{`It changed (${formatSize(diff.size)}); there are no lines to show`}</Blank>;
+  else if (diff.binary) body = <Blank icon={Binary} title="Binary file">{`It changed (${formatSize(diff.size)}); there are no lines to show`}</Blank>;
   else if (!diff.hunks.length)
     body = empty ?? (
       <Blank
@@ -219,10 +224,9 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
 
   return (
     <div ref={box} className="flex min-h-0 min-w-0 flex-1 flex-col" data-diff-pane={path}>
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1.5 border-b border-[var(--node-border)] px-2">
+      <div className="flex h-9 flex-none items-center gap-1 border-b border-[var(--node-border)] ps-3 pe-1.5 touch:h-11">
         <DiffTitle diff={diff} path={path} />
-        {tools}
-        <span className="mx-0.5 h-4 w-px flex-none bg-[var(--node-border)]" />
+        {tools && <span className="flex flex-none items-center gap-1 pe-1">{tools}</span>}
         <ToolButton
           label={shownMode === 'split' ? 'Unified diff' : narrow ? 'Side by side (the window is too narrow)' : 'Side by side'}
           icon={shownMode === 'split' ? Rows3 : Columns2}

@@ -37,23 +37,31 @@ export function Overlay({ view }: { view: View }) {
   const path = view.kind === 'fileHistory' || view.kind === 'blame' ? view.path : null;
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-view={view.kind}>
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] bg-[color-mix(in_srgb,var(--node-header)_60%,transparent)] px-1.5">
+      <div className="flex h-10 flex-none items-center gap-1 border-b border-[var(--node-border)] bg-[var(--node-header)] px-2.5 touch:h-12">
         <ToolButton label={`Back (${keys('⌘[')})`} icon={ArrowLeft} onClick={repo.back} />
         <ToolButton label={`Forward (${keys('⌘]')})`} icon={ArrowRight} disabled={!repo.canForward} onClick={repo.forward} />
-        <nav className="flex min-w-0 flex-1 items-center gap-1 text-xs" aria-label="Where you are">
+        <nav className="ms-1 flex min-w-0 flex-1 items-center gap-1.5 text-xs" aria-label="Where you are">
           <button
             type="button"
-            className="rounded-chip flex-none px-1 text-[var(--node-muted)] touch:py-2 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+            className="rounded-control h-7 flex-none px-1.5 text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9"
             onClick={() => repo.setTab(repo.tab)}
           >
             {tabLabel}
           </button>
-          <ChevronRight className="size-3 flex-none text-[var(--node-muted)]" />
+          <ChevronRight className="size-3 flex-none text-[var(--node-muted)] opacity-60" />
           <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />
           <span className="truncate font-medium">{viewTitle(view)}</span>
         </nav>
-        {path && view.kind === 'fileHistory' && <NodeButton onClick={() => repo.open({ kind: 'blame', path })}>Blame</NodeButton>}
-        {path && view.kind === 'blame' && <NodeButton onClick={() => repo.open({ kind: 'fileHistory', path })}>History</NodeButton>}
+        {path && view.kind === 'fileHistory' && (
+          <NodeButton variant="ghost" onClick={() => repo.open({ kind: 'blame', path })}>
+            Blame
+          </NodeButton>
+        )}
+        {path && view.kind === 'blame' && (
+          <NodeButton variant="ghost" onClick={() => repo.open({ kind: 'fileHistory', path })}>
+            History
+          </NodeButton>
+        )}
         <ToolButton label={`Close (${keys('⎋')})`} icon={X} onClick={() => repo.setTab(repo.tab)} />
       </div>
       <div className={cn('flex min-h-0 flex-1 flex-col')}>{body}</div>

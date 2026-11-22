@@ -37,7 +37,7 @@ export function FileList({
   const repo = useRepo();
   const [tree, setTreeState] = useState(() => local.get('commitTree', false));
   const list = useRef<VirtualHandle>(null);
-  const rowHeight = useRowHeight(22);
+  const rowHeight = useRowHeight(28);
   const sorted = useMemo(() => (tree ? [...files].sort((a, b) => a.path.localeCompare(b.path)) : files), [files, tree]);
   const rows = useMemo(() => {
     if (!tree) return sorted.map((f) => ({ f, depth: 0, dir: null as string | null }));
@@ -98,7 +98,7 @@ export function FileList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-commit-files>
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1.5 border-b border-[var(--node-border)] ps-2 pe-1 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-9 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-3 pe-1 text-2xs text-[var(--node-muted)] touch:h-11">
         <span className="min-w-0 flex-1 truncate">
           {plural(files.length, 'file')}
           {truncated ? '+' : ''} <span className="text-[var(--ansi-2)]">+{additions.toLocaleString('en-US')}</span>{' '}
@@ -126,7 +126,7 @@ export function FileList({
           const r = rows[n];
           if (!r.f)
             return (
-              <div className="flex h-full items-center gap-1 px-2 text-[var(--node-muted)]" style={{ paddingLeft: 8 + r.depth * 12 }}>
+              <div className="flex h-full items-center gap-2 px-3 text-[var(--node-muted)]" style={{ paddingLeft: 12 + r.depth * 12 }}>
                 <FolderTree className="size-3.5 flex-none" />
                 <span className="truncate">{r.dir}</span>
               </div>
@@ -137,7 +137,7 @@ export function FileList({
             <div className="h-full px-1">
               <div
                 className={rowClass(f.path === picked)}
-                style={{ paddingLeft: 6 + r.depth * 12 }}
+                style={{ paddingLeft: 8 + r.depth * 12 }}
                 onClick={() => {
                   onPick(f.path);
                   onOpen?.();
@@ -148,9 +148,9 @@ export function FileList({
                 {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
                 {tree ? <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span> : <PathLabel path={f.path} from={f.from} />}
                 {f.binary ? (
-                  <span className="text-[10px] text-[var(--node-muted)]">bin</span>
+                  <span className="text-2xs text-[var(--node-muted)]">bin</span>
                 ) : (
-                  <span className="flex-none text-[10px] tabular-nums opacity-80">
+                  <span className="flex-none text-2xs tabular-nums">
                     {f.additions > 0 && <span className="text-[var(--ansi-2)]">+{f.additions}</span>}{' '}
                     {f.deletions > 0 && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
                   </span>

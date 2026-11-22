@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { FolderGit2, GitBranch, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { ToolButton, menuItems, type MenuEntry } from '@hyperpane/ui';
+import { Toolbar as Bar, ToolButton, menuItems, type MenuEntry } from '@hyperpane/ui';
 import type { Branches, Found } from '../../../shared/index.ts';
 import { syncChoice, syncMenu } from '../../app/actions/sync.ts';
 import { type Repo, useRepo } from '../../app/repo.ts';
@@ -78,10 +78,15 @@ export function Toolbar({
   const showCounts = !!status.upstream && !status.upstreamGone && (status.ahead > 0 || status.behind > 0);
 
   return (
-    <div className="flex h-10 flex-none items-stretch border-b border-[var(--node-border)] bg-[var(--node-header)]">
-      <div className="flex flex-none items-center px-1.5 max-sm:hidden">
-        <ToolButton label={sidebar ? 'Hide the list' : 'Show the list'} icon={sidebar ? PanelLeftClose : PanelLeftOpen} onClick={onSidebar} />
-      </div>
+    // 44px: its 32px two-line buttons get 6px above and below, as a 40px
+    // bar gives 28px controls.
+    <Bar aria-label="Repository" className="h-11 gap-0.5">
+      <ToolButton
+        label={sidebar ? 'Hide the list' : 'Show the list'}
+        icon={sidebar ? PanelLeftClose : PanelLeftOpen}
+        onClick={onSidebar}
+        className="me-1 max-sm:hidden"
+      />
       <Segment
         icon={FolderGit2}
         title="Repository"
@@ -113,7 +118,7 @@ export function Toolbar({
         sub={sync.sub}
         badge={
           showCounts ? (
-            <span className="flex flex-none items-center gap-1 rounded-full bg-[var(--node-hover)] px-1.5 text-[10px] leading-4 font-medium tabular-nums">
+            <span className="flex flex-none items-center gap-1 rounded-full bg-[var(--node-hover)] px-1.5 text-2xs leading-4 font-medium tabular-nums">
               {status.behind > 0 && <span>↓{status.behind}</span>}
               {status.ahead > 0 && <span>↑{status.ahead}</span>}
             </span>
@@ -124,10 +129,10 @@ export function Toolbar({
       />
       <div className="min-w-0 flex-1 max-sm:hidden" />
       {status.fetchError && (
-        <span className="flex min-w-0 items-center px-3 text-2xs text-[var(--ansi-3)]" title={status.fetchError}>
+        <span className="flex min-w-0 items-center px-2 text-2xs text-[var(--ansi-3)]" title={status.fetchError}>
           <span className="truncate">Auto-fetch failed</span>
         </span>
       )}
-    </div>
+    </Bar>
   );
 }

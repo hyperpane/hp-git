@@ -62,7 +62,7 @@ export function HunkRow({
             }
             aria-label={checking ? (all ? 'Leave this hunk out' : 'Commit this hunk') : undefined}
             className={cn(
-              'h-4 rounded-chip px-1 font-mono text-[10px] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
+              'h-4 rounded-chip px-1 font-mono text-2xs transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
               (all || some) && 'text-[var(--node-accent)]',
             )}
             onClick={onPick}
@@ -209,7 +209,7 @@ export function CodeCell({
     <div className="flex-none cursor-text ps-1 pe-6 whitespace-pre select-text">
       <span data-code>{paint(text, spans, words, kind === '+' ? 'git-word-added' : 'git-word-removed')}</span>
       {noNewline && (
-        <span className="ms-2 text-[10px] text-[var(--node-muted)] italic select-none" title="No newline at end of file">
+        <span className="ms-2 text-2xs text-[var(--node-muted)] italic select-none" title="No newline at end of file">
           ⏎̸
         </span>
       )}

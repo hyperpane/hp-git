@@ -47,7 +47,7 @@ export function ChangesList({
   };
   const [closed, setClosed] = useState<Set<string>>(new Set());
   const list = useRef<VirtualHandle>(null);
-  const rowHeight = useRowHeight(22);
+  const rowHeight = useRowHeight(28);
   const anchor = useRef<string | null>(null);
 
   const groups = useMemo(() => {
@@ -243,7 +243,7 @@ export function ChangesList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
         <Checkbox
           {...inRow}
           checked={allChecked}
@@ -255,10 +255,10 @@ export function ChangesList({
           className="mx-1"
         />
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
+          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput
             ref={filterRef}
-            className="w-full ps-6"
+            className="w-full ps-7"
             placeholder={`Filter ${plural(total, 'file')} (${keys('⌘F')})`}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
@@ -281,7 +281,9 @@ export function ChangesList({
           Nothing to commit{status.branch ? ` on ${status.branch}` : ''}.
         </Blank>
       ) : rows.length === 0 ? (
-        <Blank>No file matches “{filter}”.</Blank>
+        <Blank icon={Search} title="No matches">
+          No file matches “{filter}”.
+        </Blank>
       ) : (
         <VirtualList
           ref={list}
@@ -297,7 +299,7 @@ export function ChangesList({
         />
       )}
       {status.truncated && (
-        <div className="flex-none border-t border-[var(--node-border)] px-2 py-1 text-2xs text-[var(--ansi-3)]">
+        <div className="flex h-7 flex-none items-center border-t border-[var(--node-border)] px-3 text-2xs text-[var(--ansi-3)]">
           More than 10 000 files changed: some aren’t listed
         </div>
       )}

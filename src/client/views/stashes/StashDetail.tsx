@@ -12,7 +12,12 @@ import { CommitDetails } from '../commit/CommitDetails.tsx';
 
 export function StashDetail({ stash }: { stash: Stash | null }) {
   const repo = useRepo();
-  if (!stash) return <Blank icon={Archive}>Pick a stash</Blank>;
+  if (!stash)
+    return (
+      <Blank icon={Archive} title="No stash picked">
+        Pick one to see what it put aside.
+      </Blank>
+    );
   const ref = `stash@{${stash.index}}`;
   const actions = stashActions(repo, stash);
   return (
@@ -24,7 +29,7 @@ export function StashDetail({ stash }: { stash: Stash | null }) {
       diffOf={(f) => ({ path: f.path, oldPath: f.from, commit: f.untracked ? `${ref}^3` : ref })}
       rev={() => ref}
       top={() => (
-        <div className="flex h-9 flex-none items-center gap-1.5 touch:h-12 border-b border-[var(--node-border)] px-3">
+        <div className="flex h-10 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-3 pe-2.5 touch:h-12">
           <Archive className="size-3.5 text-[var(--node-muted)]" />
           <span className="min-w-0 flex-1 truncate text-2xs text-[var(--node-muted)]">
             {ref}

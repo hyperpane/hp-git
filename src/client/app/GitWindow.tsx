@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type Host, useData, useProject, useServerPart, useWindow } from '@hyperpane/sdk/client';
 import { codeHighlightCss } from '@hyperpane/code';
 import { NodeButton, NodeMessage } from '@hyperpane/ui';
+import { FolderX } from 'lucide-react';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
 import { DIFF_CSS } from '../components/diff/styles.ts';
@@ -116,15 +117,19 @@ export function GitWindow({ host }: { host: Host }) {
   if (found.for === folder && found.error)
     return (
       <Blank
+        icon={FolderX}
+        error
         title="Git can’t open this folder"
         actions={
           <>
-            <NodeButton onClick={() => setAttempt((n) => n + 1)}>Try Again</NodeButton>
+            <NodeButton variant="primary" onClick={() => setAttempt((n) => n + 1)}>
+              Try Again
+            </NodeButton>
             <NodeButton onClick={chooseFolder}>Open Another Folder</NodeButton>
           </>
         }
       >
-        <span className="text-[var(--ansi-1)]">{found.error}</span>
+        {found.error}
       </Blank>
     );
   if (!f) return <NodeMessage>Looking for a repository</NodeMessage>;

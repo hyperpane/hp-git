@@ -5,7 +5,7 @@
 import { useMemo, useState } from 'react';
 import { FolderGit2, GitBranch, X } from 'lucide-react';
 import { type Host, useHost, useWindow } from '@hyperpane/sdk/client';
-import { Button, NodeButton, Progress } from '@hyperpane/ui';
+import { NodeButton, Progress, cn, styles } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { gitTools } from '../app/api.ts';
 import { askCredentials } from '../app/credentials.ts';
@@ -76,10 +76,12 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 overflow-auto p-6 text-center text-xs" data-welcome>
-      <FolderGit2 className="size-10 text-[var(--node-muted)] opacity-80" strokeWidth={1.25} />
+      <div className="rounded-surface grid size-10 place-items-center bg-[var(--node-hover)] text-[var(--node-muted)]">
+        <FolderGit2 aria-hidden className="size-5" />
+      </div>
       <div className="flex max-w-md flex-col gap-1">
-        <div className="text-base font-semibold">{basenameOf(folder) || folder} isn’t a Git repository</div>
-        <div className="break-all text-[var(--node-muted)]">{folder}</div>
+        <div className="text-sm font-semibold">{basenameOf(folder) || folder} isn’t a Git repository</div>
+        <div className="font-mono text-2xs break-all text-[var(--node-muted)]">{folder}</div>
       </div>
       {cloning ? (
         <div className="flex w-80 max-w-full flex-col gap-2">
@@ -88,7 +90,7 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
               Cloning: {cloning.phase}
               {cloning.percent !== null ? ` ${Math.round(cloning.percent)}%` : ''}
             </span>
-            <NodeButton onClick={cloning.cancel}>
+            <NodeButton variant="ghost" onClick={cloning.cancel}>
               <X />
               Cancel
             </NodeButton>
@@ -98,26 +100,27 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
         </div>
       ) : (
         <div className="flex flex-wrap justify-center gap-2">
-          <Button size="sm" disabled={busy} onClick={init}>
+          <NodeButton variant="primary" disabled={busy} onClick={init}>
             {busy ? 'Initializing' : 'Initialize Repository'}
-          </Button>
-          <Button size="sm" variant="secondary" onClick={clone}>
-            Clone
-          </Button>
-          <Button size="sm" variant="ghost" onClick={onChoose}>
+          </NodeButton>
+          <NodeButton onClick={clone}>Clone</NodeButton>
+          <NodeButton variant="ghost" onClick={onChoose}>
             Open Another Folder
-          </Button>
+          </NodeButton>
         </div>
       )}
       {error && <div className="max-w-md text-[var(--ansi-1)]">{error}</div>}
       {found.repos.length > 0 && (
-        <div className="flex w-80 max-w-full flex-col gap-1 text-left">
-          <div className="text-2xs font-semibold tracking-wide text-[var(--node-muted)] uppercase">Repositories in this folder</div>
+        <div className="mt-2 flex w-80 max-w-full flex-col gap-0.5 text-left">
+          <div className="flex h-7 items-center px-2 font-medium text-[var(--node-muted)]">Repositories in this folder</div>
           {found.repos.slice(0, 12).map((r) => (
             <button
               key={r.root}
               type="button"
-              className="rounded-chip flex h-7 items-center gap-2 px-2 hover:bg-[var(--node-hover)]"
+              className={cn(
+                'rounded-control flex h-7 items-center gap-2 px-2 transition-colors duration-100 hover:bg-[var(--node-hover)] touch:h-10',
+                styles.focusRing,
+              )}
               onClick={() => {
                 host.win.setData('folder', r.root);
                 host.win.setData('repo', null);

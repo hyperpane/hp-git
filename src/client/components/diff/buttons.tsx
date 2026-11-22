@@ -13,7 +13,7 @@ export function HunkButton({ children, onClick, disabled, danger }: { children: 
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'rounded-chip h-4 flex-none px-1.5 text-[10px] font-medium transition-colors duration-100 disabled:opacity-40',
+        'rounded-chip h-4 flex-none px-1.5 text-2xs font-medium transition-colors duration-100 disabled:opacity-40',
         danger ? 'text-[var(--ansi-1)] hover:bg-[color-mix(in_srgb,var(--ansi-1)_16%,transparent)]' : 'text-[var(--node-fg)] hover:bg-[var(--node-hover)]',
       )}
     >

@@ -45,7 +45,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
       title={shown ? 'Hide the message, for more of the diff' : 'Show the message'}
       aria-label={shown ? 'Hide the message' : 'Show the message'}
       aria-expanded={shown}
-      className="rounded-chip flex size-5 flex-none items-center justify-center text-[var(--node-muted)] touch:size-8 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+      className="rounded-chip flex size-6 flex-none items-center justify-center text-[var(--node-muted)] transition-colors duration-100 touch:size-8 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
       onClick={() => setShown(!shown)}
     >
       {shown ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
@@ -53,9 +53,9 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
   );
   if (!shown)
     return (
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-1.5 border-b border-[var(--node-border)] ps-1.5 pe-3" data-commit-header="folded">
+      <div className="flex h-9 flex-none items-center gap-2 border-b border-[var(--node-border)] ps-1.5 pe-3 touch:h-11" data-commit-header="folded">
         {fold}
-        <div className="min-w-0 flex-1 truncate font-semibold" title={c.subject}>
+        <div className="min-w-0 flex-1 truncate font-medium" title={c.subject}>
           {c.subject}
         </div>
         <Authors commit={c} size={16} />
@@ -63,13 +63,16 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
       </div>
     );
   return (
-    <div className="flex max-h-[45%] flex-none flex-col gap-1.5 overflow-auto border-b border-[var(--node-border)] py-2 ps-1.5 pe-3" data-commit-header="open">
-      <div className="flex items-start gap-1.5">
+    <div
+      className="flex max-h-[45%] flex-none flex-col gap-2 overflow-auto border-b border-[var(--node-border)] pt-1.5 pb-3 ps-1.5 pe-3"
+      data-commit-header="open"
+    >
+      <div className="flex items-start gap-2">
         {fold}
-        <div className="min-w-0 flex-1 text-sm leading-snug font-semibold break-words select-text">{c.subject}</div>
+        <div className="min-w-0 flex-1 pt-0.5 text-sm leading-snug font-semibold break-words select-text">{c.subject}</div>
         {sha}
       </div>
-      <div className="flex flex-col gap-1.5 ps-[26px]">
+      <div className="flex flex-col gap-2 ps-8">
         {body && (
           <div className="relative">
             <pre

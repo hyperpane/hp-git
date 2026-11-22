@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { ChevronDown, X, type LucideIcon } from 'lucide-react';
 import { Progress, cn, styles } from '@hyperpane/ui';
 import { useRepo } from '../../app/repo.ts';
-import { narrowSegment } from './Segment.tsx';
+import { SegmentText, narrowSegment, segmentButton } from './Segment.tsx';
 
 export function SyncSegment({
   icon: Icon,
@@ -25,23 +25,18 @@ export function SyncSegment({
   const repo = useRepo();
   const sync = repo.sync;
   return (
-    <div className={cn('relative flex flex-none items-stretch border-e border-[var(--node-border)]', narrowSegment('w-[28%] max-w-72 min-w-36'))}>
+    <div className={cn('rounded-control relative flex h-8 flex-none items-stretch overflow-hidden touch:h-10', narrowSegment('w-[28%] max-w-72 min-w-36'))}>
       <button
         type="button"
         onClick={sync ? undefined : onClick}
-        className={cn(
-          'flex min-w-0 flex-1 items-center gap-2 px-2.5 text-left transition-colors duration-100 hover:bg-[var(--node-hover)]',
-          styles.focusRingInset,
-        )}
+        className={cn(segmentButton, 'h-full flex-1 rounded-e-none touch:h-full', styles.focusRingInset)}
         title={sync ? sync.text || sync.label : label}
       >
         <Icon className={cn('size-4 flex-none text-[var(--node-muted)]', sync && 'animate-[git-spin_1s_linear_infinite]')} />
-        <span className="flex min-w-0 flex-1 flex-col leading-tight">
-          <span className="truncate text-xs font-semibold">{sync ? sync.label : label}</span>
-          <span className="truncate text-[10px] text-[var(--node-muted)]">
-            {sync ? (sync.phase ? `${sync.phase}${sync.percent !== null ? ` ${Math.round(sync.percent)}%` : ''}` : 'Starting') : sub}
-          </span>
-        </span>
+        <SegmentText
+          title={sync ? (sync.phase ? `${sync.phase}${sync.percent !== null ? ` ${Math.round(sync.percent)}%` : ''}` : 'Starting') : sub}
+          value={sync ? sync.label : label}
+        />
         {!sync && badge}
       </button>
       {sync ? (
@@ -49,7 +44,10 @@ export function SyncSegment({
           type="button"
           title="Cancel"
           aria-label="Cancel"
-          className="flex w-7 flex-none items-center justify-center text-[var(--node-muted)] touch:w-10 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          className={cn(
+            'rounded-e-control flex w-7 flex-none items-center justify-center text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:w-10',
+            styles.focusRingInset,
+          )}
           onClick={() => sync.cancel()}
         >
           <X className="size-3.5" />
@@ -59,7 +57,10 @@ export function SyncSegment({
           type="button"
           title="More: fetch, pull, push, force push, remotes"
           aria-label="More sync actions"
-          className="flex w-6 flex-none items-center justify-center touch:w-10 border-s border-[var(--node-border)] text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          className={cn(
+            'rounded-e-control flex w-6 flex-none items-center justify-center text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:w-10',
+            styles.focusRingInset,
+          )}
           onClick={(e) => onMenu(e.currentTarget)}
         >
           <ChevronDown className="size-3.5" />

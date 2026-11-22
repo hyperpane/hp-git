@@ -2,7 +2,7 @@
 // files one changed since they parted.
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, TriangleAlert } from 'lucide-react';
 import { NodeMessage, SegmentedControl, SplitPane } from '@hyperpane/ui';
 import type { Commit, Compare } from '../../../shared/index.ts';
 import { commitMenu } from '../../app/actions/commits.ts';
@@ -31,12 +31,17 @@ export function CompareView({ base, head }: { base: string; head: string }) {
     );
     return () => p.cancel();
   }, [repo.api, base, head, repo.version]);
-  if (state.error) return <NodeMessage error>{state.error}</NodeMessage>;
+  if (state.error)
+    return (
+      <Blank icon={TriangleAlert} error title="These can’t be compared">
+        {state.error}
+      </Blank>
+    );
   if (!state.c) return <NodeMessage>Comparing</NodeMessage>;
   const c = state.c;
   return (
     <div ref={setBox} className="flex min-h-0 flex-1 flex-col" data-compare={`${base}...${head}`}>
-      <div className="flex h-8 flex-none touch:h-11 items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-10 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)] touch:h-12">
         <SegmentedControl
           size="xs"
           label="What to compare"
@@ -58,7 +63,7 @@ export function CompareView({ base, head }: { base: string; head: string }) {
         <SplitPane
           id="compare"
           direction="column"
-          initial={box.clientHeight ? Math.max(80, Math.round((box.clientHeight - 32) / 2)) : 200}
+          initial={box.clientHeight ? Math.max(80, Math.round((box.clientHeight - 40) / 2)) : 200}
           min={80}
           minOther={80}
           first={
@@ -83,10 +88,10 @@ export function CompareView({ base, head }: { base: string; head: string }) {
 
 function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string; commits: Commit[] }) {
   const repo = useRepo();
-  const rowHeight = useRowHeight(24);
+  const rowHeight = useRowHeight(28);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-7 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-3 text-2xs font-medium">
+      <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-xs font-medium">
         {icon}
         {title}
       </div>
@@ -121,7 +126,7 @@ function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string
           }}
         />
       ) : (
-        <Blank>Nothing</Blank>
+        <p className="px-3 py-2 text-[var(--node-muted)]">None</p>
       )}
     </div>
   );

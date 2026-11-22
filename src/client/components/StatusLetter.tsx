@@ -27,7 +27,7 @@ export function StatusLetter({ letter, className, title }: { letter: Shown; clas
   return (
     <span
       title={title ?? label}
-      className={cn('rounded-chip inline-flex h-4 w-4 flex-none items-center justify-center font-mono text-[10px] leading-none font-semibold', className)}
+      className={cn('rounded-chip inline-flex h-4 w-4 flex-none items-center justify-center font-mono text-2xs leading-none font-semibold', className)}
       style={{ color, background: `color-mix(in srgb, ${color} 16%, transparent)` }}
     >
       {letter}

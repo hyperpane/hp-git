@@ -5,7 +5,7 @@
 // take one side for the whole file, or open it in the Editor.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, TriangleAlert } from 'lucide-react';
+import { Binary, Check, TriangleAlert } from 'lucide-react';
 import { MONO } from '@hyperpane/code';
 import { NodeButton, NodeMessage } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
@@ -87,14 +87,18 @@ export function ConflictView({ file }: { file: FileStatus }) {
     <div className="flex min-h-0 flex-1 flex-col" data-conflict={file.path}>
       {bar}
       {state.error ? (
-        <NodeMessage error>{state.error}</NodeMessage>
+        <Blank icon={TriangleAlert} error title="The conflict can’t be read">
+          {state.error}
+        </Blank>
       ) : state.binary ? (
-        <Blank title="A binary file">Use ours or theirs for it</Blank>
+        <Blank icon={Binary} title="A binary file">
+          Use ours or theirs for it.
+        </Blank>
       ) : !state.lines ? (
         <NodeMessage>Loading</NodeMessage>
       ) : (
         <>
-          <div className="flex h-8 flex-none touch:h-11 items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs">
+          <div className="flex h-10 flex-none items-center gap-2 border-b border-[var(--node-border)] ps-3 pe-2.5 text-2xs touch:h-12">
             <span className="text-[var(--node-muted)]">
               {conflicts.length ? `${chosen} of ${plural(conflicts.length, 'conflict')} chosen` : 'No conflict markers are left'}
             </span>
@@ -105,7 +109,7 @@ export function ConflictView({ file }: { file: FileStatus }) {
             <span className="flex items-center gap-1 text-[var(--node-muted)]">
               <span className="size-2 rounded-full bg-[var(--ansi-5)]" /> Theirs: {theirs}
             </span>
-            <NodeButton disabled={saving || !chosen} onClick={() => save(false)}>
+            <NodeButton variant="ghost" disabled={saving || !chosen} onClick={() => save(false)}>
               Save
             </NodeButton>
             <NodeButton

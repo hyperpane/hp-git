@@ -73,7 +73,7 @@ export function Authors({
           className={i > 0 ? '-ms-1.5' : undefined}
         />
       ))}
-      {more > 0 && <span className="ms-0.5 text-[10px] text-[var(--node-muted)] tabular-nums">+{more}</span>}
+      {more > 0 && <span className="ms-0.5 text-2xs text-[var(--node-muted)] tabular-nums">+{more}</span>}
     </span>
   );
 }

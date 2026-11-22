@@ -25,7 +25,7 @@ export function ConflictBlock({
   return (
     <div className="rounded-surface my-2 overflow-hidden border border-[color-mix(in_srgb,var(--ansi-9)_40%,var(--node-border))] font-sans" data-block={number}>
       <div
-        className="flex h-7 items-center gap-1 border-b border-[var(--node-border)] px-2 text-2xs touch:h-11 max-sm:h-auto max-sm:min-h-7 max-sm:flex-wrap max-sm:py-1"
+        className="flex h-8 items-center gap-1 border-b border-[var(--node-border)] ps-3 pe-1 text-2xs touch:h-11 max-sm:h-auto max-sm:min-h-8 max-sm:flex-wrap max-sm:py-1"
         style={{ background: 'color-mix(in srgb, var(--ansi-9) 7%, transparent)' }}
       >
         <span className="font-semibold">Conflict {number}</span>
@@ -74,7 +74,7 @@ function Side({ title, lines, color, taken, dropped }: { title: string; lines: s
       )}
     >
       <div
-        className="flex h-5 items-center gap-1 px-2 font-sans text-[10px] font-semibold"
+        className="flex h-5 items-center gap-1 px-2 font-sans text-2xs font-semibold"
         style={{ color, background: `color-mix(in srgb, ${color} 10%, transparent)` }}
       >
         <span className="truncate">{title}</span>
@@ -98,8 +98,8 @@ function Pick({ on, onClick, children }: { on: boolean; onClick(): void; childre
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        'rounded-chip h-5 px-1.5 text-2xs font-medium transition-colors duration-100 touch:h-8 touch:px-2.5',
-        on ? 'bg-[var(--node-accent)] text-[var(--node-bg)]' : 'text-[var(--node-fg)] hover:bg-[var(--node-hover)]',
+        'rounded-chip h-6 px-2 text-2xs font-medium transition-colors duration-100 touch:h-8 touch:px-2.5',
+        on ? 'bg-[var(--node-accent)] text-white' : 'text-[var(--node-fg)] hover:bg-[var(--node-hover)]',
       )}
     >
       {children}

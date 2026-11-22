@@ -29,7 +29,8 @@ export function Popover({
       ref={panel}
       style={style}
       className={cn(
-        'rounded-surface shadow-popover z-(--z-popover) flex flex-col overflow-hidden border border-[var(--node-border)] bg-[var(--node-bg)] text-xs text-[var(--node-fg)] motion-safe:animate-[ax-fade-in_150ms_ease-out]',
+        // The menus' step above the window, not the window's own card.
+        'rounded-surface shadow-popover z-(--z-popover) flex flex-col overflow-hidden border border-[var(--border)] bg-[var(--popover)] text-xs text-[var(--popover-foreground)] motion-safe:animate-[ax-fade-in_150ms_ease-out]',
         className,
       )}
     >

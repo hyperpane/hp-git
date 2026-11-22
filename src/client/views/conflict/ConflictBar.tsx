@@ -25,7 +25,7 @@ export function ConflictBar({
   const { api } = repo;
   return (
     <div
-      className="flex flex-none flex-wrap items-center gap-2 border-b border-[var(--node-border)] px-3 py-1.5"
+      className="flex min-h-10 flex-none flex-wrap items-center gap-2 border-b border-[var(--node-border)] ps-3 pe-2.5 py-1.5"
       style={{ background: 'color-mix(in srgb, var(--ansi-9) 10%, transparent)' }}
     >
       <TriangleAlert className="size-3.5 flex-none text-[var(--ansi-9)]" />

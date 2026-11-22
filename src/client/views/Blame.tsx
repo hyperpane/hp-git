@@ -5,8 +5,10 @@
 // that commit. On a phone the label is narrower: who and the summary.
 
 import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { MONO } from '@hyperpane/code';
 import { NodeMessage, PHONE_WIDTH, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
+import { Blank } from '../components/Blank.tsx';
 import type { Blame as BlameData } from '../../shared/index.ts';
 import { useRepo } from '../app/repo.ts';
 import { Avatar } from '../components/Avatar.tsx';
@@ -67,7 +69,12 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
     if (b && line) requestAnimationFrame(() => list.current?.scrollToIndex(line - 1, 'center'));
   }, [b, line]);
 
-  if (state.error) return <NodeMessage error>{state.error}</NodeMessage>;
+  if (state.error)
+    return (
+      <Blank icon={TriangleAlert} error title="This file can’t be blamed">
+        {state.error}
+      </Blank>
+    );
   if (!b) return <NodeMessage>Blaming {path}</NodeMessage>;
 
   const shade = (date: number) => {
@@ -99,7 +106,7 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-blame={path}>
-      <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-9 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
         <span className="min-w-0 flex-1 truncate">
           {b.lines.length.toLocaleString('en-US')} lines · {Object.keys(b.commits).length} commits{rev ? ` · at ${shortSha(rev)}` : ' · the working tree'}
           {b.truncated ? ' · cut short (the file is big)' : ''}

@@ -6,6 +6,7 @@
 // alone with the way back to them.
 
 import { type ReactNode, useEffect, useState } from 'react';
+import { FileDiff, TriangleAlert } from 'lucide-react';
 import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { ChangedFile, CommitDetail } from '../../../shared/index.ts';
 import type { DiffRequest, Pending } from '../../app/api.ts';
@@ -52,7 +53,12 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
     if (c) setFile((cur) => (cur && c.files.some((f) => f.path === cur) ? cur : (c.files[0]?.path ?? null)));
   }, [c]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (state.id === id && state.error) return <NodeMessage error>{state.error}</NodeMessage>;
+  if (state.id === id && state.error)
+    return (
+      <Blank icon={TriangleAlert} error title="The commit can’t be read">
+        {state.error}
+      </Blank>
+    );
   if (!c) return <NodeMessage>Loading the commit</NodeMessage>;
   const picked = c.files.find((f) => f.path === file) ?? null;
   const request = picked ? (diffOf ? diffOf(picked, c) : { path: picked.path, oldPath: picked.from, commit: c.sha }) : null;
@@ -75,7 +81,9 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
           request ? (
             <DiffPane key={`${c.sha}:${picked!.path}`} request={request} newRev={rev ? rev(c) : c.sha} />
           ) : (
-            <Blank>{c.files.length ? 'Pick a file' : 'This commit changes no files'}</Blank>
+            <Blank icon={FileDiff} title={c.files.length ? 'No file picked' : 'No files changed'}>
+              {c.files.length ? 'Pick one to see its diff.' : 'This commit changes no files.'}
+            </Blank>
           )
         }
       />
