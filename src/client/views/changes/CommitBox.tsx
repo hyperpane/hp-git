@@ -216,7 +216,7 @@ export function CommitBox() {
           title="Add a co-author"
           aria-label="Add a co-author"
           className={cn(
-            'rounded-control flex h-6 items-center gap-1 px-1.5 text-2xs text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
+            'rounded-control flex h-6 items-center gap-1 px-1.5 text-2xs text-[var(--node-muted)] touch:h-9 transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
             styles.focusRing,
           )}
           onClick={pickCoAuthor}

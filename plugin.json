@@ -2,7 +2,7 @@
   "manifest": 1,
   "id": "git",
   "name": "Git",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "publisher": "hyperpane",
   "description": "Commit, branch and sync, laid out like GitHub Desktop: changes checked by file, hunk or line, history with a graph, branches, stashes, tags, blame, conflicts, and fetch, pull and push.",
   "icon": "icon.svg",
@@ -188,7 +188,7 @@
   },
   "signature": {
     "key": "ed25519:5LgmP9NjLnpvz48igrFekSqi+4k6gzaO8sNwlsgNKFc=",
-    "sig": "st56bHBdx9Big6iq997UmcOTpCKil0QA4cdkyf3UAcsX1AQDP+u4rtvrmwWURda4dYKj2Cx13uKnt5bsV+rqDw==",
-    "server": "d+XneniL9BXhG0A+6/0drnSUlIEWlA7AgAK6TgoApud8DwklEYZVISU711za08y7yl7H83HYTgUskAOzWgfiDA=="
+    "sig": "I2SOgAt+FKBoAozvuW6VDyzF+0Hj0LHRlVTFUwCJWO9heMrHIXSIgx/CrmhO/6QoFvH2cy9adxTK0E7HBitjBQ==",
+    "server": "SXBBSvAJZuOiIAZahMenQ6GD9Jm0o3te6Cw6NWr6whXZa1+NXmqMitdp6xhNZJ9kVKFfErKuk1MLdWSPJ89EBA=="
   }
 }

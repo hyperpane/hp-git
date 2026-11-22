@@ -32,7 +32,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
     <button
       type="button"
       title="Copy the SHA"
-      className="rounded-chip flex h-5 flex-none items-center gap-1 px-1 font-mono text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+      className="rounded-chip flex h-5 flex-none items-center gap-1 px-1 touch:h-8 font-mono text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
       onClick={() => copy(c.sha, repo.toast)}
     >
       {shortSha(c.sha)}
@@ -45,7 +45,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
       title={shown ? 'Hide the message, for more of the diff' : 'Show the message'}
       aria-label={shown ? 'Hide the message' : 'Show the message'}
       aria-expanded={shown}
-      className="rounded-chip flex size-5 flex-none items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+      className="rounded-chip flex size-5 flex-none items-center justify-center text-[var(--node-muted)] touch:size-8 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
       onClick={() => setShown(!shown)}
     >
       {shown ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
@@ -53,7 +53,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
   );
   if (!shown)
     return (
-      <div className="flex h-8 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-1.5 pe-3" data-commit-header="folded">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1.5 border-b border-[var(--node-border)] ps-1.5 pe-3" data-commit-header="folded">
         {fold}
         <div className="min-w-0 flex-1 truncate font-semibold" title={c.subject}>
           {c.subject}

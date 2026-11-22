@@ -3,12 +3,13 @@
 // file's history and blame (in this window). It asks the server for the
 // diff when the file or its status changes, and drops the request when the
 // selection moves on (git stops). Images show before and after; binary
-// files, big diffs and submodules say what changed.
+// files, big diffs and submodules say what changed. Narrow, it's unified,
+// and the file's history and blame are in its More menu only.
 
 import { type MouseEvent as ReactMouseEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Columns2, FileClock, MoreHorizontal, Pilcrow, Rows3, ScanSearch } from 'lucide-react';
 import { formatSize } from '@hyperpane/sdk/client';
-import { NodeButton, NodeMessage, ToolButton, cn, menuItems, type MenuEntry } from '@hyperpane/ui';
+import { NodeButton, NodeMessage, ToolButton, cn, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
 import type { Diff } from '../../../shared/index.ts';
 import type { DiffRequest } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -56,7 +57,7 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
   const [state, setState] = useState<State>({ for: '' });
   const [expansions, setExpansions] = useState<Map<number, Expansion>>(new Map());
   const box = useRef<HTMLDivElement>(null);
-  const [narrow, setNarrow] = useState(false);
+  const narrow = useCompact(560, box);
 
   useEffect(() => {
     setFull(false);
@@ -82,14 +83,6 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
       pending?.cancel();
     };
   }, [fetchKey]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const el = box.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver(() => setNarrow(el.clientWidth < 560));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const diff = state.for === key ? state.diff : undefined;
   const error = state.for === key ? state.error : undefined;
@@ -226,7 +219,7 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
 
   return (
     <div ref={box} className="flex min-h-0 min-w-0 flex-1 flex-col" data-diff-pane={path}>
-      <div className="flex h-8 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-2">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1.5 border-b border-[var(--node-border)] px-2">
         <DiffTitle diff={diff} path={path} />
         {tools}
         <span className="mx-0.5 h-4 w-px flex-none bg-[var(--node-border)]" />
@@ -242,8 +235,12 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
           active={ignoreWs}
           onClick={() => setIgnoreWs(!ignoreWs)}
         />
-        <ToolButton label="File history" icon={FileClock} onClick={() => repo.open({ kind: 'fileHistory', path })} />
-        <ToolButton label="Blame" icon={ScanSearch} onClick={() => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to })} />
+        {!narrow && (
+          <>
+            <ToolButton label="File history" icon={FileClock} onClick={() => repo.open({ kind: 'fileHistory', path })} />
+            <ToolButton label="Blame" icon={ScanSearch} onClick={() => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to })} />
+          </>
+        )}
         <ToolButton label="More" icon={MoreHorizontal} onClick={moreMenu} />
       </div>
       {banner}

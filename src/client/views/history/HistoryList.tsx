@@ -22,16 +22,20 @@ import { LANE_WIDTH, MAX_LANES } from '../../lib/graph.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { MODES, type SearchMode } from '../../lib/logSearch.ts';
 import { authorNames } from '../../lib/people.ts';
+import { useRowHeight } from '../../lib/rows.ts';
 
 const ROW = 26;
 
 export function HistoryList({
   selected,
   onSelect,
+  onOpen,
   filterRef,
 }: {
   selected: string | null;
   onSelect: React.Dispatch<React.SetStateAction<string | null>>;
+  /** A commit clicked: it, when one at a time. */
+  onOpen?(): void;
   filterRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const repo = useRepo();
@@ -41,6 +45,7 @@ export function HistoryList({
   const [mode, setMode] = useState<SearchMode>('message');
   const [all, setAll] = useState(false);
   const list = useRef<VirtualHandle>(null);
+  const rowHeight = useRowHeight(ROW);
 
   // Typing settles before git is asked.
   useEffect(() => {
@@ -116,7 +121,10 @@ export function HistoryList({
             'rounded-chip flex h-full cursor-default items-center gap-1.5 ps-1.5 pe-1.5',
             isSel ? 'bg-[var(--node-selection-inactive)] group-focus-within/list:bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]',
           )}
-          onClick={() => onSelect(c.sha)}
+          onClick={() => {
+            onSelect(c.sha);
+            onOpen?.();
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -125,7 +133,7 @@ export function HistoryList({
           }}
           title={`${c.subject}\n${authorNames(c)} · ${longDate(c.date)}\n${c.sha}`}
         >
-          {showGraph && g ? <GraphCell row={g} head={isHead} height={ROW} width={graphWidth} /> : <span className="w-1" />}
+          {showGraph && g ? <GraphCell row={g} head={isHead} height={rowHeight} width={graphWidth} /> : <span className="w-1" />}
           <span className="flex min-w-0 flex-1 items-center gap-1">
             {c.refs.slice(0, 2).map((r) => (
               <RefBadge key={`${r.kind}:${r.name}`} refName={r} className="max-w-28 min-w-6 shrink" />
@@ -156,10 +164,10 @@ export function HistoryList({
   const current = MODES.find((m) => m.id === mode)!;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <button
           type="button"
-          className="rounded-control flex h-6 flex-none items-center gap-0.5 px-1.5 text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          className="rounded-control flex h-6 flex-none items-center gap-0.5 px-1.5 text-2xs touch:h-9 text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
           title="What to search, and which branches"
           onClick={modeMenu}
         >
@@ -189,7 +197,7 @@ export function HistoryList({
             <button
               type="button"
               aria-label="Clear"
-              className="absolute top-1/2 right-1 flex size-4 -translate-y-1/2 items-center justify-center rounded-full text-[var(--node-muted)] hover:text-[var(--node-fg)]"
+              className="absolute top-1/2 right-1 flex size-4 -translate-y-1/2 touch:size-8 items-center justify-center rounded-full text-[var(--node-muted)] hover:text-[var(--node-fg)]"
               onClick={() => setText('')}
             >
               <X className="size-3" />
@@ -216,7 +224,7 @@ export function HistoryList({
         <VirtualList
           ref={list}
           count={commits.length}
-          rowHeight={ROW}
+          rowHeight={rowHeight}
           row={row}
           rowKey={(n) => commits[n].sha}
           onEnd={log.loadMore}

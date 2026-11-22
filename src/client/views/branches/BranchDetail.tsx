@@ -36,9 +36,9 @@ export function BranchDetail({ pick, branches }: { pick: BranchPick | null; bran
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col" data-branch-detail={b.name}>
       <div className="flex flex-none flex-col gap-1.5 border-b border-[var(--node-border)] px-3 py-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-sm:flex-wrap">
           {pick.kind === 'remote' ? <Cloud className="size-4 text-[var(--node-muted)]" /> : <GitBranch className="size-4 text-[var(--node-accent)]" />}
-          <span className="min-w-0 flex-1 truncate text-sm font-semibold">{b.name}</span>
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold max-sm:basis-[calc(100%-1.5rem)]">{b.name}</span>
           {main.map((a) => (
             <NodeButton key={a.label} onClick={a.run}>
               {a.label}

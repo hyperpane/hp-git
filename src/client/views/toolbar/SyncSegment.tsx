@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { ChevronDown, X, type LucideIcon } from 'lucide-react';
 import { Progress, cn, styles } from '@hyperpane/ui';
 import { useRepo } from '../../app/repo.ts';
+import { narrowSegment } from './Segment.tsx';
 
 export function SyncSegment({
   icon: Icon,
@@ -24,7 +25,7 @@ export function SyncSegment({
   const repo = useRepo();
   const sync = repo.sync;
   return (
-    <div className="relative flex w-[28%] max-w-72 min-w-36 flex-none items-stretch border-e border-[var(--node-border)]">
+    <div className={cn('relative flex flex-none items-stretch border-e border-[var(--node-border)]', narrowSegment('w-[28%] max-w-72 min-w-36'))}>
       <button
         type="button"
         onClick={sync ? undefined : onClick}
@@ -48,7 +49,7 @@ export function SyncSegment({
           type="button"
           title="Cancel"
           aria-label="Cancel"
-          className="flex w-7 flex-none items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          className="flex w-7 flex-none items-center justify-center text-[var(--node-muted)] touch:w-10 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
           onClick={() => sync.cancel()}
         >
           <X className="size-3.5" />
@@ -58,7 +59,7 @@ export function SyncSegment({
           type="button"
           title="More: fetch, pull, push, force push, remotes"
           aria-label="More sync actions"
-          className="flex w-6 flex-none items-center justify-center border-s border-[var(--node-border)] text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+          className="flex w-6 flex-none items-center justify-center touch:w-10 border-s border-[var(--node-border)] text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
           onClick={(e) => onMenu(e.currentTarget)}
         >
           <ChevronDown className="size-3.5" />

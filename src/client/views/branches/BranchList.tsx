@@ -24,12 +24,15 @@ export function BranchList({
   error,
   picked,
   onPick,
+  onOpen,
   filterRef,
 }: {
   branches: Branches | null;
   error: string | null;
   picked: BranchPick | null;
   onPick: React.Dispatch<React.SetStateAction<BranchPick | null>>;
+  /** A branch clicked: it, when one at a time. */
+  onOpen?(): void;
   filterRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const repo = useRepo();
@@ -104,7 +107,7 @@ export function BranchList({
   if (error && !branches) return <NodeMessage error>{error}</NodeMessage>;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput
@@ -151,7 +154,10 @@ export function BranchList({
               <div className="h-full px-1 py-px" data-branch={r.b.name}>
                 <div
                   className={cn(rowClass(isPicked), 'items-center')}
-                  onClick={() => onPick({ kind: r.t, name: r.b.name })}
+                  onClick={() => {
+                    onPick({ kind: r.t, name: r.b.name });
+                    onOpen?.();
+                  }}
                   onDoubleClick={() => !current && repo.run(() => repo.api.checkout(r.b.name))}
                   onContextMenu={(e) => menu(e, r)}
                   title={`${r.b.name}\n${r.b.subject}\n${r.b.author} · ${longDate(r.b.date)}`}

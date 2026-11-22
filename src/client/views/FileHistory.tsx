@@ -1,16 +1,17 @@
 // A file's history, over the tabs: the commits that touched it (following
 // renames, with the path it had in each), a page at a time, and the picked
-// commit's change to it beside them.
+// commit's change to it beside them (or alone, in a narrow window).
 
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { FileClock } from 'lucide-react';
-import { NodeMessage, SplitPane } from '@hyperpane/ui';
+import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { FileCommit } from '../../shared/index.ts';
 import { commitMenu } from '../app/actions/commits.ts';
 import { useRepo } from '../app/repo.ts';
 import { Authors } from '../components/Avatar.tsx';
 import { Blank } from '../components/Blank.tsx';
 import { DiffPane } from '../components/diff/DiffPane.tsx';
+import { ListDetail } from '../components/ListDetail.tsx';
 import { StatusLetter } from '../components/StatusLetter.tsx';
 import { type VirtualHandle, VirtualList } from '../components/VirtualList.tsx';
 import { ago, longDate, shortSha } from '../lib/format.ts';
@@ -27,6 +28,7 @@ export function FileHistory({ path }: { path: string }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [picked, setPicked] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const pending = useRef<{ cancel(): void } | null>(null);
   const list = useRef<VirtualHandle>(null);
   const latest = useRef(commits);
@@ -75,11 +77,16 @@ export function FileHistory({ path }: { path: string }) {
   if (!commits.length)
     return loading ? <NodeMessage>Loading the history of {path}</NodeMessage> : <Blank icon={FileClock}>No commit has touched {path}.</Blank>;
   return (
-    <SplitPane
+    <ListDetail
       id="fileHistory"
       initial={300}
       min={200}
       minOther={300}
+      below={PHONE_WIDTH}
+      open={open}
+      onBack={() => setOpen(false)}
+      backLabel="Commits"
+      title={c ? c.subject : undefined}
       first={
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex h-8 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-2.5 text-2xs text-[var(--node-muted)]">
@@ -103,7 +110,10 @@ export function FileHistory({ path }: { path: string }) {
                 <div className="h-full px-1 py-px" data-sha={x.sha}>
                   <div
                     className={rowClass(x.sha === picked)}
-                    onClick={() => setPicked(x.sha)}
+                    onClick={() => {
+                      setPicked(x.sha);
+                      setOpen(true);
+                    }}
                     onContextMenu={(e) => {
                       e.preventDefault();
                       e.stopPropagation();

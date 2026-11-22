@@ -24,7 +24,7 @@ export function StashDetail({ stash }: { stash: Stash | null }) {
       diffOf={(f) => ({ path: f.path, oldPath: f.from, commit: f.untracked ? `${ref}^3` : ref })}
       rev={() => ref}
       top={() => (
-        <div className="flex h-9 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-3">
+        <div className="flex h-9 flex-none items-center gap-1.5 touch:h-12 border-b border-[var(--node-border)] px-3">
           <Archive className="size-3.5 text-[var(--node-muted)]" />
           <span className="min-w-0 flex-1 truncate text-2xs text-[var(--node-muted)]">
             {ref}

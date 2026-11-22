@@ -85,7 +85,7 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
         <button
           type="button"
           className={cn(
-            'rounded-control flex h-7 flex-none items-center gap-1 border border-[var(--node-border)] px-2 text-xs hover:bg-[var(--node-hover)]',
+            'rounded-control flex h-7 flex-none items-center gap-1 border border-[var(--node-border)] px-2 text-xs hover:bg-[var(--node-hover)] touch:h-9',
             styles.focusRing,
           )}
           onClick={create}

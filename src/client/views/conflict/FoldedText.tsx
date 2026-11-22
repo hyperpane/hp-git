@@ -17,7 +17,7 @@ export function FoldedText({ lines, first, last, open, onOpen }: { lines: string
       {long && (
         <button
           type="button"
-          className="rounded-chip my-0.5 flex h-5 w-full items-center gap-1 px-2 font-sans text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)]"
+          className="rounded-chip my-0.5 flex h-5 w-full items-center touch:h-9 gap-1 px-2 font-sans text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)]"
           style={{ background: 'color-mix(in srgb, var(--node-fg) 3%, transparent)' }}
           onClick={onOpen}
         >

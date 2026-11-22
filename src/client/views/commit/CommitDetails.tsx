@@ -2,15 +2,18 @@
 // parents (open them), its branches and tags, its signature; then the files
 // it changed with their counts, and the picked file's diff beside them.
 // History, tags, stashes and the views opened over the tabs all show
-// commits this way.
+// commits this way. In a narrow window, the files, or one file's diff
+// alone with the way back to them.
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { NodeMessage, SplitPane } from '@hyperpane/ui';
+import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { ChangedFile, CommitDetail } from '../../../shared/index.ts';
 import type { DiffRequest, Pending } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { DiffPane } from '../../components/diff/DiffPane.tsx';
+import { ListDetail } from '../../components/ListDetail.tsx';
+import { basenameOf } from '../../lib/paths.ts';
 import { CommitHeader } from './CommitHeader.tsx';
 import { FileList } from './FileList.tsx';
 
@@ -33,6 +36,7 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
   const repo = useRepo();
   const [state, setState] = useState<{ c?: CommitDetail; error?: string; id: string }>({ id: '' });
   const [file, setFile] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const p = load();
@@ -55,13 +59,18 @@ export function CommitDetails({ load, id, diffOf, rev, top, place = 'commit' }: 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col" data-commit={c.sha}>
       {top?.(c)}
-      <CommitHeader c={c} />
-      <SplitPane
+      <ListDetail
         id={`${place}.files`}
         initial={240}
         min={140}
         minOther={240}
-        first={<FileList files={c.files} truncated={c.truncated} picked={file} onPick={setFile} sha={c.sha} />}
+        below={PHONE_WIDTH}
+        open={open}
+        onBack={() => setOpen(false)}
+        backLabel="Files"
+        title={picked ? basenameOf(picked.path) : undefined}
+        top={<CommitHeader c={c} />}
+        first={<FileList files={c.files} truncated={c.truncated} picked={file} onPick={setFile} onOpen={() => setOpen(true)} sha={c.sha} />}
         second={
           request ? (
             <DiffPane key={`${c.sha}:${picked!.path}`} request={request} newRev={rev ? rev(c) : c.sha} />

@@ -11,7 +11,7 @@ import { shortSha } from '../../lib/format.ts';
 
 export function LastCommit({ last, onUndo, onDismiss }: { last: { sha: string; summary: string }; onUndo(): void; onDismiss(): void }) {
   return (
-    <div className="rounded-control flex h-7 items-center gap-2 bg-[var(--node-hover)] ps-2 pe-1 text-2xs">
+    <div className="rounded-control flex h-7 items-center gap-2 bg-[var(--node-hover)] ps-2 pe-1 text-2xs touch:h-11">
       <span className="min-w-0 flex-1 truncate">
         Committed <span className="font-mono">{shortSha(last.sha)}</span> {last.summary}
       </span>
@@ -22,7 +22,7 @@ export function LastCommit({ last, onUndo, onDismiss }: { last: { sha: string; s
       <button
         type="button"
         aria-label="Dismiss"
-        className="rounded-chip flex size-5 items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)]"
+        className="rounded-chip flex size-5 items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)] touch:size-9"
         onClick={onDismiss}
       >
         <X className="size-3" />
@@ -75,7 +75,7 @@ export function SummaryField({
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Summary"
-        className="rounded-control h-7 w-full border border-[var(--node-border)] bg-transparent px-2 pe-8 text-xs text-[var(--node-fg)] outline-none transition-colors duration-100 placeholder:text-[var(--node-muted)] hover:border-[color-mix(in_srgb,var(--node-fg)_24%,transparent)] focus:border-[var(--node-accent)]"
+        className="rounded-control h-7 w-full border border-[var(--node-border)] bg-transparent px-2 pe-8 text-xs touch:h-10 touch:text-sm text-[var(--node-fg)] outline-none transition-colors duration-100 placeholder:text-[var(--node-muted)] hover:border-[color-mix(in_srgb,var(--node-fg)_24%,transparent)] focus:border-[var(--node-accent)]"
       />
       {summary.length > 50 && (
         <span
@@ -95,7 +95,7 @@ export function CoAuthorList({ coAuthors, onRemove }: { coAuthors: { name: strin
       {coAuthors.map((c) => (
         <span
           key={c.email}
-          className="rounded-chip flex h-5 items-center gap-1 bg-[var(--node-hover)] ps-0.5 pe-0.5 text-2xs"
+          className="rounded-chip flex h-5 items-center gap-1 bg-[var(--node-hover)] ps-0.5 pe-0.5 text-2xs touch:h-8"
           title={`Co-authored-by: ${c.name} <${c.email}>`}
         >
           <Avatar name={c.name} email={c.email} size={14} />
@@ -103,7 +103,7 @@ export function CoAuthorList({ coAuthors, onRemove }: { coAuthors: { name: strin
           <button
             type="button"
             aria-label={`Remove ${c.name}`}
-            className="rounded-chip flex size-4 items-center justify-center text-[var(--node-muted)] hover:text-[var(--node-fg)]"
+            className="rounded-chip flex size-4 items-center justify-center text-[var(--node-muted)] hover:text-[var(--node-fg)] touch:size-7"
             onClick={() => onRemove(c)}
           >
             <X className="size-3" />
@@ -135,7 +135,7 @@ export function Chip({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'rounded-control flex h-6 items-center gap-1 border px-2 text-2xs transition-colors duration-100 disabled:pointer-events-none disabled:opacity-40',
+        'rounded-control flex h-6 items-center gap-1 border px-2 text-2xs touch:h-9 touch:px-3 transition-colors duration-100 disabled:pointer-events-none disabled:opacity-40',
         on
           ? 'border-[color-mix(in_srgb,var(--node-accent)_60%,transparent)] bg-[color-mix(in_srgb,var(--node-accent)_18%,transparent)] text-[var(--node-fg)]'
           : 'border-[var(--node-border)] text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',

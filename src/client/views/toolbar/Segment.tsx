@@ -23,7 +23,7 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
       onClick={onClick}
       aria-expanded={active}
       className={cn(
-        'flex min-w-0 flex-none items-center gap-2 border-e border-[var(--node-border)] px-2.5 text-left transition-colors duration-100 first-of-type:border-s hover:bg-[var(--node-hover)]',
+        'flex min-w-0 flex-none items-center gap-2 border-e border-[var(--node-border)] px-2.5 text-left transition-colors duration-100 first-of-type:border-s hover:bg-[var(--node-hover)] max-sm:gap-1.5 max-sm:px-2',
         active && 'bg-[var(--node-active)]',
         styles.focusRingInset,
         className,
@@ -38,3 +38,7 @@ export const Segment = forwardRef<HTMLButtonElement, SegmentProps>(function Segm
     </button>
   );
 });
+
+/** A segment's width: a share of the bar's, or, narrow, an equal part of
+ * all of it. */
+export const narrowSegment = (wide: string) => `${wide} max-sm:w-auto max-sm:min-w-0 max-sm:max-w-none max-sm:flex-1`;

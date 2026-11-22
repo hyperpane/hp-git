@@ -1,12 +1,14 @@
 // The files changed from one revision to another (or to the working tree),
-// and the picked one's diff beside them.
+// and the picked one's diff beside them (or alone, in a narrow window).
 
 import { useEffect, useState } from 'react';
-import { NodeMessage, SplitPane } from '@hyperpane/ui';
+import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { ChangedFile } from '../../../shared/index.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { DiffPane } from '../../components/diff/DiffPane.tsx';
+import { ListDetail } from '../../components/ListDetail.tsx';
+import { basenameOf } from '../../lib/paths.ts';
 import { FileList } from './FileList.tsx';
 
 /** The files changed from one revision to another (or to the working tree,
@@ -15,6 +17,7 @@ export function FilesBetween({ from, to, place = 'between' }: { from: string; to
   const repo = useRepo();
   const [state, setState] = useState<{ files?: ChangedFile[]; truncated?: boolean; error?: string; key: string }>({ key: '' });
   const [file, setFile] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const key = `${from}..${to ?? ''}`;
   useEffect(() => {
     const p = repo.api.changes(from, to);
@@ -33,12 +36,17 @@ export function FilesBetween({ from, to, place = 'between' }: { from: string; to
   if (!files.length) return <Blank>No files differ</Blank>;
   const picked = files.find((f) => f.path === file) ?? null;
   return (
-    <SplitPane
+    <ListDetail
       id={`${place}.files`}
       initial={240}
       min={140}
       minOther={240}
-      first={<FileList files={files} truncated={!!state.truncated} picked={file} onPick={setFile} />}
+      below={PHONE_WIDTH}
+      open={open}
+      onBack={() => setOpen(false)}
+      backLabel="Files"
+      title={picked ? basenameOf(picked.path) : undefined}
+      first={<FileList files={files} truncated={!!state.truncated} picked={file} onPick={setFile} onOpen={() => setOpen(true)} />}
       second={
         picked ? (
           <DiffPane key={`${key}:${picked.path}`} request={{ path: picked.path, oldPath: picked.from, from, to }} newRev={to} />

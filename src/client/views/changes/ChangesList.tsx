@@ -20,6 +20,7 @@ import { listKey } from '../../lib/listKey.ts';
 import { local } from '../../lib/local.ts';
 import { type Pick, type Side, pickOf, sideFiles, splitPick } from '../../lib/picks.ts';
 import { stateOf } from '../../lib/include.ts';
+import { useRowHeight } from '../../lib/rows.ts';
 import { DirRow, FileRow, SectionRow, inRow } from './ChangeRows.tsx';
 import { CommitBox } from './CommitBox.tsx';
 import { changesMenu, fileMenu } from './menus.ts';
@@ -27,10 +28,13 @@ import { changesMenu, fileMenu } from './menus.ts';
 export function ChangesList({
   picked,
   setPicked,
+  onOpen,
   filterRef,
 }: {
   picked: Pick[];
   setPicked: React.Dispatch<React.SetStateAction<Pick[]>>;
+  /** A file clicked (not added to the pick): its diff, when one at a time. */
+  onOpen?(): void;
   filterRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const repo = useRepo();
@@ -43,6 +47,7 @@ export function ChangesList({
   };
   const [closed, setClosed] = useState<Set<string>>(new Set());
   const list = useRef<VirtualHandle>(null);
+  const rowHeight = useRowHeight(22);
   const anchor = useRef<string | null>(null);
 
   const groups = useMemo(() => {
@@ -116,6 +121,11 @@ export function ChangesList({
     anchor.current = k;
     if (mod(e)) setPicked(pickedSet.has(k) ? picked.filter((p) => p !== k) : [...picked, k as Pick]);
     else setPicked([k as Pick]);
+  };
+
+  const clickFile = (it: Item, e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }) => {
+    click(it, e);
+    if (!e.shiftKey && !mod(e)) onOpen?.();
   };
 
   const onKey = (e: KeyboardEvent) => {
@@ -227,13 +237,13 @@ export function ChangesList({
         />
       );
     return (
-      <FileRow it={it} checked={checked(it.side, [it.file])} isPicked={pickedSet.has(itemKey(it))} tree={tree} click={click} menu={menu} toggle={toggle} />
+      <FileRow it={it} checked={checked(it.side, [it.file])} isPicked={pickedSet.has(itemKey(it))} tree={tree} click={clickFile} menu={menu} toggle={toggle} />
     );
   };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <Checkbox
           {...inRow}
           checked={allChecked}
@@ -276,7 +286,7 @@ export function ChangesList({
         <VirtualList
           ref={list}
           count={rows.length}
-          rowHeight={22}
+          rowHeight={rowHeight}
           row={row}
           rowKey={(n) => itemKey(rows[n])}
           className="group/list git-scroll py-1"

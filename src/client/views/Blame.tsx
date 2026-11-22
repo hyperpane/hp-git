@@ -2,11 +2,11 @@
 // changed it. Lines from one commit run together under one label (who,
 // when, the summary); a bar beside them shades by age, newest brightest.
 // A label opens its commit; a line's menu blames the file as it was before
-// that commit.
+// that commit. On a phone the label is narrower: who and the summary.
 
 import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { MONO } from '@hyperpane/code';
-import { NodeMessage, menuItems, type MenuEntry } from '@hyperpane/ui';
+import { NodeMessage, PHONE_WIDTH, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
 import type { Blame as BlameData } from '../../shared/index.ts';
 import { useRepo } from '../app/repo.ts';
 import { Avatar } from '../components/Avatar.tsx';
@@ -26,6 +26,8 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
   const [spans, setSpans] = useState<Span[][] | null>(null);
   const [hover, setHover] = useState<string | null>(null);
   const list = useRef<VirtualHandle>(null);
+  const narrow = useCompact(PHONE_WIDTH);
+  const label = narrow ? 140 : 260;
 
   useEffect(() => {
     setState({});
@@ -115,7 +117,7 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
         ref={list}
         count={b.lines.length}
         rowHeight={ROW}
-        width={`max(100%, calc(${Math.max(...b.lines.slice(0, 5000).map((l) => l.text.length), 10)}ch + 360px))`}
+        width={`max(100%, calc(${Math.max(...b.lines.slice(0, 5000).map((l) => l.text.length), 10)}ch + ${label + 100}px))`}
         className="git-scroll"
         style={{ fontFamily: MONO, fontSize: 12, lineHeight: `${ROW}px` }}
         tabIndex={0}
@@ -134,8 +136,9 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
               onContextMenu={(e) => menu(e, l.sha)}
             >
               <div
-                className="sticky left-0 z-[1] flex h-full w-[260px] flex-none items-center gap-1.5 overflow-hidden border-e border-[var(--node-border)] ps-2 pe-1 font-sans text-2xs"
+                className="sticky left-0 z-[1] flex h-full flex-none items-center gap-1.5 overflow-hidden border-e border-[var(--node-border)] ps-2 pe-1 font-sans text-2xs"
                 style={{
+                  width: label,
                   background: lit ? 'linear-gradient(var(--node-hover), var(--node-hover)), var(--node-bg)' : 'var(--node-bg)',
                   borderTop: first && n ? '1px solid var(--node-border)' : undefined,
                 }}
@@ -148,7 +151,7 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
                   ) : c ? (
                     <>
                       <Avatar name={c.author} email={c.email} size={14} />
-                      <span className="w-14 flex-none truncate text-[var(--node-muted)]">{ago(c.date)}</span>
+                      {!narrow && <span className="w-14 flex-none truncate text-[var(--node-muted)]">{ago(c.date)}</span>}
                       <span className="min-w-0 flex-1 cursor-pointer truncate hover:underline">{c.summary}</span>
                     </>
                   ) : (
@@ -156,8 +159,8 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
                   ))}
               </div>
               <span
-                className="sticky left-[260px] z-[1] h-full w-[3px] flex-none"
-                style={{ background: c && !uncommitted ? shade(c.date) : 'var(--ansi-3)' }}
+                className="sticky z-[1] h-full w-[3px] flex-none"
+                style={{ left: label, background: c && !uncommitted ? shade(c.date) : 'var(--ansi-3)' }}
               />
               <span className="flex-none pe-2 ps-2 text-right text-[var(--node-muted)] tabular-nums select-none" style={{ width: `${digits + 2}ch` }}>
                 {n + 1}

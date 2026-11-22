@@ -11,7 +11,7 @@ import { Authors } from '../../components/Avatar.tsx';
 import { Blank } from '../../components/Blank.tsx';
 import { VirtualList } from '../../components/VirtualList.tsx';
 import { longDate, plural, shortAgo, shortSha } from '../../lib/format.ts';
-import { rowClass } from '../../lib/rows.ts';
+import { rowClass, useRowHeight } from '../../lib/rows.ts';
 import { FilesBetween } from '../commit/FilesBetween.tsx';
 
 /** Two refs side by side: the commits on each side (`head` has `ahead`
@@ -36,7 +36,7 @@ export function CompareView({ base, head }: { base: string; head: string }) {
   const c = state.c;
   return (
     <div ref={setBox} className="flex min-h-0 flex-1 flex-col" data-compare={`${base}...${head}`}>
-      <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
         <SegmentedControl
           size="xs"
           label="What to compare"
@@ -83,6 +83,7 @@ export function CompareView({ base, head }: { base: string; head: string }) {
 
 function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string; commits: Commit[] }) {
   const repo = useRepo();
+  const rowHeight = useRowHeight(24);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-7 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-3 text-2xs font-medium">
@@ -92,7 +93,7 @@ function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string
       {commits.length ? (
         <VirtualList
           count={commits.length}
-          rowHeight={24}
+          rowHeight={rowHeight}
           className="group/list git-scroll py-1"
           row={(n) => {
             const c = commits[n];

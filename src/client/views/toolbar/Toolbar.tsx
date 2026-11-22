@@ -2,7 +2,9 @@
 // to one nested here or a submodule, or another folder), the branch (a
 // searchable list: recent first, then local, then remote; make one), and
 // one sync button for what fits now (Fetch, Pull ↓n, Push ↑n, Publish), with
-// its progress, a cancel, and a menu with the rest.
+// its progress, a cancel, and a menu with the rest. In a narrow window
+// (a phone) the three share its width, and the list is always there to go
+// back to, so there's no button to hide it.
 
 import { useEffect, useRef, useState } from 'react';
 import { FolderGit2, GitBranch, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -15,7 +17,7 @@ import { copy } from '../../lib/clipboard.ts';
 import { shortSha } from '../../lib/format.ts';
 import { basenameOf } from '../../lib/paths.ts';
 import { BranchPicker } from './BranchPicker.tsx';
-import { Segment } from './Segment.tsx';
+import { Segment, narrowSegment } from './Segment.tsx';
 import { SyncSegment } from './SyncSegment.tsx';
 
 const openMenu = (repo: Repo, el: HTMLElement, items: (MenuEntry | null)[]) => {
@@ -77,10 +79,16 @@ export function Toolbar({
 
   return (
     <div className="flex h-10 flex-none items-stretch border-b border-[var(--node-border)] bg-[var(--node-header)]">
-      <div className="flex flex-none items-center px-1.5">
+      <div className="flex flex-none items-center px-1.5 max-sm:hidden">
         <ToolButton label={sidebar ? 'Hide the list' : 'Show the list'} icon={sidebar ? PanelLeftClose : PanelLeftOpen} onClick={onSidebar} />
       </div>
-      <Segment icon={FolderGit2} title="Repository" value={name} onClick={(e) => repoMenu(e.currentTarget)} className="w-[22%] max-w-56 min-w-28" />
+      <Segment
+        icon={FolderGit2}
+        title="Repository"
+        value={name}
+        onClick={(e) => repoMenu(e.currentTarget)}
+        className={narrowSegment('w-[22%] max-w-56 min-w-28')}
+      />
       <Segment
         ref={branchButton}
         icon={GitBranch}
@@ -89,9 +97,14 @@ export function Toolbar({
         warn={status.detached}
         onClick={() => setPicker(!picker)}
         active={picker}
-        className="w-[26%] max-w-64 min-w-32"
+        className={narrowSegment('w-[26%] max-w-64 min-w-32')}
       />
-      <Popover open={picker} anchor={branchButton} onClose={() => setPicker(false)} className="max-h-[min(420px,calc(100vh-56px))] w-80">
+      <Popover
+        open={picker}
+        anchor={branchButton}
+        onClose={() => setPicker(false)}
+        className="max-h-[min(420px,calc(100vh-56px))] w-80 max-w-[calc(100vw-16px)]"
+      >
         <BranchPicker branches={branches} onClose={() => setPicker(false)} />
       </Popover>
       <SyncSegment
@@ -109,7 +122,7 @@ export function Toolbar({
         onClick={() => sync.run?.()}
         onMenu={(el) => openMenu(repo, el, syncMenu(repo))}
       />
-      <div className="min-w-0 flex-1" />
+      <div className="min-w-0 flex-1 max-sm:hidden" />
       {status.fetchError && (
         <span className="flex min-w-0 items-center px-3 text-2xs text-[var(--ansi-3)]" title={status.fetchError}>
           <span className="truncate">Auto-fetch failed</span>

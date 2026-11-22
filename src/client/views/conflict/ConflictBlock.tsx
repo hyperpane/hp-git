@@ -25,7 +25,7 @@ export function ConflictBlock({
   return (
     <div className="rounded-surface my-2 overflow-hidden border border-[color-mix(in_srgb,var(--ansi-9)_40%,var(--node-border))] font-sans" data-block={number}>
       <div
-        className="flex h-7 items-center gap-1 border-b border-[var(--node-border)] px-2 text-2xs"
+        className="flex h-7 items-center gap-1 border-b border-[var(--node-border)] px-2 text-2xs touch:h-11 max-sm:h-auto max-sm:min-h-7 max-sm:flex-wrap max-sm:py-1"
         style={{ background: 'color-mix(in srgb, var(--ansi-9) 7%, transparent)' }}
       >
         <span className="font-semibold">Conflict {number}</span>
@@ -44,7 +44,7 @@ export function ConflictBlock({
           Theirs, Then Ours
         </Pick>
       </div>
-      <div className={cn('grid', b.base ? 'grid-cols-3' : 'grid-cols-2')} style={{ fontFamily: MONO }}>
+      <div className={cn('grid max-sm:grid-cols-1', b.base ? 'grid-cols-3' : 'grid-cols-2')} style={{ fontFamily: MONO }}>
         <Side
           title={`Ours · ${b.oursLabel || ours}`}
           lines={b.ours}
@@ -67,7 +67,12 @@ export function ConflictBlock({
 
 function Side({ title, lines, color, taken, dropped }: { title: string; lines: string[]; color: string; taken: boolean; dropped: boolean }) {
   return (
-    <div className={cn('min-w-0 border-e border-[var(--node-border)] last:border-e-0', dropped && 'opacity-45')}>
+    <div
+      className={cn(
+        'min-w-0 border-e border-[var(--node-border)] last:border-e-0 max-sm:border-e-0 max-sm:border-b max-sm:last:border-b-0',
+        dropped && 'opacity-45',
+      )}
+    >
       <div
         className="flex h-5 items-center gap-1 px-2 font-sans text-[10px] font-semibold"
         style={{ color, background: `color-mix(in srgb, ${color} 10%, transparent)` }}
@@ -93,7 +98,7 @@ function Pick({ on, onClick, children }: { on: boolean; onClick(): void; childre
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        'rounded-chip h-5 px-1.5 text-2xs font-medium transition-colors duration-100',
+        'rounded-chip h-5 px-1.5 text-2xs font-medium transition-colors duration-100 touch:h-8 touch:px-2.5',
         on ? 'bg-[var(--node-accent)] text-[var(--node-bg)]' : 'text-[var(--node-fg)] hover:bg-[var(--node-hover)]',
       )}
     >

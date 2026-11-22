@@ -20,12 +20,15 @@ export function TagList({
   error,
   picked,
   onPick,
+  onOpen,
   filterRef,
 }: {
   tags: Tag[] | null;
   error: string | null;
   picked: string | null;
   onPick: React.Dispatch<React.SetStateAction<string | null>>;
+  /** A tag clicked: it, when one at a time. */
+  onOpen?(): void;
   filterRef: React.RefObject<HTMLInputElement | null>;
 }) {
   const repo = useRepo();
@@ -61,7 +64,7 @@ export function TagList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] px-1.5">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] px-1.5">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-[var(--node-muted)]" />
           <NodeInput
@@ -107,7 +110,10 @@ export function TagList({
               <div className="h-full px-1 py-px" data-tag={t.name}>
                 <div
                   className={rowClass(t.name === picked)}
-                  onClick={() => onPick(t.name)}
+                  onClick={() => {
+                    onPick(t.name);
+                    onOpen?.();
+                  }}
                   onContextMenu={(e) => menu(e, t)}
                   title={`${t.name}${t.message ? `\n${t.message}` : ''}\n${longDate(t.date)}`}
                 >

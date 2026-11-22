@@ -37,13 +37,13 @@ export function Overlay({ view }: { view: View }) {
   const path = view.kind === 'fileHistory' || view.kind === 'blame' ? view.path : null;
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-view={view.kind}>
-      <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] bg-[color-mix(in_srgb,var(--node-header)_60%,transparent)] px-1.5">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] bg-[color-mix(in_srgb,var(--node-header)_60%,transparent)] px-1.5">
         <ToolButton label={`Back (${keys('⌘[')})`} icon={ArrowLeft} onClick={repo.back} />
         <ToolButton label={`Forward (${keys('⌘]')})`} icon={ArrowRight} disabled={!repo.canForward} onClick={repo.forward} />
         <nav className="flex min-w-0 flex-1 items-center gap-1 text-xs" aria-label="Where you are">
           <button
             type="button"
-            className="rounded-chip flex-none px-1 text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+            className="rounded-chip flex-none px-1 text-[var(--node-muted)] touch:py-2 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
             onClick={() => repo.setTab(repo.tab)}
           >
             {tabLabel}

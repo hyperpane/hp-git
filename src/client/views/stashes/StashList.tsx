@@ -19,11 +19,14 @@ export function StashList({
   error,
   picked,
   onPick,
+  onOpen,
 }: {
   stashes: Stash[] | null;
   error: string | null;
   picked: number | null;
   onPick: React.Dispatch<React.SetStateAction<number | null>>;
+  /** A stash clicked: it, when one at a time. */
+  onOpen?(): void;
 }) {
   const repo = useRepo();
   const list = useRef<VirtualHandle>(null);
@@ -56,7 +59,7 @@ export function StashList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none items-center gap-1 border-b border-[var(--node-border)] ps-2.5 pe-1.5 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1 border-b border-[var(--node-border)] ps-2.5 pe-1.5 text-2xs text-[var(--node-muted)]">
         <span className="flex-1">{stashes ? plural(stashes.length, 'stash', 'stashes') : ''}</span>
         <ToolButton label="Stash the changes" icon={Plus} onClick={() => stashNow(repo)} disabled={!repo.status.files.length} />
       </div>
@@ -90,7 +93,10 @@ export function StashList({
               <div className="h-full px-1 py-px" data-stash={s.index}>
                 <div
                   className={rowClass(s.index === picked)}
-                  onClick={() => onPick(s.index)}
+                  onClick={() => {
+                    onPick(s.index);
+                    onOpen?.();
+                  }}
                   onContextMenu={(e) => menu(e, s)}
                   title={`${s.message}\n${longDate(s.date)}`}
                 >

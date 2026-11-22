@@ -15,7 +15,7 @@ import { plural } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { local } from '../../lib/local.ts';
 import { basenameOf } from '../../lib/paths.ts';
-import { rowClass } from '../../lib/rows.ts';
+import { rowClass, useRowHeight } from '../../lib/rows.ts';
 
 /** The files a commit changed, flat or by folder, with their counts. */
 export function FileList({
@@ -23,17 +23,21 @@ export function FileList({
   truncated,
   picked,
   onPick,
+  onOpen,
   sha,
 }: {
   files: ChangedFile[];
   truncated: boolean;
   picked: string | null;
   onPick(p: string): void;
+  /** A file clicked: its diff, when one at a time. */
+  onOpen?(): void;
   sha?: string;
 }) {
   const repo = useRepo();
   const [tree, setTreeState] = useState(() => local.get('commitTree', false));
   const list = useRef<VirtualHandle>(null);
+  const rowHeight = useRowHeight(22);
   const sorted = useMemo(() => (tree ? [...files].sort((a, b) => a.path.localeCompare(b.path)) : files), [files, tree]);
   const rows = useMemo(() => {
     if (!tree) return sorted.map((f) => ({ f, depth: 0, dir: null as string | null }));
@@ -94,7 +98,7 @@ export function FileList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-commit-files>
-      <div className="flex h-8 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-2 pe-1 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-8 flex-none touch:h-11 items-center gap-1.5 border-b border-[var(--node-border)] ps-2 pe-1 text-2xs text-[var(--node-muted)]">
         <span className="min-w-0 flex-1 truncate">
           {plural(files.length, 'file')}
           {truncated ? '+' : ''} <span className="text-[var(--ansi-2)]">+{additions.toLocaleString('en-US')}</span>{' '}
@@ -112,7 +116,7 @@ export function FileList({
       <VirtualList
         ref={list}
         count={rows.length}
-        rowHeight={22}
+        rowHeight={rowHeight}
         className="group/list git-scroll py-1"
         tabIndex={0}
         role="listbox"
@@ -134,7 +138,10 @@ export function FileList({
               <div
                 className={rowClass(f.path === picked)}
                 style={{ paddingLeft: 6 + r.depth * 12 }}
-                onClick={() => onPick(f.path)}
+                onClick={() => {
+                  onPick(f.path);
+                  onOpen?.();
+                }}
                 onContextMenu={(e) => menu(e, f)}
                 title={f.from ? `${f.from} → ${f.path}` : f.path}
               >

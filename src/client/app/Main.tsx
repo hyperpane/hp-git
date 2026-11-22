@@ -3,19 +3,22 @@
 // under it says when a merge, rebase, cherry-pick or revert is under way.
 // On the left, the tabs (Changes, History, Branches, Stashes, Tags), each a
 // list; on the right, what's picked in it: a diff, a commit, a branch
-// compared with the current one. File history, blame, commits and compares
-// open over the tabs, in this window, with a way back. Everything follows
-// the repository as it changes, here, in a terminal or in another app.
+// compared with the current one; in a narrow window (a phone), one or the
+// other, with a way back to the list. File history, blame, commits and
+// compares open over the tabs, in this window, with a way back. Everything
+// follows the repository as it changes, here, in a terminal or in another
+// app.
 //
 // Its keys and menu are hooks/useWindowKeys.ts and hooks/useWindowMenu.ts;
 // the views over the tabs, views/Overlay.tsx.
 
-import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Archive, FileDiff, GitBranch, GitCommitHorizontal, History, Tag as TagIcon } from 'lucide-react';
 import { keys, useEvent } from '@hyperpane/sdk/client';
-import { SplitPane, type TabItem, Tabs, ToolButton } from '@hyperpane/ui';
+import { COMPACT_WIDTH, type TabItem, Tabs, ToolButton, useCompact } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
+import { ListDetail } from '../components/ListDetail.tsx';
 import { useBranches } from '../hooks/useBranches.ts';
 import { useStashes } from '../hooks/useStashes.ts';
 import { useTags } from '../hooks/useTags.ts';
@@ -56,6 +59,12 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
   const [stash, setStash] = useState<number | null>(null);
   const [tag, setTag] = useState<string | null>(null);
   const [pickerWants, setPickerWants] = useState(false);
+  // Narrow, the list or what's picked in it: a row clicked opens the
+  // second, the back bar the first; another tab starts at its list.
+  const compact = useCompact();
+  const [openIn, setOpenIn] = useState<Tab | null>(null);
+  const open = openIn === tab;
+  const opens = () => setOpenIn(tab);
   const filters = {
     changes: useRef<HTMLInputElement>(null),
     history: useRef<HTMLInputElement>(null),
@@ -92,16 +101,24 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
     else {
       setTab('changes');
       const f = status.files.find((x) => x.path === rel);
-      if (f) setPicked([pickOf(sideOf(f, repo.including), rel)]);
+      if (f) {
+        setPicked([pickOf(sideOf(f, repo.including), rel)]);
+        setOpenIn('changes');
+      }
     }
     if (host.window) host.app.focusWindow(host.window.id);
   });
 
-  useWindowKeys(repo, sidebar, setSidebar, filters);
-
-  // Narrow, the tabs other than the picked one show as icons.
-  const [side, setSide] = useState<HTMLDivElement | null>(null);
-  const narrow = useNarrow(side, 380);
+  // The filter is in the list: one at a time, back to it.
+  useWindowKeys(
+    repo,
+    sidebar && !(compact && open),
+    (on) => {
+      setOpenIn(null);
+      setSidebar(on);
+    },
+    filters,
+  );
 
   const conflicts = status.files.filter((f) => f.conflict).length;
   const tabs: TabItem<Tab>[] = [
@@ -115,23 +132,23 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
   let left: ReactNode;
   let right: ReactNode;
   if (tab === 'changes') {
-    left = <ChangesList picked={picked} setPicked={setPicked} filterRef={filters.changes} />;
+    left = <ChangesList picked={picked} setPicked={setPicked} onOpen={opens} filterRef={filters.changes} />;
     right = <ChangesDetail picked={picked} />;
   } else if (tab === 'history') {
-    left = <HistoryList selected={commit} onSelect={setCommit} filterRef={filters.history} />;
+    left = <HistoryList selected={commit} onSelect={setCommit} onOpen={opens} filterRef={filters.history} />;
     right = commit ? (
       <CommitDetails key={commit} id={commit} load={() => repo.api.show(commit)} place="history" />
     ) : (
       <Blank icon={GitCommitHorizontal}>Pick a commit</Blank>
     );
   } else if (tab === 'branches') {
-    left = <BranchList branches={branches.branches} error={branches.error} picked={branch} onPick={setBranch} filterRef={filters.branches} />;
+    left = <BranchList branches={branches.branches} error={branches.error} picked={branch} onPick={setBranch} onOpen={opens} filterRef={filters.branches} />;
     right = <BranchDetail pick={branch} branches={branches.branches} />;
   } else if (tab === 'stashes') {
-    left = <StashList stashes={stashes.stashes} error={stashes.error} picked={stash} onPick={setStash} />;
+    left = <StashList stashes={stashes.stashes} error={stashes.error} picked={stash} onPick={setStash} onOpen={opens} />;
     right = <StashDetail stash={stashes.stashes?.find((s) => s.index === stash) ?? null} />;
   } else {
-    left = <TagList tags={tags.tags} error={tags.error} picked={tag} onPick={setTag} filterRef={filters.tags} />;
+    left = <TagList tags={tags.tags} error={tags.error} picked={tag} onPick={setTag} onOpen={opens} filterRef={filters.tags} />;
     right = <TagDetail tag={tags.tags?.find((t) => t.name === tag) ?? null} />;
   }
 
@@ -152,7 +169,7 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
       ) : (
         <div className="flex min-h-0 flex-1">
           {!sidebar && (
-            <div className="flex w-9 flex-none flex-col items-center gap-0.5 border-e border-[var(--node-border)] py-1">
+            <div className="flex w-9 flex-none flex-col items-center gap-0.5 border-e border-[var(--node-border)] py-1 max-sm:hidden">
               {tabs.map((t) => (
                 <ToolButton
                   key={t.value}
@@ -164,15 +181,19 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
               ))}
             </div>
           )}
-          <SplitPane
+          <ListDetail
             id="side"
             initial={320}
             min={220}
             minOther={320}
             collapsed={!sidebar}
+            below={COMPACT_WIDTH}
+            open={open}
+            onBack={() => setOpenIn(null)}
+            backLabel={tab[0].toUpperCase() + tab.slice(1)}
             first={
-              <div ref={setSide} className="flex min-h-0 flex-1 flex-col">
-                <Tabs items={tabs} value={tab} onValueChange={setTab} fill compact={narrow} label="Views" />
+              <div className="flex min-h-0 flex-1 flex-col">
+                <Tabs items={tabs} value={tab} onValueChange={setTab} fill label="Views" />
                 {left}
               </div>
             }
@@ -185,17 +206,3 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
 }
 
 const TABS_ORDER: Tab[] = ['changes', 'history', 'branches', 'stashes', 'tags'];
-
-/** Whether the element is narrower than `width` px, followed as it resizes. */
-function useNarrow(el: HTMLElement | null, width: number): boolean {
-  const [narrow, setNarrow] = useState(false);
-  useLayoutEffect(() => {
-    if (!el) return;
-    const measure = () => setNarrow(el.clientWidth > 0 && el.clientWidth < width);
-    measure();
-    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
-    ro?.observe(el);
-    return () => ro?.disconnect();
-  }, [el, width]);
-  return narrow;
-}

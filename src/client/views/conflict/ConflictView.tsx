@@ -94,7 +94,7 @@ export function ConflictView({ file }: { file: FileStatus }) {
         <NodeMessage>Loading</NodeMessage>
       ) : (
         <>
-          <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs">
+          <div className="flex h-8 flex-none touch:h-11 items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs">
             <span className="text-[var(--node-muted)]">
               {conflicts.length ? `${chosen} of ${plural(conflicts.length, 'conflict')} chosen` : 'No conflict markers are left'}
             </span>

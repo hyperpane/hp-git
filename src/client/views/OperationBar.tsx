@@ -63,7 +63,7 @@ export function OperationBar() {
       {op.kind === 'rebase' && (
         <button
           type="button"
-          className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
+          className="rounded-control h-6 touch:h-9 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
           onClick={() => go('skip')}
         >
           Skip Commit
@@ -72,7 +72,7 @@ export function OperationBar() {
       {op.kind !== 'bisect' && (
         <button
           type="button"
-          className="rounded-control h-6 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
+          className="rounded-control h-6 touch:h-9 border border-[var(--node-border)] px-2.5 text-xs hover:bg-[var(--node-hover)]"
           onClick={() => go('abort')}
         >
           Abort

@@ -48,7 +48,7 @@ export function SectionRow({
           <button
             type="button"
             tabIndex={-1}
-            className="rounded-chip px-1 text-2xs font-medium tracking-normal normal-case hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+            className="rounded-chip px-1 text-2xs font-medium tracking-normal normal-case touch:px-2 touch:py-1.5 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
             onClick={() => (it.side === 'staged' ? unstage(files) : stage(files))}
           >
             {it.side === 'staged' ? 'Unstage all' : 'Stage all'}
