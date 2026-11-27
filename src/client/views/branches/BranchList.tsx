@@ -3,9 +3,9 @@
 // behind, then the remote branches.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Cloud, GitBranch, Plus, Search, TriangleAlert } from 'lucide-react';
+import { Cloud, GitBranch, Plus, Search, TriangleAlert } from '@hyperpane/icons';
 import { keys } from '@hyperpane/sdk/client';
-import { NodeInput, NodeMessage, ToolButton, cn, menuItems } from '@hyperpane/ui';
+import { NodeMessage, ToolButton, cn, menuItems } from '@hyperpane/ui';
 import type { Branches, LocalBranch, RemoteBranch } from '../../../shared/index.ts';
 import { type BranchPick, branchActions, createBranch } from '../../app/actions/branches.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -15,7 +15,9 @@ import { SectionHeader } from '../../components/SectionHeader.tsx';
 import { type VirtualHandle, VirtualList } from '../../components/VirtualList.tsx';
 import { ago, longDate } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
-import { rowClass } from '../../lib/rows.ts';
+import { ROW_H_TALL, ROW_INSET_TALL, rowClass } from '../../lib/rows.ts';
+import { header } from '../../ui/classes.ts';
+import { Chip, SearchField } from '../../ui/parts.tsx';
 
 type Row = { t: 'section'; label: string; count: number } | { t: 'local'; b: LocalBranch; recent: boolean } | { t: 'remote'; b: RemoteBranch };
 
@@ -112,22 +114,21 @@ export function BranchList({
     );
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput
-            ref={filterRef}
-            className="w-full ps-7"
-            placeholder={`Filter branches (${keys('⌘F')})`}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key !== 'ArrowDown') return;
-              list.current?.element?.focus();
-              e.preventDefault();
-            }}
-          />
-        </div>
+      <div className={cn(header.base, 'gap-1')}>
+        <SearchField
+          inputRef={filterRef}
+          placeholder="Filter branches"
+          aria-label="Filter branches"
+          title={`Filter branches (${keys('⌘F')})`}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          onClear={() => setFilter('')}
+          onKeyDown={(e) => {
+            if (e.key !== 'ArrowDown') return;
+            list.current?.element?.focus();
+            e.preventDefault();
+          }}
+        />
         <ToolButton label="New branch" icon={Plus} onClick={() => createBranch(repo)} />
       </div>
       {!branches ? (
@@ -140,9 +141,9 @@ export function BranchList({
         <VirtualList
           ref={list}
           count={rows.length}
-          rowHeight={40}
+          rowHeight={ROW_H_TALL}
           rowKey={(n) => keyOf(rows[n])}
-          className="group/list git-scroll py-1"
+          className="group/list git-scroll py-1.5"
           tabIndex={0}
           role="listbox"
           ariaLabel="Branches"
@@ -151,16 +152,16 @@ export function BranchList({
             const r = rows[n];
             if (r.t === 'section')
               return (
-                <div className="flex h-full items-end px-1 pb-0.5">
-                  <SectionHeader label={r.label} count={r.count} className="h-5" />
+                <div className="flex h-full items-end px-1.5 pb-1">
+                  <SectionHeader label={r.label} count={r.count} className="h-6" />
                 </div>
               );
             const isPicked = !!picked && picked.kind === r.t && picked.name === r.b.name;
             const current = r.t === 'local' && r.b.current;
             return (
-              <div className="h-full px-1 py-px" data-branch={r.b.name}>
+              <div className={ROW_INSET_TALL} data-branch={r.b.name}>
                 <div
-                  className={cn(rowClass(isPicked), 'items-center')}
+                  className={cn(rowClass(isPicked), 'gap-2.5 px-2.5')}
                   onClick={() => {
                     onPick({ kind: r.t, name: r.b.name });
                     onOpen?.();
@@ -169,26 +170,29 @@ export function BranchList({
                   onContextMenu={(e) => menu(e, r)}
                   title={`${r.b.name}\n${r.b.subject}\n${r.b.author} · ${longDate(r.b.date)}`}
                 >
-                  {r.t === 'remote' ? (
-                    <Cloud className="size-3.5 flex-none text-[var(--node-muted)]" />
-                  ) : (
-                    <GitBranch className={cn('size-3.5 flex-none', current ? 'text-[var(--node-accent)]' : 'text-[var(--node-muted)]')} />
-                  )}
-                  <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                    <span className="flex min-w-0 items-center gap-1.5">
+                  <span
+                    className={cn(
+                      'grid size-7 flex-none place-items-center rounded-control',
+                      current ? 'bg-[var(--git-accent-soft)] text-[var(--node-accent)]' : 'bg-[var(--git-fill)] text-[var(--node-muted)]',
+                    )}
+                  >
+                    {r.t === 'remote' ? <Cloud variant="outline" className="size-3.5" /> : <GitBranch variant={current ? 'fill' : 'outline'} className="size-3.5" />}
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="flex min-w-0 items-center gap-1.5 leading-4">
                       <span className={cn('truncate', current && 'font-medium')}>{r.b.name}</span>
-                      {current && <span className="flex-none text-2xs text-[var(--node-accent)]">current</span>}
-                      {r.t === 'local' && r.recent && <span className="flex-none text-2xs text-[var(--node-muted)]">recent</span>}
-                      {r.t === 'local' && r.b.gone && <span className="flex-none text-2xs text-[var(--ansi-3)]">upstream gone</span>}
+                      {current && <Chip color="var(--node-accent)">current</Chip>}
+                      {r.t === 'local' && r.recent && <span className="flex-none text-[11px] text-[var(--node-muted)]">recent</span>}
+                      {r.t === 'local' && r.b.gone && <Chip color="var(--git-modified)">upstream gone</Chip>}
                     </span>
-                    <span className="truncate text-2xs text-[var(--node-muted)]">
+                    <span className="truncate text-xs leading-4 text-[var(--node-muted)]">
                       {r.t === 'local' && r.b.upstream ? `${r.b.upstream} · ` : ''}
                       {r.b.subject}
                     </span>
                   </div>
-                  <div className="flex flex-none flex-col items-end gap-0.5 leading-tight">
+                  <div className="flex flex-none flex-col items-end gap-0.5">
                     {r.t === 'local' && <AheadBehind ahead={r.b.ahead} behind={r.b.behind} />}
-                    <span className="text-2xs text-[var(--node-muted)] tabular-nums">{ago(r.b.date)}</span>
+                    <span className="text-xs leading-4 text-[var(--node-muted)] tabular-nums">{ago(r.b.date)}</span>
                   </div>
                 </div>
               </div>

@@ -7,9 +7,9 @@
 // and the file's history and blame are in its More menu only.
 
 import { type MouseEvent as ReactMouseEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
-import { Binary, Columns2, FileClock, FileWarning, MoreHorizontal, Pilcrow, Rows3, ScanSearch, TriangleAlert } from 'lucide-react';
+import { Binary, Columns2, FileClock, FileWarning, MoreHorizontal, Pilcrow, Rows3, ScanSearch, TriangleAlert } from '@hyperpane/icons';
 import { formatSize } from '@hyperpane/sdk/client';
-import { NodeButton, NodeMessage, ToolButton, cn, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
+import { NodeMessage, SegmentedControl, ToolButton, cn, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
 import type { Diff } from '../../../shared/index.ts';
 import type { DiffRequest } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -17,6 +17,8 @@ import { useDiffMode } from '../../hooks/useDiffMode.ts';
 import type { LineChecks } from '../../hooks/useLineChecks.ts';
 import { copy } from '../../lib/clipboard.ts';
 import type { Expansion, Gap, LineKey } from '../../lib/diff/model.ts';
+import { header } from '../../ui/classes.ts';
+import { Button } from '../../ui/parts.tsx';
 import { Blank } from '../Blank.tsx';
 import { DiffTitle } from './DiffTitle.tsx';
 import { DiffView, type LineActions } from './DiffView.tsx';
@@ -181,7 +183,7 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
     );
   else if (diff.tooLarge)
     body = (
-      <Blank icon={FileWarning} title="This diff is big" actions={<NodeButton onClick={() => setFull(true)}>Show It Anyway</NodeButton>}>
+      <Blank icon={FileWarning} title="This diff is big" actions={<Button onClick={() => setFull(true)}>Show It Anyway</Button>}>
         Its changes come to {formatSize(diff.size)}
         {diff.additions + diff.deletions > 0 ? ` (${(diff.additions + diff.deletions).toLocaleString('en-US')} lines)` : ''}. Showing it may take a moment.
       </Blank>
@@ -224,16 +226,21 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
 
   return (
     <div ref={box} className="flex min-h-0 min-w-0 flex-1 flex-col" data-diff-pane={path}>
-      <div className="flex h-9 flex-none items-center gap-1 border-b border-[var(--node-border)] ps-3 pe-1.5 touch:h-11">
+      <div className={cn(header.base, 'gap-1 ps-3.5 pe-2')}>
         <DiffTitle diff={diff} path={path} />
-        {tools && <span className="flex flex-none items-center gap-1 pe-1">{tools}</span>}
-        <ToolButton
-          label={shownMode === 'split' ? 'Unified diff' : narrow ? 'Side by side (the window is too narrow)' : 'Side by side'}
-          icon={shownMode === 'split' ? Rows3 : Columns2}
-          disabled={narrow}
-          onClick={() => setMode(mode === 'split' ? 'unified' : 'split')}
+        {tools && <span className="flex flex-none items-center gap-1 pe-1.5">{tools}</span>}
+        <SegmentedControl
+          size="sm"
+          label={narrow ? 'How to show the diff (side by side needs a wider window)' : 'How to show the diff'}
+          value={shownMode}
+          onValueChange={(v) => setMode(v as 'unified' | 'split')}
+          className="me-1 flex-none"
+          options={[
+            { value: 'unified', label: <Rows3 variant="outline" />, srLabel: 'Unified diff' },
+            { value: 'split', label: <Columns2 variant="outline" />, srLabel: 'Side by side', disabled: narrow },
+          ]}
         />
-        <ToolButton
+        <ToolButton iconVariant="outline"
           label={ignoreWs ? 'Show whitespace changes' : 'Ignore whitespace changes'}
           icon={Pilcrow}
           active={ignoreWs}
@@ -241,11 +248,11 @@ export function DiffPane({ request, stamp, newRev, actions, checks, tools, menu,
         />
         {!narrow && (
           <>
-            <ToolButton label="File history" icon={FileClock} onClick={() => repo.open({ kind: 'fileHistory', path })} />
-            <ToolButton label="Blame" icon={ScanSearch} onClick={() => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to })} />
+            <ToolButton iconVariant="outline" label="File history" icon={FileClock} onClick={() => repo.open({ kind: 'fileHistory', path })} />
+            <ToolButton iconVariant="outline" label="Blame" icon={ScanSearch} onClick={() => repo.open({ kind: 'blame', path, rev: request.commit ?? request.to })} />
           </>
         )}
-        <ToolButton label="More" icon={MoreHorizontal} onClick={moreMenu} />
+        <ToolButton iconVariant="outline" label="More" icon={MoreHorizontal} onClick={moreMenu} />
       </div>
       {banner}
       <div className={cn('flex min-h-0 flex-1 flex-col')}>{body}</div>

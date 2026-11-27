@@ -3,9 +3,9 @@
 
 import { useState } from 'react';
 import { keys } from '@hyperpane/sdk/client';
-import { NodeButton } from '@hyperpane/ui';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
+import { Button } from '../../ui/parts.tsx';
 import { Blank } from '../../components/Blank.tsx';
 import type { LineKey } from '../../lib/diff/model.ts';
 import { plural } from '../../lib/format.ts';
@@ -35,8 +35,8 @@ export function ChangesDetail({ picked }: { picked: Pick[] }) {
           actions={
             changes.length > 0 && (
               <>
-                <NodeButton onClick={() => check(changes, true)}>Include {changes.length}</NodeButton>
-                <NodeButton onClick={() => check(changes, false)}>Leave Out {changes.length}</NodeButton>
+                <Button onClick={() => check(changes, true)}>Include {changes.length}</Button>
+                <Button onClick={() => check(changes, false)}>Leave Out {changes.length}</Button>
               </>
             )
           }
@@ -50,8 +50,8 @@ export function ChangesDetail({ picked }: { picked: Pick[] }) {
         title={`${plural(picked.length, 'file')} picked`}
         actions={
           <>
-            {unstaged.length > 0 && <NodeButton onClick={() => stage(unstaged)}>Stage {unstaged.length}</NodeButton>}
-            {staged.length > 0 && <NodeButton onClick={() => unstage(staged)}>Unstage {staged.length}</NodeButton>}
+            {unstaged.length > 0 && <Button onClick={() => stage(unstaged)}>Stage {unstaged.length}</Button>}
+            {staged.length > 0 && <Button onClick={() => unstage(staged)}>Unstage {staged.length}</Button>}
           </>
         }
       >

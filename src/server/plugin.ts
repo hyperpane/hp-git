@@ -8,6 +8,7 @@
 // This file wires each op to its handler (ops/, one file per group); what
 // they share (running git, parsing what it prints, the watches) is in lib/.
 
+import os from 'node:os';
 import path from 'node:path';
 import { type Host, type JsonSpec, PluginError, fromClient, json } from '@hyperpane/sdk/server';
 import type { Outcome, Status, SyncEvent, Topics } from '../shared/index.ts';
@@ -129,7 +130,8 @@ export function makeGit(options: Options = {}) {
     const spec: JsonSpec = {
       calls: {
         version: async () => (await git.which()) ?? { path: null, version: null },
-        find: async ({ path: p }) => find(git, p),
+        // With the server's home folder, so the window can write ~ for it.
+        find: async ({ path: p }) => ({ ...(await find(git, p)), home: os.homedir().replace(/\\/g, '/') }),
         init: async ({ path: p, branch }) => init(git, p, branch, String((await settings()).defaultBranch ?? 'main')),
 
         status: read((repo, req, { signal }) => status(repo, { stats: !!req.stats, signal })),

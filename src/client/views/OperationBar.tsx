@@ -1,9 +1,10 @@
-// The bar under the toolbar while a merge, rebase, cherry-pick or revert
+// The banner under the top bar while a merge, rebase, cherry-pick or revert
 // is under way: what it is, what's left, and Continue, Skip or Abort.
 
 import { useRepo } from '../app/repo.ts';
 import { plural, shortSha } from '../lib/format.ts';
-import { NodeButton } from '@hyperpane/ui';
+import { GitCommitHorizontal, GitCompareArrows, GitMerge, Search } from '@hyperpane/icons';
+import { Button } from '../ui/parts.tsx';
 
 /** The branch a merge's prepared message names (“Merge branch 'x'”). */
 const mergedName = (message?: string) => /^Merge (?:remote-tracking )?branch '([^']+)'/.exec(message ?? '')?.[1] ?? null;
@@ -46,26 +47,41 @@ export function OperationBar() {
     }
     repo.outcome(await repo.run(() => api.operation(action)), action === 'continue' ? 'Continuing' : 'Skipping');
   };
+  const Icon = op.kind === 'rebase' ? GitCompareArrows : op.kind === 'merge' ? GitMerge : op.kind === 'bisect' ? Search : GitCommitHorizontal;
+  const tone = conflicts ? 'var(--git-conflicted)' : 'var(--git-modified)';
+  // A banner under the top bar, in the colour of what's left: conflicts, or
+  // a step to take.
   return (
-    <div
-      className="flex min-h-10 flex-none flex-wrap items-center gap-x-2 gap-y-1 border-b border-[var(--node-border)] ps-3 pe-2.5 py-1.5"
-      style={{ background: 'color-mix(in srgb, var(--ansi-3) 12%, transparent)' }}
-      data-operation={op.kind}
-    >
-      <span className="size-2 flex-none rounded-full bg-[var(--ansi-3)]" />
-      <span className="font-medium">{what}</span>
-      <span className="min-w-0 flex-1 truncate text-[var(--node-muted)]">{next}</span>
-      {op.kind !== 'bisect' && (
-        <NodeButton variant="primary" disabled={conflicts > 0} onClick={() => go('continue')}>
-          Continue
-        </NodeButton>
-      )}
-      {op.kind === 'rebase' && <NodeButton onClick={() => go('skip')}>Skip Commit</NodeButton>}
-      {op.kind !== 'bisect' && (
-        <NodeButton variant="ghost" onClick={() => go('abort')}>
-          Abort
-        </NodeButton>
-      )}
+    <div className="flex-none px-2 pt-2" data-operation={op.kind}>
+      <div
+        role="status"
+        className="rounded-surface flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 py-1.5 ps-2 pe-1.5 ring-1 ring-inset"
+        style={{
+          background: `color-mix(in srgb, ${tone} 11%, var(--node-bg))`,
+          '--tw-ring-color': `color-mix(in srgb, ${tone} 28%, transparent)`,
+        } as React.CSSProperties}
+      >
+        <span className="grid size-7 flex-none place-items-center rounded-full" style={{ background: `color-mix(in srgb, ${tone} 20%, transparent)`, color: tone }}>
+          <Icon aria-hidden className="size-4" />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col leading-tight">
+          <span className="truncate text-[13px] font-medium">{what}</span>
+          <span className="truncate text-xs text-[var(--node-muted)]">{next}</span>
+        </span>
+        <span className="flex flex-none items-center gap-1">
+          {op.kind !== 'bisect' && (
+            <Button variant="ghost" onClick={() => go('abort')}>
+              Abort
+            </Button>
+          )}
+          {op.kind === 'rebase' && <Button onClick={() => go('skip')}>Skip Commit</Button>}
+          {op.kind !== 'bisect' && (
+            <Button variant="primary" disabled={conflicts > 0} onClick={() => go('continue')}>
+              Continue
+            </Button>
+          )}
+        </span>
+      </div>
     </div>
   );
 }

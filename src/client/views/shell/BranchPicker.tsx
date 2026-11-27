@@ -1,11 +1,13 @@
-// The branch dropdown under the toolbar: the current branch, recent ones,
+// The branch dropdown under the top bar's branch pill: the current branch, recent ones,
 // the rest, then remote ones; type to find one, ↑ ↓ and ↵ to switch, or
 // make one.
 
 import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { GitBranch, Plus, Search } from 'lucide-react';
+import { Check, GitBranch, Plus, Search } from '@hyperpane/icons';
 import { keys } from '@hyperpane/sdk/client';
-import { NodeButton, NodeInput, cn } from '@hyperpane/ui';
+import { cn } from '@hyperpane/ui';
+import { field } from '../../ui/classes.ts';
+import { Button } from '../../ui/parts.tsx';
 import type { Branches } from '../../../shared/index.ts';
 import { createBranch } from '../../app/actions/branches.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -77,25 +79,33 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
 
   return (
     <>
-      <div className="flex flex-none items-center gap-1.5 border-b border-[var(--border)] p-2">
+      <div className="flex flex-none items-center gap-1.5 p-2 pb-1">
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput ref={input} className="w-full ps-7" placeholder="Find a branch" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onKey} />
+          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
+          <input
+            ref={input}
+            spellCheck={false}
+            className={cn(field, 'w-full ps-8')}
+            placeholder="Find a branch"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={onKey}
+          />
         </div>
-        <NodeButton onClick={create} title="New branch from the current one">
+        <Button onClick={create} title="New branch from the current one">
           <Plus />
           New
-        </NodeButton>
+        </Button>
       </div>
-      <div ref={listRef} className="git-scroll min-h-0 flex-1 overflow-auto p-1 pb-1.5">
+      <div ref={listRef} className="git-scroll min-h-0 flex-1 overflow-auto px-1.5 pb-1.5">
         {!branches ? (
-          <div className="p-4 text-center text-[var(--node-muted)]">Loading</div>
+          <div className="p-6 text-center text-[13px] text-[var(--node-muted)]">Loading</div>
         ) : !rows.length ? (
-          <div className="p-4 text-center text-[var(--node-muted)]">{q ? `No branch matches. ${keys('↵')} makes ${q.trim()}.` : 'No branches'}</div>
+          <div className="p-6 text-center text-[13px] text-[var(--node-muted)]">{q ? `No branch matches. ${keys('↵')} makes ${q.trim()}.` : 'No branches'}</div>
         ) : (
           rows.map((r, i) =>
             r.t === 'head' ? (
-              <div key={`h${i}`} className="flex h-7 items-end px-2 pb-1.5 text-2xs font-medium text-[var(--node-muted)]">
+              <div key={`h${i}`} className="flex h-8 items-end px-2 pb-1.5 text-[11px] leading-4 font-medium tracking-[0.06em] text-[var(--node-muted)] uppercase">
                 {r.label}
               </div>
             ) : (
@@ -104,19 +114,23 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
                 type="button"
                 data-pick={i}
                 className={cn(
-                  'rounded-control flex h-9 w-full items-center gap-2 px-2 text-left touch:h-11',
-                  i === sel ? 'bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]',
+                  'rounded-control flex h-11 w-full items-center gap-2.5 px-2 text-left text-[13px] transition-colors duration-75 touch:h-12',
+                  i === sel ? 'bg-[var(--git-selected)]' : 'hover:bg-[var(--node-hover)]',
                 )}
                 onMouseEnter={() => setAt(choices.indexOf(i))}
                 onClick={() => choose(r)}
               >
-                <GitBranch className={cn('size-3.5 flex-none', r.current ? 'text-[var(--node-accent)]' : 'text-[var(--node-muted)]')} />
+                {r.current ? (
+                  <Check className="size-4 flex-none text-[var(--node-accent)]" />
+                ) : (
+                  <GitBranch className="size-4 flex-none text-[var(--node-muted)]" variant="outline" />
+                )}
                 <span className="flex min-w-0 flex-1 flex-col leading-tight">
                   <span className={cn('truncate', r.current && 'font-medium')}>{r.name}</span>
-                  <span className="truncate text-2xs text-[var(--node-muted)]">{r.sub}</span>
+                  <span className="truncate text-xs text-[var(--node-muted)]">{r.sub}</span>
                 </span>
                 {(r.ahead || r.behind) && (
-                  <span className="flex-none text-2xs text-[var(--node-muted)] tabular-nums">
+                  <span className="flex-none text-xs text-[var(--node-muted)] tabular-nums">
                     {r.behind ? `↓${r.behind} ` : ''}
                     {r.ahead ? `↑${r.ahead}` : ''}
                   </span>
@@ -126,7 +140,7 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
           )
         )}
       </div>
-      <div className="flex h-7 flex-none items-center border-t border-[var(--border)] px-3 text-2xs text-[var(--node-muted)]">
+      <div className="flex h-8 flex-none items-center border-t border-[var(--git-line)] px-3 text-xs text-[var(--node-muted)]">
         {branches ? `${plural(branches.local.length, 'local branch', 'local branches')}, ${branches.remote.length} remote` : ''} · {keys('↵')} switches
       </div>
     </>

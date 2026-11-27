@@ -1,13 +1,22 @@
-// The window's keys: the tabs, the filter, back and forward, and Escape
-// out of a view over the tabs.
+// The window's keys: the tabs, the filter, back and forward, Escape out of
+// a view over the tabs, and the rail folded (⌘\) and the list hidden (⇧⌘\).
 
 import { type RefObject, useEffect } from 'react';
 import { mod, shortcutKey } from '@hyperpane/sdk/client';
 import type { Repo, Tab } from '../app/repo.ts';
 
-export function useWindowKeys(repo: Repo, sidebar: boolean, setSidebar: (on: boolean) => void, filters: Record<Tab, RefObject<HTMLInputElement | null>>) {
+export function useWindowKeys(
+  repo: Repo,
+  /** Whether the list shows, and showing or hiding it. */
+  list: boolean,
+  setList: (on: boolean) => void,
+  filters: Record<Tab, RefObject<HTMLInputElement | null>>,
+  /** Folding the rail and back. */
+  toggleRail?: () => void,
+) {
   const { tab, setTab } = repo;
-  // Keys: tabs by Ctrl+1…5, the filter by ⌘F, back and forward by ⌘[ ⌘]
+  // Keys: tabs by Ctrl+1…5, the filter by ⌘F, the rail by ⌘\ and the list
+  // by ⇧⌘\, back and forward by ⌘[ ⌘]
   // (and Alt+← →, and the mouse's buttons), all by the physical key.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -18,11 +27,15 @@ export function useWindowKeys(repo: Repo, sidebar: boolean, setSidebar: (on: boo
         setTab((['changes', 'history', 'branches', 'stashes', 'tags'] as Tab[])[Number(digit[1]) - 1]);
       } else if (k === 'f' && mod(e) && !e.shiftKey && !e.altKey) {
         if (repo.view) return;
-        if (!sidebar) setSidebar(true);
+        if (!list) setList(true);
         requestAnimationFrame(() => {
           filters[tab].current?.focus();
           filters[tab].current?.select();
         });
+      } else if (e.code === 'Backslash' && mod(e) && !e.altKey) {
+        if (e.shiftKey) setList(!list);
+        else if (toggleRail) toggleRail();
+        else return;
       } else if ((e.code === 'BracketLeft' && mod(e)) || (e.key === 'ArrowLeft' && e.altKey && !isField(e.target))) {
         repo.back();
       } else if ((e.code === 'BracketRight' && mod(e)) || (e.key === 'ArrowRight' && e.altKey && !isField(e.target))) {

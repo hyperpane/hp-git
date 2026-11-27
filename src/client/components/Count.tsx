@@ -6,7 +6,7 @@ import { cn } from '@hyperpane/ui';
 export function Count({ n, className }: { n: number; className?: string }) {
   if (!n) return null;
   return (
-    <span className={cn('rounded-full bg-[var(--node-hover)] px-1.5 text-2xs leading-4 font-medium text-[var(--node-muted)] tabular-nums', className)}>
+    <span className={cn('rounded-full bg-[var(--git-fill)] px-1.5 text-[11px] leading-4 font-medium text-[var(--node-muted)] tabular-nums', className)}>
       {n > 99999 ? '99k+' : n.toLocaleString('en-US')}
     </span>
   );
@@ -17,11 +17,11 @@ export function AheadBehind({ ahead, behind, className }: { ahead?: number; behi
   if (!ahead && !behind) return null;
   return (
     <span
-      className={cn('flex flex-none items-center gap-1 text-2xs text-[var(--node-muted)] tabular-nums', className)}
+      className={cn('flex flex-none items-center gap-1.5 text-xs leading-4 tabular-nums', className)}
       title={`${ahead ?? 0} ahead, ${behind ?? 0} behind`}
     >
-      {!!behind && <span>↓{behind}</span>}
-      {!!ahead && <span>↑{ahead}</span>}
+      {!!behind && <span className="text-[var(--git-remote)]">↓{behind}</span>}
+      {!!ahead && <span className="text-[var(--git-added)]">↑{ahead}</span>}
     </span>
   );
 }

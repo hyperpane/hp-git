@@ -268,7 +268,7 @@ export const DiffView = memo(function DiffView({ diff, mode, actions, expansions
             rowHeight={ROW}
             row={half('left')}
             width={gutter + 16 + codeWidth}
-            className="git-scroll w-1/2 flex-none border-e border-[var(--node-border)]"
+            className="git-scroll w-1/2 flex-none border-e border-[var(--git-line)]"
             onScroll={follow('left')}
             tabIndex={0}
             ariaLabel={`Before, in ${diff.path}`}
@@ -290,7 +290,7 @@ export const DiffView = memo(function DiffView({ diff, mode, actions, expansions
         <PickedBar n={n} actions={actions} busy={busy} onRun={(action) => run(action, [...selected])} onClear={() => setSelected(new Set())} />
       )}
       {diff.truncated && (
-        <div className="flex h-7 flex-none items-center gap-2 border-t border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
+        <div className="flex h-8 flex-none items-center gap-2 border-t border-[var(--git-line)] px-3.5 text-xs text-[var(--node-muted)]">
           The diff was cut here: it’s longer than this window shows
         </div>
       )}

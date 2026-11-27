@@ -4,9 +4,9 @@
 // checks it out, branches or tags it, picks, reverts or resets to it.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpFromLine, ChevronDown, GitBranch, History, Search, TriangleAlert, X } from 'lucide-react';
+import { ArrowUpFromLine, ChevronDown, GitBranch, History, Search, TriangleAlert } from '@hyperpane/icons';
 import { keys, mod } from '@hyperpane/sdk/client';
-import { NodeButton, NodeInput, ToolButton, cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
+import { ToolButton, cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
 import { commitMenu } from '../../app/actions/commits.ts';
 import type { LogRequest } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -22,9 +22,11 @@ import { LANE_WIDTH, MAX_LANES } from '../../lib/graph.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { MODES, type SearchMode } from '../../lib/logSearch.ts';
 import { authorNames } from '../../lib/people.ts';
-import { useRowHeight } from '../../lib/rows.ts';
+import { ROW_H, ROW_INSET, rowClass, useRowHeight } from '../../lib/rows.ts';
+import { footer, header } from '../../ui/classes.ts';
+import { SearchField } from '../../ui/parts.tsx';
 
-const ROW = 28;
+const ROW = ROW_H;
 
 export function HistoryList({
   selected,
@@ -115,12 +117,9 @@ export function HistoryList({
     const isSel = c.sha === selected;
     const isHead = c.sha === status.head;
     return (
-      <div className="h-full px-1" data-sha={c.sha}>
+      <div className={ROW_INSET} data-sha={c.sha}>
         <div
-          className={cn(
-            'rounded-control flex h-full cursor-default items-center gap-2 ps-1.5 pe-2',
-            isSel ? 'bg-[var(--node-selection-inactive)] group-focus-within/list:bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]',
-          )}
+          className={cn(rowClass(isSel), 'ps-1.5')}
           onClick={() => {
             onSelect(c.sha);
             onOpen?.();
@@ -140,7 +139,7 @@ export function HistoryList({
             ))}
             {c.refs.length > 2 && (
               <span
-                className="flex-none text-2xs text-[var(--node-muted)]"
+                className="flex-none text-[11px] text-[var(--node-muted)]"
                 title={c.refs
                   .slice(2)
                   .map((r) => r.name)
@@ -149,11 +148,11 @@ export function HistoryList({
                 +{c.refs.length - 2}
               </span>
             )}
-            <span className={cn('min-w-12 flex-1 truncate', isHead && 'font-medium')}>{c.subject}</span>
+            <span className={cn('ms-0.5 min-w-12 flex-1 truncate', isHead && 'font-medium')}>{c.subject}</span>
           </span>
-          {c.unpushed && <ArrowUpFromLine className="size-3 flex-none text-[var(--node-muted)]" aria-label="Not pushed" />}
-          <Authors commit={c} size={16} />
-          <span className="w-7 flex-none text-right text-2xs whitespace-nowrap text-[var(--node-muted)] tabular-nums" title={longDate(c.date)}>
+          {c.unpushed && <ArrowUpFromLine variant="outline" className="size-3.5 flex-none text-[var(--node-muted)]" aria-label="Not pushed" />}
+          <Authors commit={c} size={18} />
+          <span className="w-8 flex-none text-right text-xs whitespace-nowrap text-[var(--node-muted)] tabular-nums" title={longDate(c.date)}>
             {shortAgo(c.date)}
           </span>
         </div>
@@ -164,49 +163,38 @@ export function HistoryList({
   const current = MODES.find((m) => m.id === mode)!;
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
-        <NodeButton
-          variant="ghost"
-          className="gap-1 px-2 font-normal text-[var(--node-muted)] hover:text-[var(--node-fg)]"
+      <div className={cn(header.base, 'gap-1')}>
+        <button
+          type="button"
+          className={cn(
+            'flex h-7 flex-none items-center gap-1 rounded-control ps-2 pe-1.5 text-[13px] text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9',
+            styles.focusRing,
+          )}
           title="What to search, and which branches"
           onClick={modeMenu}
         >
-          {all ? <GitBranch /> : null}
+          {all ? <GitBranch className="size-3.5" /> : null}
           {current.label.split(' ')[0]}
-          <ChevronDown className="opacity-70" />
-        </NodeButton>
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput
-            ref={filterRef}
-            className="w-full ps-7 pe-6"
-            placeholder={`${current.hint} (${keys('⌘F')})`}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setText('');
-                list.current?.element?.focus();
-              } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
-                list.current?.element?.focus();
-                e.preventDefault();
-              }
-            }}
-          />
-          {text && (
-            <button
-              type="button"
-              aria-label="Clear"
-              className={cn(
-                'absolute top-1/2 right-1.5 flex size-4 -translate-y-1/2 items-center justify-center rounded-full text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:size-8',
-                styles.focusRing,
-              )}
-              onClick={() => setText('')}
-            >
-              <X className="size-3" />
-            </button>
-          )}
-        </div>
+          <ChevronDown className="size-3.5 opacity-70" />
+        </button>
+        <SearchField
+          inputRef={filterRef}
+          placeholder={current.hint}
+          aria-label="Search the history"
+          title={`${current.hint} (${keys('⌘F')})`}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onClear={() => setText('')}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setText('');
+              list.current?.element?.focus();
+            } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+              list.current?.element?.focus();
+              e.preventDefault();
+            }
+          }}
+        />
         <ToolButton label={all ? 'This branch only' : 'Every branch and tag'} icon={GitBranch} active={all} onClick={() => setAll(!all)} />
       </div>
       {log.error ? (
@@ -233,7 +221,7 @@ export function HistoryList({
           row={row}
           rowKey={(n) => commits[n].sha}
           onEnd={log.loadMore}
-          className="group/list git-scroll py-1"
+          className="group/list git-scroll py-1.5"
           tabIndex={0}
           role="listbox"
           ariaLabel="Commits"
@@ -241,7 +229,7 @@ export function HistoryList({
         />
       )}
       {commits.length > 0 && (
-        <div className="flex h-7 flex-none items-center gap-1 border-t border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)] tabular-nums">
+        <div className={footer}>
           {commits.length.toLocaleString('en-US')}
           {log.more ? '+' : ''} commits
           {log.loading && <span>· loading</span>}

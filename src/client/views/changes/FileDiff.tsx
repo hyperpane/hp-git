@@ -5,11 +5,11 @@
 // whole file staged or unstaged.
 
 import { useMemo } from 'react';
-import { NodeButton } from '@hyperpane/ui';
 import type { Diff, FileStatus } from '../../../shared/index.ts';
 import { discardPatch, stagePatch, unstagePatch } from '../../../shared/patch.ts';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
+import { Button } from '../../ui/parts.tsx';
 import type { LineChecks } from '../../hooks/useLineChecks.ts';
 import { DiffPane } from '../../components/diff/DiffPane.tsx';
 import type { LineActions } from '../../components/diff/DiffView.tsx';
@@ -80,9 +80,9 @@ export function FileDiff({ side, file, onLines }: { side: Side; file: FileStatus
   );
   const tools =
     side === 'changes' ? null : side === 'staged' ? (
-      <NodeButton onClick={() => unstage([file])}>Unstage File</NodeButton>
+      <Button onClick={() => unstage([file])}>Unstage File</Button>
     ) : (
-      <NodeButton onClick={() => stage([file])}>Stage File</NodeButton>
+      <Button onClick={() => stage([file])}>Stage File</Button>
     );
   return (
     <DiffPane

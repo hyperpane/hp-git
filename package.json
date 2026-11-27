@@ -20,7 +20,6 @@
     "@types/react-dom": "19.3.0",
     "codemirror": "6.0.2",
     "happy-dom": "20.14.6",
-    "lucide-react": "1.66.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "sucrase": "3.35.1",
@@ -30,6 +29,8 @@
     "@hyperpane/sdk": "0.1.5"
   },
   "peerDependenciesMeta": {
-    "@hyperpane/sdk": { "optional": true }
+    "@hyperpane/sdk": {
+      "optional": true
+    }
   }
 }

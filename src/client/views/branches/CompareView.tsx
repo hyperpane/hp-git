@@ -2,7 +2,7 @@
 // files one changed since they parted.
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { ArrowDownLeft, ArrowUpRight, TriangleAlert } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Check, TriangleAlert } from '@hyperpane/icons';
 import { NodeMessage, SegmentedControl, SplitPane } from '@hyperpane/ui';
 import type { Commit, Compare } from '../../../shared/index.ts';
 import { commitMenu } from '../../app/actions/commits.ts';
@@ -11,7 +11,7 @@ import { Authors } from '../../components/Avatar.tsx';
 import { Blank } from '../../components/Blank.tsx';
 import { VirtualList } from '../../components/VirtualList.tsx';
 import { longDate, plural, shortAgo, shortSha } from '../../lib/format.ts';
-import { rowClass, useRowHeight } from '../../lib/rows.ts';
+import { ROW_H, ROW_INSET, rowClass, useRowHeight } from '../../lib/rows.ts';
 import { FilesBetween } from '../commit/FilesBetween.tsx';
 
 /** Two refs side by side: the commits on each side (`head` has `ahead`
@@ -41,9 +41,9 @@ export function CompareView({ base, head }: { base: string; head: string }) {
   const c = state.c;
   return (
     <div ref={setBox} className="flex min-h-0 flex-1 flex-col" data-compare={`${base}...${head}`}>
-      <div className="flex h-10 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)] touch:h-12">
+      <div className="flex h-10 flex-none items-center gap-3 border-b border-[var(--git-line)] px-3.5 text-xs text-[var(--node-muted)] touch:h-12">
         <SegmentedControl
-          size="xs"
+          size="sm"
           label="What to compare"
           value={show}
           onValueChange={(v) => setShow(v as 'commits' | 'files')}
@@ -68,15 +68,19 @@ export function CompareView({ base, head }: { base: string; head: string }) {
           minOther={80}
           first={
             <CommitColumn
-              icon={<ArrowUpRight className="size-3.5 text-[var(--ansi-2)]" />}
-              title={`${plural(c.aheadCount, 'commit')} on ${head} not on ${base}`}
+              icon={<ArrowUpRight className="size-3.5 text-[var(--git-added)]" />}
+              count={c.aheadCount}
+              title={`on ${head} not on ${base}`}
+              empty={`${base} has every commit of ${head}`}
               commits={c.ahead}
             />
           }
           second={
             <CommitColumn
-              icon={<ArrowDownLeft className="size-3.5 text-[var(--ansi-4)]" />}
-              title={`${plural(c.behindCount, 'commit')} on ${base} not on ${head}`}
+              icon={<ArrowDownLeft className="size-3.5 text-[var(--git-remote)]" />}
+              count={c.behindCount}
+              title={`on ${base} not on ${head}`}
+              empty={`${head} has every commit of ${base}`}
               commits={c.behind}
             />
           }
@@ -86,24 +90,25 @@ export function CompareView({ base, head }: { base: string; head: string }) {
   );
 }
 
-function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string; commits: Commit[] }) {
+function CommitColumn({ icon, count, title, empty, commits }: { icon: ReactNode; count: number; title: string; empty: string; commits: Commit[] }) {
   const repo = useRepo();
-  const rowHeight = useRowHeight(28);
+  const rowHeight = useRowHeight(ROW_H);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-8 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-xs font-medium">
+      <div className="flex h-9 flex-none items-center gap-2 px-3.5 pt-1 text-xs">
         {icon}
-        {title}
+        <span className="font-medium tabular-nums">{plural(count, 'commit')}</span>{' '}
+        <span className="min-w-0 truncate text-[var(--node-muted)]">{title}</span>
       </div>
       {commits.length ? (
         <VirtualList
           count={commits.length}
           rowHeight={rowHeight}
-          className="group/list git-scroll py-1"
+          className="group/list git-scroll pb-1.5"
           row={(n) => {
             const c = commits[n];
             return (
-              <div className="h-full px-1">
+              <div className={ROW_INSET}>
                 <div
                   className={rowClass(false)}
                   onClick={() => repo.open({ kind: 'commit', sha: c.sha })}
@@ -114,10 +119,10 @@ function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string
                   }}
                   title={`${c.subject}\n${c.author} · ${longDate(c.date)}`}
                 >
-                  <span className="font-mono text-2xs text-[var(--node-muted)]">{shortSha(c.sha)}</span>
+                  <span className="font-mono text-xs text-[var(--node-muted)]">{shortSha(c.sha)}</span>
                   <span className="min-w-0 flex-1 truncate">{c.subject}</span>
-                  <Authors commit={c} size={16} />
-                  <span className="w-7 flex-none text-right text-2xs whitespace-nowrap text-[var(--node-muted)] tabular-nums" title={longDate(c.date)}>
+                  <Authors commit={c} size={18} />
+                  <span className="w-8 flex-none text-right text-xs whitespace-nowrap text-[var(--node-muted)] tabular-nums" title={longDate(c.date)}>
                     {shortAgo(c.date)}
                   </span>
                 </div>
@@ -126,7 +131,10 @@ function CommitColumn({ icon, title, commits }: { icon: ReactNode; title: string
           }}
         />
       ) : (
-        <p className="px-3 py-2 text-[var(--node-muted)]">None</p>
+        <p className="flex items-center gap-1.5 px-3.5 py-1 text-xs text-[var(--node-muted)]">
+          <Check className="size-3.5 flex-none opacity-70" />
+          <span className="min-w-0 truncate">{empty}</span>
+        </p>
       )}
     </div>
   );

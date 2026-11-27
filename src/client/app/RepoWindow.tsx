@@ -2,8 +2,9 @@
 // has come, given to every view below (useRepo), or why it can't be read.
 
 import type { Host } from '@hyperpane/sdk/client';
-import { NodeButton, NodeMessage } from '@hyperpane/ui';
-import { TriangleAlert } from 'lucide-react';
+import { NodeMessage } from '@hyperpane/ui';
+import { Button } from '../ui/parts.tsx';
+import { TriangleAlert } from '@hyperpane/icons';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
 import { basenameOf } from '../lib/paths.ts';
@@ -16,7 +17,7 @@ export function RepoWindow({ host, root, server, found, onChooseFolder }: { host
   const { repo, error } = useRepoState(host, root, server, windowId);
   if (!repo)
     return error ? (
-      <Blank icon={TriangleAlert} error title="Git can’t read this repository" actions={<NodeButton onClick={onChooseFolder}>Open Another Folder</NodeButton>}>
+      <Blank icon={TriangleAlert} error title="Git can’t read this repository" actions={<Button onClick={onChooseFolder}>Open Another Folder</Button>}>
         {error}
       </Blank>
     ) : (

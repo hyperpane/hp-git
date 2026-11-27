@@ -3,13 +3,15 @@
 // a cancel; repositories found inside it are offered too.
 
 import { useMemo, useState } from 'react';
-import { FolderGit2, GitBranch, X } from 'lucide-react';
+import { FolderGit2, X } from '@hyperpane/icons';
 import { type Host, useHost, useWindow } from '@hyperpane/sdk/client';
-import { NodeButton, Progress, cn, styles } from '@hyperpane/ui';
+import { Progress, cn, styles } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { gitTools } from '../app/api.ts';
 import { askCredentials } from '../app/credentials.ts';
 import { basenameOf } from '../lib/paths.ts';
+import { card, section } from '../ui/classes.ts';
+import { Button } from '../ui/parts.tsx';
 
 type Cloning = { phase: string; percent: number | null; text: string; cancel(): void };
 
@@ -75,50 +77,52 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
   };
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 overflow-auto p-6 text-center text-xs" data-welcome>
-      <div className="rounded-surface grid size-10 place-items-center bg-[var(--node-hover)] text-[var(--node-muted)]">
-        <FolderGit2 aria-hidden className="size-5" />
+    <div className="git-scroll flex h-full flex-col items-center justify-center gap-5 overflow-auto p-6 text-center text-[13px]" data-welcome>
+      <div className="rounded-surface grid size-12 place-items-center bg-[var(--git-accent-soft)] text-[var(--node-accent)] ring-1 ring-[color-mix(in_srgb,var(--node-accent)_22%,transparent)] ring-inset">
+        <FolderGit2 aria-hidden className="size-6" />
       </div>
-      <div className="flex max-w-md flex-col gap-1">
-        <div className="text-sm font-semibold">{basenameOf(folder) || folder} isn’t a Git repository</div>
-        <div className="font-mono text-2xs break-all text-[var(--node-muted)]">{folder}</div>
+      <div className="flex max-w-md flex-col gap-1.5">
+        <div className="text-[15px] font-semibold tracking-[-0.01em]">{basenameOf(folder) || folder} isn’t a Git repository</div>
+        <div className="font-mono text-xs break-all text-[var(--node-muted)]">{folder}</div>
       </div>
       {cloning ? (
         <div className="flex w-80 max-w-full flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 truncate text-left">
+            <span className="min-w-0 flex-1 truncate text-left text-xs">
               Cloning: {cloning.phase}
               {cloning.percent !== null ? ` ${Math.round(cloning.percent)}%` : ''}
             </span>
-            <NodeButton variant="ghost" onClick={cloning.cancel}>
+            <Button variant="ghost" onClick={cloning.cancel}>
               <X />
               Cancel
-            </NodeButton>
+            </Button>
           </div>
           <Progress value={cloning.percent} size="sm" label="Cloning" />
-          {cloning.text && <div className="truncate text-left font-mono text-2xs text-[var(--node-muted)]">{cloning.text}</div>}
+          {cloning.text && <div className="truncate text-left font-mono text-[11px] text-[var(--node-muted)]">{cloning.text}</div>}
         </div>
       ) : (
         <div className="flex flex-wrap justify-center gap-2">
-          <NodeButton variant="primary" disabled={busy} onClick={init}>
+          <Button variant="primary" lg disabled={busy} onClick={init}>
             {busy ? 'Initializing' : 'Initialize Repository'}
-          </NodeButton>
-          <NodeButton onClick={clone}>Clone</NodeButton>
-          <NodeButton variant="ghost" onClick={onChoose}>
+          </Button>
+          <Button lg onClick={clone}>
+            Clone
+          </Button>
+          <Button variant="ghost" lg onClick={onChoose}>
             Open Another Folder
-          </NodeButton>
+          </Button>
         </div>
       )}
-      {error && <div className="max-w-md text-[var(--ansi-1)]">{error}</div>}
+      {error && <div className="max-w-md text-xs text-[var(--git-deleted)]">{error}</div>}
       {found.repos.length > 0 && (
-        <div className="mt-2 flex w-80 max-w-full flex-col gap-0.5 text-left">
-          <div className="flex h-7 items-center px-2 font-medium text-[var(--node-muted)]">Repositories in this folder</div>
+        <div className={cn(card, 'mt-2 flex w-80 max-w-full flex-col gap-0.5 p-1.5 text-left')}>
+          <div className={cn(section.header, 'px-2')}>Repositories in this folder</div>
           {found.repos.slice(0, 12).map((r) => (
             <button
               key={r.root}
               type="button"
               className={cn(
-                'rounded-control flex h-7 items-center gap-2 px-2 transition-colors duration-100 hover:bg-[var(--node-hover)] touch:h-10',
+                'rounded-control flex h-8 items-center gap-2 px-2 transition-colors duration-100 hover:bg-[var(--node-hover)] touch:h-10',
                 styles.focusRing,
               )}
               onClick={() => {
@@ -126,9 +130,9 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
                 host.win.setData('repo', null);
               }}
             >
-              <GitBranch className="size-3.5 flex-none text-[var(--node-muted)]" />
+              <FolderGit2 variant="outline" className="size-4 flex-none text-[var(--node-muted)]" />
               <span className="min-w-0 flex-1 truncate">{r.name}</span>
-              <span className="truncate text-2xs text-[var(--node-muted)]">{r.kind}</span>
+              <span className="truncate text-xs text-[var(--node-muted)]">{r.kind}</span>
             </button>
           ))}
         </div>

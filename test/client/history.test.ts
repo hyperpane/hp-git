@@ -115,7 +115,7 @@ test('History pages in as it scrolls, and searches by message, author, SHA and p
   await until(() => w.root.textContent!.includes('300+ commits'), 20000, 'the first page');
   // The end of the list in view: the next page.
   const list = w.root.querySelector<HTMLElement>('[aria-label="Commits"]')!;
-  list.scrollTop = 300 * 26;
+  list.scrollTop = 300 * 32; // a row is 32px
   list.dispatchEvent(new Event('scroll'));
   await until(() => w.root.textContent!.includes('341 commits'), 10000, 'the second page');
   assert.deepEqual(

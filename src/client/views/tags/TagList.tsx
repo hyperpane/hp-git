@@ -3,9 +3,9 @@
 // picked tag's commit on the right.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, Search, Tag as TagIcon, TriangleAlert } from 'lucide-react';
+import { Plus, Tag as TagIcon, TriangleAlert } from '@hyperpane/icons';
 import { keys } from '@hyperpane/sdk/client';
-import { NodeButton, NodeInput, NodeMessage, ToolButton, menuItems } from '@hyperpane/ui';
+import { NodeMessage, ToolButton, cn, menuItems } from '@hyperpane/ui';
 import type { Tag } from '../../../shared/index.ts';
 import { createTag, tagActions } from '../../app/actions/tags.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -13,7 +13,9 @@ import { Blank } from '../../components/Blank.tsx';
 import { type VirtualHandle, VirtualList } from '../../components/VirtualList.tsx';
 import { ago, longDate, plural, shortSha } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
-import { rowClass } from '../../lib/rows.ts';
+import { ROW_H_TALL, ROW_INSET_TALL, rowClass } from '../../lib/rows.ts';
+import { footer, header } from '../../ui/classes.ts';
+import { Button, SearchField } from '../../ui/parts.tsx';
 
 export function TagList({
   tags,
@@ -64,22 +66,21 @@ export function TagList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput
-            ref={filterRef}
-            className="w-full ps-7"
-            placeholder={`Filter tags (${keys('⌘F')})`}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key !== 'ArrowDown') return;
-              list.current?.element?.focus();
-              e.preventDefault();
-            }}
-          />
-        </div>
+      <div className={cn(header.base, 'gap-1')}>
+        <SearchField
+          inputRef={filterRef}
+          placeholder="Filter tags"
+          aria-label="Filter tags"
+          title={`Filter tags (${keys('⌘F')})`}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          onClear={() => setFilter('')}
+          onKeyDown={(e) => {
+            if (e.key !== 'ArrowDown') return;
+            list.current?.element?.focus();
+            e.preventDefault();
+          }}
+        />
         <ToolButton label="New tag" icon={Plus} disabled={!repo.status.head} onClick={() => createTag(repo)} />
       </div>
       {error && !tags ? (
@@ -92,7 +93,7 @@ export function TagList({
         <Blank
           icon={TagIcon}
           title={filter ? undefined : 'No tags'}
-          actions={!filter && repo.status.head ? <NodeButton onClick={() => createTag(repo)}>Tag the Current Commit</NodeButton> : undefined}
+          actions={!filter && repo.status.head ? <Button variant="primary" onClick={() => createTag(repo)}>Tag the Current Commit</Button> : undefined}
         >
           {filter ? 'No tag matches' : 'Tags name commits that matter: releases, milestones'}
         </Blank>
@@ -100,8 +101,8 @@ export function TagList({
         <VirtualList
           ref={list}
           count={shown.length}
-          rowHeight={40}
-          className="group/list git-scroll py-1"
+          rowHeight={ROW_H_TALL}
+          className="group/list git-scroll py-1.5"
           tabIndex={0}
           role="listbox"
           ariaLabel="Tags"
@@ -109,9 +110,9 @@ export function TagList({
           row={(n) => {
             const t = shown[n];
             return (
-              <div className="h-full px-1 py-px" data-tag={t.name}>
+              <div className={ROW_INSET_TALL} data-tag={t.name}>
                 <div
-                  className={rowClass(t.name === picked)}
+                  className={cn(rowClass(t.name === picked), 'gap-2.5 px-2.5')}
                   onClick={() => {
                     onPick(t.name);
                     onOpen?.();
@@ -119,15 +120,17 @@ export function TagList({
                   onContextMenu={(e) => menu(e, t)}
                   title={`${t.name}${t.message ? `\n${t.message}` : ''}\n${longDate(t.date)}`}
                 >
-                  <TagIcon className="size-3.5 flex-none text-[var(--ansi-3)]" />
-                  <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                    <span className="truncate font-medium">{t.name}</span>
-                    <span className="truncate text-2xs text-[var(--node-muted)]">
-                      {shortSha(t.sha)}
+                  <span className="grid size-7 flex-none place-items-center rounded-control bg-[color-mix(in_srgb,var(--git-tag)_14%,transparent)] text-[var(--git-tag)]">
+                    <TagIcon variant="outline" className="size-3.5" />
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate leading-4 font-medium">{t.name}</span>
+                    <span className="truncate text-xs leading-4 text-[var(--node-muted)]">
+                      <span className="font-mono">{shortSha(t.sha)}</span>
                       {t.annotated ? ` · ${t.message?.split('\n')[0] ?? ''}` : ' · lightweight'}
                     </span>
                   </div>
-                  <span className="flex-none text-2xs text-[var(--node-muted)]">{ago(t.date)}</span>
+                  <span className="flex-none self-start pt-1 text-xs text-[var(--node-muted)] tabular-nums">{ago(t.date)}</span>
                 </div>
               </div>
             );
@@ -135,7 +138,7 @@ export function TagList({
         />
       )}
       {tags && tags.length > 0 && (
-        <div className="flex h-7 flex-none items-center border-t border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
+        <div className={footer}>
           {plural(tags.length, 'tag')}
         </div>
       )}

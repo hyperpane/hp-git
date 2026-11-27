@@ -25,3 +25,11 @@ export function relativeTo(root: string, path: string): string | null {
 
 /** A pattern for .gitignore that matches only this path. */
 export const ignoreExact = (path: string) => `/${path.replace(/([*?[\]\\!#])/g, '\\$1')}`;
+
+/** A path with the home folder written as ~ (when it's known and the path
+ * is in it). */
+export function tildify(path: string, home: string | undefined): string {
+  if (!home) return path;
+  const rel = relativeTo(home, path);
+  return rel === null ? path : rel ? `~/${rel}` : '~';
+}

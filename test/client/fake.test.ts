@@ -252,7 +252,7 @@ test('a folder that isn’t a repository: initialize it (on the default branch),
   await until(() => w.app.calls('window.setData').some((d) => d.key === 'folder' && d.value === '/work/x'), 5000, 'the folder');
 });
 
-test('keys: Ctrl+2 (by its place) is History, the list folds away and back', async (t) => {
+test('keys: Ctrl+2 (by its place) is History, the list folds away and back, the rail folds and opens', async (t) => {
   const w = await window(
     t,
     server(() => status({ files: [file('a.txt')] })),
@@ -266,12 +266,28 @@ test('keys: Ctrl+2 (by its place) is History, the list folds away and back', asy
   });
   // History asks for its log from an effect, a moment after the tab shows.
   await until(() => w.app.ops('log').length, 15000, 'the log');
+  const historyFilter = () => w.root.querySelector('input[placeholder^="Words in the message"]');
+  await until(historyFilter, 5000, 'the history list');
   click(button(w.root, 'Hide the list')!);
-  await until(() => !w.root.querySelector('[role="tablist"]'));
+  await until(() => !historyFilter(), 5000, 'the list hidden');
   // The rail keeps the tabs.
-  click(button(w.root, /^Changes \(/)!);
+  click(w.root.querySelector('[role="tab"][data-value="changes"]')!);
   click(button(w.root, 'Show the list')!);
-  await until(() => w.root.querySelector('[role="tab"][data-value="changes"][aria-selected="true"]'));
+  await until(() => w.root.querySelector('[role="tab"][data-value="changes"][aria-selected="true"]') && w.root.querySelector('[aria-label="Changed files"]'));
+  // ⇧⌘\ hides the list too, and back.
+  key(globalThis.window as unknown as Window, '\\', { code: 'Backslash', metaKey: true, shiftKey: true });
+  await until(() => !w.root.querySelector('[aria-label="Changed files"]'), 5000, 'hidden by the key');
+  key(globalThis.window as unknown as Window, '\\', { code: 'Backslash', metaKey: true, shiftKey: true });
+  await until(() => w.root.querySelector('[aria-label="Changed files"]'), 5000, 'shown by the key');
+  // The rail folds to its icons (its button, then ⌘\ back), the tabs still there.
+  const rail = () => w.root.querySelector<HTMLElement>('nav[data-rail]')!;
+  assert.equal(rail().dataset.rail, 'open');
+  click(button(w.root, 'Collapse the sidebar')!);
+  await until(() => rail().dataset.rail === 'collapsed', 5000, 'folded');
+  assert.equal(w.root.querySelectorAll('nav[data-rail] [role="tab"]').length, 5);
+  assert.ok(button(w.root, 'Expand the sidebar'));
+  key(globalThis.window as unknown as Window, '\\', { code: 'Backslash', metaKey: true });
+  await until(() => rail().dataset.rail === 'open', 5000, 'opened by the key');
 });
 
 test('other plugins open a file’s blame here (git.open), in this window', async (t) => {
@@ -328,7 +344,8 @@ test('main.tsx mounts the window, and a dialog frame', async (t) => {
   const { app, root, stop } = await boot({ folder: ROOT, fake: server(() => status({ files: [file('a.txt')] })) });
   t.after(stop);
   await until(() => root.querySelector('[data-git]'), 5000, 'the window');
-  await until(() => app.last('window.setTitle')?.title === 'app · main');
+  await until(() => app.last('window.setTitle')?.title === 'app');
+  await until(() => /^main\b.* · /.test(app.last('window.setDescription')?.description ?? ''));
 });
 
 test('10 000 changed files and 5 000 commits: only the rows on screen are drawn', async (t) => {
@@ -365,7 +382,7 @@ test('10 000 changed files and 5 000 commits: only the rows on screen are drawn'
   const commitsList = await until(() => w.root.querySelector<HTMLElement>('[aria-label="Commits"]'), 20_000, 'commits');
   await until(() => commitsList.querySelectorAll('[data-sha]').length > 10);
   assert.ok(commitsList.querySelectorAll('[data-sha]').length < 80);
-  commitsList.scrollTop = 290 * 26;
+  commitsList.scrollTop = 290 * 32; // a row is 32px
   commitsList.dispatchEvent(new Event('scroll'));
   await until(() => w.app.ops('log').some((r) => r.skip === 300), 5000, 'the next page');
 });

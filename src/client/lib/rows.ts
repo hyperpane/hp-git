@@ -2,14 +2,26 @@
 
 import { cn, useTouch } from '@hyperpane/ui';
 
-/** The row style every list here uses (28px, from the list's height):
- * the control's corners, hover, selected in the accent's selection while
- * the list has the keyboard, quieter while it hasn't. */
+/** The row style every list here uses (DESIGN.md, list row), as tall as
+ * the list's row: the control's corners, the window's hover; picked, a soft
+ * pill in the accent while the list has the keys, a neutral one while it
+ * hasn't. Put it in a `ROW_INSET` box so the pill keeps off the edges. */
 export const rowClass = (selected: boolean) =>
   cn(
-    'rounded-control flex h-full cursor-default items-center gap-2 px-2',
-    selected ? 'bg-[var(--node-selection-inactive)] group-focus-within/list:bg-[var(--node-selection)]' : 'hover:bg-[var(--node-hover)]',
+    'group/row relative flex h-full min-w-0 cursor-default items-center gap-2 rounded-control px-2 text-[13px] transition-colors duration-100',
+    selected
+      ? 'bg-[var(--git-selected-quiet)] group-focus-within/list:bg-[var(--git-selected)]'
+      : 'hover:bg-[var(--node-hover)]',
   );
+
+/** The box around a row: 6px in from the list's edges. */
+export const ROW_INSET = 'h-full px-1.5';
+/** Around a two-line row: 1px between pills too. */
+export const ROW_INSET_TALL = 'h-full px-1.5 py-px';
+
+/** A list row's height (DESIGN.md): 32px; two lines 46 (a 44px pill). */
+export const ROW_H = 32;
+export const ROW_H_TALL = 46;
 
 /** A list's row height: `px`, or a finger's (36px) when the frame is used
  * with one. */

@@ -3,8 +3,8 @@
 // or not); a stash's files and diffs on the right, to apply, pop or drop.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useRef } from 'react';
-import { Archive, Plus, TriangleAlert } from 'lucide-react';
-import { NodeButton, NodeMessage, ToolButton, menuItems } from '@hyperpane/ui';
+import { Archive, Plus, TriangleAlert } from '@hyperpane/icons';
+import { NodeMessage, ToolButton, cn, menuItems } from '@hyperpane/ui';
 import type { Stash } from '../../../shared/index.ts';
 import { stashActions, stashNow } from '../../app/actions/stashes.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -12,7 +12,9 @@ import { Blank } from '../../components/Blank.tsx';
 import { type VirtualHandle, VirtualList } from '../../components/VirtualList.tsx';
 import { ago, longDate, plural } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
-import { rowClass } from '../../lib/rows.ts';
+import { ROW_H_TALL, ROW_INSET_TALL, rowClass } from '../../lib/rows.ts';
+import { header } from '../../ui/classes.ts';
+import { Button } from '../../ui/parts.tsx';
 
 export function StashList({
   stashes,
@@ -59,8 +61,8 @@ export function StashList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 flex-none items-center gap-1 ps-3 pe-2.5 text-2xs text-[var(--node-muted)] touch:h-12">
-        <span className="flex-1">{stashes ? plural(stashes.length, 'stash', 'stashes') : ''}</span>
+      <div className={cn(header.base, 'ps-3.5')}>
+        <span className={cn(header.meta, 'flex-1 font-medium')}>{stashes ? plural(stashes.length, 'stash', 'stashes') : ''}</span>
         <ToolButton label="Stash the changes" icon={Plus} onClick={() => stashNow(repo)} disabled={!repo.status.files.length} />
       </div>
       {error && !stashes ? (
@@ -74,7 +76,7 @@ export function StashList({
           icon={Archive}
           title="No stashes"
           actions={
-            repo.status.files.length ? <NodeButton onClick={() => stashNow(repo)}>Stash {plural(repo.status.files.length, 'Change')}</NodeButton> : undefined
+            repo.status.files.length ? <Button variant="primary" onClick={() => stashNow(repo)}>Stash {plural(repo.status.files.length, 'Change')}</Button> : undefined
           }
         >
           Stash changes to put them aside, switch branches, and bring them back later
@@ -83,8 +85,8 @@ export function StashList({
         <VirtualList
           ref={list}
           count={stashes.length}
-          rowHeight={40}
-          className="group/list git-scroll py-1"
+          rowHeight={ROW_H_TALL}
+          className="group/list git-scroll py-1.5"
           tabIndex={0}
           role="listbox"
           ariaLabel="Stashes"
@@ -92,9 +94,9 @@ export function StashList({
           row={(n) => {
             const s = stashes[n];
             return (
-              <div className="h-full px-1 py-px" data-stash={s.index}>
+              <div className={ROW_INSET_TALL} data-stash={s.index}>
                 <div
-                  className={rowClass(s.index === picked)}
+                  className={cn(rowClass(s.index === picked), 'gap-2.5 px-2.5')}
                   onClick={() => {
                     onPick(s.index);
                     onOpen?.();
@@ -102,15 +104,17 @@ export function StashList({
                   onContextMenu={(e) => menu(e, s)}
                   title={`${s.message}\n${longDate(s.date)}`}
                 >
-                  <Archive className="size-3.5 flex-none text-[var(--node-muted)]" />
-                  <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                    <span className="truncate">{s.message}</span>
-                    <span className="truncate text-2xs text-[var(--node-muted)]">
+                  <span className="grid size-7 flex-none place-items-center rounded-control bg-[color-mix(in_srgb,var(--git-stash)_14%,transparent)] text-[var(--git-stash)]">
+                    <Archive variant="outline" className="size-3.5" />
+                  </span>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate leading-4">{s.message}</span>
+                    <span className="truncate text-xs leading-4 text-[var(--node-muted)]">
                       stash@{`{${s.index}}`}
                       {s.branch ? ` · on ${s.branch}` : ''}
                     </span>
                   </div>
-                  <span className="flex-none text-2xs text-[var(--node-muted)]">{ago(s.date)}</span>
+                  <span className="flex-none self-start pt-1 text-xs text-[var(--node-muted)] tabular-nums">{ago(s.date)}</span>
                 </div>
               </div>
             );

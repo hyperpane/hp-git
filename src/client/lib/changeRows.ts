@@ -1,4 +1,5 @@
-// The Changes list's rows: each section's header, then its files, flat or
+// The Changes list's rows: each section's header (none when there's only
+// the one, Changes), then its files, flat or
 // by folder (a chain of single folders as one row), as far as it's open.
 
 import type { FileStatus } from '../../shared/index.ts';
@@ -13,11 +14,15 @@ export type Item =
  * or flat. */
 export function items(groups: Record<Side, FileStatus[]>, tree: boolean, closed: Set<string>): Item[] {
   const out: Item[] = [];
-  for (const side of SIDES) {
+  // Every file checked as it comes, with nothing else to tell apart (no
+  // conflicts): one section, whose header would only say again what the
+  // rail and the filter say. Its files, then, without one.
+  const sides = SIDES.filter((side) => groups[side].length);
+  const bare = sides.length === 1 && sides[0] === 'changes';
+  for (const side of sides) {
     const files = groups[side];
-    if (!files.length) continue;
-    out.push({ t: 'section', side, count: files.length });
-    if (closed.has(`section:${side}`)) continue;
+    if (!bare) out.push({ t: 'section', side, count: files.length });
+    if (!bare && closed.has(`section:${side}`)) continue;
     if (!tree) {
       for (const file of files) out.push({ t: 'file', side, file, depth: 0 });
       continue;

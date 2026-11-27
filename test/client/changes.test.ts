@@ -37,7 +37,12 @@ test('Changes lists changed, staged and untracked files; the title says where', 
     'the files',
   );
   const name = dir.slice(dir.lastIndexOf('/') + 1);
-  await until(() => w.app.last('window.setTitle')?.title === `${name} · main`);
+  // The title is the repository; under it, the branch and where it is.
+  await until(() => w.app.last('window.setTitle')?.title === name);
+  await until(() => {
+    const d: string = w.app.last('window.setDescription')?.description ?? '';
+    return d.startsWith('main · ') && d.endsWith(`/${name}`);
+  });
   // The tab counts them; the toolbar names the branch.
   assert.match(w.root.querySelector('[role="tab"][data-value="changes"]')!.textContent!, /3/);
   assert.match(w.root.textContent!, /Current branch\s*main/);

@@ -6,9 +6,9 @@
 // The rows are ChangeRows.tsx, their menus menus.ts.
 
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCheck, FolderTree, List, MoreHorizontal, Search } from 'lucide-react';
+import { CheckCheck, FolderTree, List, MoreHorizontal, Search } from '@hyperpane/icons';
 import { keys, mod, shortcutKey } from '@hyperpane/sdk/client';
-import { Checkbox, NodeInput, ToolButton, menuItems } from '@hyperpane/ui';
+import { Checkbox, ToolButton, cn, menuItems } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -20,8 +20,10 @@ import { listKey } from '../../lib/listKey.ts';
 import { local } from '../../lib/local.ts';
 import { type Pick, type Side, pickOf, sideFiles, splitPick } from '../../lib/picks.ts';
 import { stateOf } from '../../lib/include.ts';
-import { useRowHeight } from '../../lib/rows.ts';
-import { DirRow, FileRow, SectionRow, inRow } from './ChangeRows.tsx';
+import { ROW_H, useRowHeight } from '../../lib/rows.ts';
+import { footer, header } from '../../ui/classes.ts';
+import { SearchField } from '../../ui/parts.tsx';
+import { DirRow, FileRow, ROW_CHECK, SectionRow, inRow } from './ChangeRows.tsx';
 import { CommitBox } from './CommitBox.tsx';
 import { changesMenu, fileMenu } from './menus.ts';
 
@@ -47,7 +49,7 @@ export function ChangesList({
   };
   const [closed, setClosed] = useState<Set<string>>(new Set());
   const list = useRef<VirtualHandle>(null);
-  const rowHeight = useRowHeight(28);
+  const rowHeight = useRowHeight(ROW_H);
   const anchor = useRef<string | null>(null);
 
   const groups = useMemo(() => {
@@ -243,7 +245,7 @@ export function ChangesList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-10 flex-none items-center gap-1 px-2.5 touch:h-12">
+      <div className={cn(header.base, 'gap-1 ps-3.5')}>
         <Checkbox
           {...inRow}
           checked={allChecked}
@@ -252,27 +254,26 @@ export function ChangesList({
           }
           onCheckedChange={() => (allChecked === true ? allOut() : allIn())}
           disabled={!total}
-          className="mx-1"
+          className={cn(ROW_CHECK, 'me-1.5')}
         />
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-[var(--node-muted)]" />
-          <NodeInput
-            ref={filterRef}
-            className="w-full ps-7"
-            placeholder={`Filter ${plural(total, 'file')} (${keys('⌘F')})`}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') {
-                setFilter('');
-                list.current?.element?.focus();
-              } else if (e.key === 'ArrowDown') {
-                list.current?.element?.focus();
-                e.preventDefault();
-              }
-            }}
-          />
-        </div>
+        <SearchField
+          inputRef={filterRef}
+          placeholder={`Filter ${plural(total, 'file')}`}
+          aria-label="Filter the files"
+          title={`Filter the files (${keys('⌘F')})`}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          onClear={() => setFilter('')}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              setFilter('');
+              list.current?.element?.focus();
+            } else if (e.key === 'ArrowDown') {
+              list.current?.element?.focus();
+              e.preventDefault();
+            }
+          }}
+        />
         <ToolButton label={tree ? 'Show as a list' : 'Group by folder'} icon={tree ? List : FolderTree} onClick={() => setTree(!tree)} />
         <ToolButton label="More: stash, ignore, discard all" icon={MoreHorizontal} onClick={(e) => moreMenu(e)} />
       </div>
@@ -291,7 +292,7 @@ export function ChangesList({
           rowHeight={rowHeight}
           row={row}
           rowKey={(n) => itemKey(rows[n])}
-          className="group/list git-scroll py-1"
+          className="group/list git-scroll py-1.5"
           tabIndex={0}
           role="listbox"
           ariaLabel="Changed files"
@@ -299,7 +300,7 @@ export function ChangesList({
         />
       )}
       {status.truncated && (
-        <div className="flex h-7 flex-none items-center border-t border-[var(--node-border)] px-3 text-2xs text-[var(--ansi-3)]">
+        <div className={cn(footer, 'text-[var(--git-modified)]')}>
           More than 10 000 files changed: some aren’t listed
         </div>
       )}

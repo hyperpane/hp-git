@@ -4,7 +4,7 @@
 // the next commit; drag for more) and its code (select it with the mouse
 // and copy it).
 
-import { ArrowDownToLine, ArrowUpToLine, Ellipsis, UnfoldVertical } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpToLine, Check, Ellipsis, Minus, UnfoldVertical } from '@hyperpane/icons';
 import { cn } from '@hyperpane/ui';
 import type { Hunk, Line } from '../../../shared/index.ts';
 import type { Span } from '../../lib/diff/highlight.ts';
@@ -45,8 +45,11 @@ export function HunkRow({
   onRun(action: LineActions['primary'], keys: LineKey[]): void;
 }) {
   return (
-    <div className="flex h-full items-center font-sans text-2xs text-[var(--node-muted)]" style={{ background: HUNK }}>
-      <div className="sticky left-0 flex h-full max-w-full min-w-0 items-center gap-2 px-2">
+    <div
+      className="group/hunk flex h-full items-center border-y border-[var(--git-line)] font-sans text-[11px] text-[var(--node-muted)]"
+      style={{ background: HUNK }}
+    >
+      <div className="sticky left-0 flex h-full max-w-full min-w-0 items-center gap-2.5 ps-2.5 pe-2">
         {canPick && withActions && (
           <button
             type="button"
@@ -62,18 +65,21 @@ export function HunkRow({
             }
             aria-label={checking ? (all ? 'Leave this hunk out' : 'Commit this hunk') : undefined}
             className={cn(
-              'h-4 rounded-chip px-1 font-mono text-2xs transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
-              (all || some) && 'text-[var(--node-accent)]',
+              'grid size-3.5 flex-none place-items-center rounded-[4px] ring-1 ring-inset transition-[background-color,box-shadow] duration-100',
+              all || some
+                ? 'bg-[var(--node-accent)] text-white ring-[var(--node-accent)] hover:brightness-110'
+                : 'ring-[color-mix(in_srgb,var(--node-fg)_32%,transparent)] hover:ring-[var(--node-fg)]',
             )}
             onClick={onPick}
           >
-            {all ? '■' : some ? '▣' : '□'}
+            {all ? <Check className="size-2.5" /> : some ? <Minus className="size-2.5" /> : null}
           </button>
         )}
-        <span className="truncate font-mono">
+        <span className="truncate font-mono text-[11px] opacity-70">
           @@ -{hunk.oldStart},{hunk.oldLines} +{hunk.newStart},{hunk.newLines} @@
-          {hunk.section ? <span className="ms-2 text-[var(--node-fg)] opacity-80">{hunk.section}</span> : null}
+          {hunk.section ? <span className="ms-2 text-[var(--node-fg)] opacity-75">{hunk.section}</span> : null}
         </span>
+        {withActions && (actions?.primary || actions?.discard) && <span className="w-1 flex-none" />}
         {withActions && actions?.primary && (
           <HunkButton disabled={busy || !keys.length} onClick={() => onRun(actions.primary, keys)}>
             {actions.primary.label} hunk
@@ -102,13 +108,10 @@ export function GapRow({
   onExpand?(gap: Gap, how: 'up' | 'down' | 'all'): void;
 }) {
   return (
-    <div
-      className="flex h-full items-center font-sans text-2xs text-[var(--node-muted)]"
-      style={{ background: 'color-mix(in srgb, var(--node-fg) 3%, transparent)' }}
-    >
-      <div className="sticky left-0 flex h-full items-center gap-1 px-2">
-        <Ellipsis className="size-3.5" />
-        <span className="me-1">{hidden === null ? 'More of the file below' : `${plural(hidden, 'unchanged line')}`}</span>
+    <div className="flex h-full items-center font-sans text-[11px] text-[var(--node-muted)]" style={{ background: HUNK }}>
+      <div className="sticky left-0 flex h-full items-center gap-1 ps-2.5 pe-2">
+        <Ellipsis className="size-3.5 opacity-70" />
+        <span className="me-1.5">{hidden === null ? 'More of the file below' : `${plural(hidden, 'unchanged line')}`}</span>
         {withActions && onExpand && (
           <>
             {gap.h > 0 && <GapButton title="Show 20 more lines below the hunk above" icon={ArrowDownToLine} onClick={() => onExpand(gap, 'down')} />}
@@ -171,19 +174,19 @@ export function Gutter({
       }
       data-out={checking && lineKey ? String(!!out) : undefined}
     >
-      <span className="pe-1.5 text-right text-[var(--node-muted)] tabular-nums" style={{ width }}>
+      <span className="pe-1.5 text-right text-[var(--node-muted)] tabular-nums opacity-75" style={{ width }}>
         {old ?? ''}
       </span>
       {both && (
-        <span className="pe-1.5 text-right text-[var(--node-muted)] tabular-nums" style={{ width }}>
+        <span className="pe-1.5 text-right text-[var(--node-muted)] tabular-nums opacity-75" style={{ width }}>
           {now ?? ''}
         </span>
       )}
       <span
         className="w-4 text-center"
-        style={{ color: out ? 'var(--node-muted)' : kind === '+' ? 'var(--ansi-2)' : kind === '-' ? 'var(--ansi-1)' : undefined }}
+        style={{ color: selected ? 'var(--node-accent)' : out ? 'var(--node-muted)' : kind === '+' ? 'var(--git-added)' : kind === '-' ? 'var(--git-deleted)' : undefined }}
       >
-        {selected ? '●' : kind === '+' || kind === '-' ? kind : ''}
+        {selected ? '●' : kind === '+' ? '+' : kind === '-' ? '−' : ''}
       </span>
     </div>
   );
@@ -209,7 +212,7 @@ export function CodeCell({
     <div className="flex-none cursor-text ps-1 pe-6 whitespace-pre select-text">
       <span data-code>{paint(text, spans, words, kind === '+' ? 'git-word-added' : 'git-word-removed')}</span>
       {noNewline && (
-        <span className="ms-2 text-2xs text-[var(--node-muted)] italic select-none" title="No newline at end of file">
+        <span className="ms-2 text-[11px] text-[var(--node-muted)] italic select-none" title="No newline at end of file">
           ⏎̸
         </span>
       )}

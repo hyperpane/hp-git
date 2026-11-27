@@ -1,21 +1,23 @@
-// Git: a repository on the window's server, laid out like GitHub Desktop.
-// The bar on top has the repository, the branch and the sync button; a bar
-// under it says when a merge, rebase, cherry-pick or revert is under way.
-// On the left, the tabs (Changes, History, Branches, Stashes, Tags), each a
-// list; on the right, what's picked in it: a diff, a commit, a branch
-// compared with the current one; in a narrow window (a phone), one or the
-// other, with a way back to the list. File history, blame, commits and
-// compares open over the tabs, in this window, with a way back. Everything
-// follows the repository as it changes, here, in a terminal or in another
-// app.
+// Git: a repository on the window's server. The bar on top has the
+// repository, the branch and the sync button (views/shell/TopBar.tsx); a
+// banner under it says when a merge, rebase, cherry-pick or revert is under
+// way. Down the left, the rail (views/shell/Rail.tsx): Changes, History,
+// Branches, Stashes, Tags, with their counts; it folds to its icons. Beside
+// it the picked view's list (resizable, and it can be hidden), then what's
+// picked in it: a diff, a commit, a branch compared with the current one. In
+// a narrow window (a phone), the views are a bar along the bottom and the
+// list and what's picked show one at a time, with a way back. File history,
+// blame, commits and compares open over the list and what's picked, with a
+// way back. Everything follows the repository as it changes, here, in a
+// terminal or in another app. DESIGN.md has the look.
 //
 // Its keys and menu are hooks/useWindowKeys.ts and hooks/useWindowMenu.ts;
 // the views over the tabs, views/Overlay.tsx.
 
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { Archive, FileDiff, GitBranch, GitCommitHorizontal, History, Tag as TagIcon } from 'lucide-react';
-import { keys, useEvent } from '@hyperpane/sdk/client';
-import { COMPACT_WIDTH, type TabItem, Tabs, ToolButton, useCompact } from '@hyperpane/ui';
+import { Archive, FileDiff, GitBranch, GitCommitHorizontal, History, Tag as TagIcon } from '@hyperpane/icons';
+import { useEvent } from '@hyperpane/sdk/client';
+import { COMPACT_WIDTH, useCompact } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
 import { ListDetail } from '../components/ListDetail.tsx';
@@ -26,7 +28,7 @@ import { useWindowKeys } from '../hooks/useWindowKeys.ts';
 import { useWindowMenu } from '../hooks/useWindowMenu.ts';
 import { shortSha } from '../lib/format.ts';
 import { local } from '../lib/local.ts';
-import { basenameOf, inRepo, relativeTo } from '../lib/paths.ts';
+import { basenameOf, inRepo, relativeTo, tildify } from '../lib/paths.ts';
 import { type Pick, pickOf, sideOf, splitPick } from '../lib/picks.ts';
 import { BranchDetail } from '../views/branches/BranchDetail.tsx';
 import { BranchList } from '../views/branches/BranchList.tsx';
@@ -40,7 +42,8 @@ import { StashDetail } from '../views/stashes/StashDetail.tsx';
 import { StashList } from '../views/stashes/StashList.tsx';
 import { TagDetail } from '../views/tags/TagDetail.tsx';
 import { TagList } from '../views/tags/TagList.tsx';
-import { Toolbar } from '../views/toolbar/Toolbar.tsx';
+import { BottomNav, type NavItem, Rail } from '../views/shell/Rail.tsx';
+import { TopBar } from '../views/shell/TopBar.tsx';
 import type { BranchPick } from './actions/branches.ts';
 import type { Repo, Tab } from './repo.ts';
 
@@ -48,11 +51,19 @@ const TAB_ICONS = { changes: FileDiff, history: History, branches: GitBranch, st
 
 export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found; onChooseFolder(): void }) {
   const { host, status, tab, setTab } = repo;
+  // The list beside the rail, shown or hidden; the rail open or folded.
+  // Both kept on this machine.
   const [sidebar, setSidebarState] = useState(() => local.get('sidebar', true));
   const setSidebar = (on: boolean) => {
     setSidebarState(on);
     local.set('sidebar', on);
   };
+  const [railFolded, setRailFolded] = useState(() => local.get('rail.folded', false));
+  const toggleRail = () =>
+    setRailFolded((was) => {
+      local.set('rail.folded', !was);
+      return !was;
+    });
   const [picked, setPicked] = useState<Pick[]>([]);
   const [commit, setCommit] = useState<string | null>(null);
   const [branch, setBranch] = useState<BranchPick | null>(null);
@@ -76,10 +87,15 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
   const stashes = useStashes(repo, tab === 'stashes');
   const tags = useTags(repo, tab === 'tags');
 
-  // The window's title: the repository and its branch.
+  // The window's title: the repository; under it, the branch (with how far
+  // it is from its upstream) and where the repository is.
   useEffect(() => {
-    host.win.setTitle(`${basenameOf(repo.root)} · ${status.branch ?? (status.head ? `${shortSha(status.head)} (detached)` : 'no commits')}`);
-  }, [host, repo.root, status.branch, status.head]);
+    host.win.setTitle(basenameOf(repo.root) || repo.root);
+  }, [host, repo.root]);
+  const where = branchLine(status);
+  useEffect(() => {
+    host.win.setDescription(`${where} · ${tildify(repo.root, found.home)}`);
+  }, [host, where, repo.root, found.home]);
 
   useWindowMenu(host, repo, onChooseFolder);
 
@@ -118,15 +134,16 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
       setSidebar(on);
     },
     filters,
+    toggleRail,
   );
 
   const conflicts = status.files.filter((f) => f.conflict).length;
-  const tabs: TabItem<Tab>[] = [
-    { value: 'changes', label: 'Changes', icon: TAB_ICONS.changes, count: status.files.length, alert: conflicts > 0 },
-    { value: 'history', label: 'History', icon: TAB_ICONS.history },
-    { value: 'branches', label: 'Branches', icon: TAB_ICONS.branches },
-    { value: 'stashes', label: 'Stashes', icon: TAB_ICONS.stashes, count: status.stashes },
-    { value: 'tags', label: 'Tags', icon: TAB_ICONS.tags },
+  const tabs: NavItem[] = [
+    { value: 'changes', label: 'Changes', icon: TAB_ICONS.changes, count: status.files.length, alert: conflicts > 0, shortcut: '⌃1' },
+    { value: 'history', label: 'History', icon: TAB_ICONS.history, shortcut: '⌃2' },
+    { value: 'branches', label: 'Branches', icon: TAB_ICONS.branches, shortcut: '⌃3' },
+    { value: 'stashes', label: 'Stashes', icon: TAB_ICONS.stashes, count: status.stashes, shortcut: '⌃4' },
+    { value: 'tags', label: 'Tags', icon: TAB_ICONS.tags, shortcut: '⌃5' },
   ];
 
   let left: ReactNode;
@@ -154,58 +171,67 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
     right = <TagDetail tag={tags.tags?.find((t) => t.name === tag) ?? null} />;
   }
 
+  // Narrow, one at a time: the views along the bottom, under the list (not
+  // under what's picked, which has its way back).
+  const alone = compact && open;
   return (
-    <div className="flex h-full min-h-0 flex-col text-xs text-[var(--node-fg)] select-none" data-git={repo.root}>
-      <Toolbar
+    <div className="flex h-full min-h-0 flex-col text-[13px] leading-5 text-[var(--node-fg)] select-none" data-git={repo.root}>
+      <TopBar
         found={found}
         onRepo={(r) => host.win.setData('repo', r)}
         onChooseFolder={onChooseFolder}
-        sidebar={sidebar}
-        onSidebar={() => setSidebar(!sidebar)}
         branches={branches.branches}
         wantBranches={setPickerWants}
       />
       <OperationBar />
-      {repo.view ? (
-        <Overlay view={repo.view} />
-      ) : (
-        <div className="flex min-h-0 flex-1">
-          {!sidebar && (
-            <div className="flex w-9 flex-none flex-col items-center gap-0.5 border-e border-[var(--node-border)] py-1 max-sm:hidden">
-              {tabs.map((t) => (
-                <ToolButton
-                  key={t.value}
-                  label={`${t.label} (${keys(`⌃${TABS_ORDER.indexOf(t.value) + 1}`)})`}
-                  icon={t.icon!}
-                  active={tab === t.value}
-                  onClick={() => setTab(t.value)}
-                />
-              ))}
-            </div>
-          )}
-          <ListDetail
-            id="side"
-            initial={320}
-            min={220}
-            minOther={320}
-            collapsed={!sidebar}
-            below={COMPACT_WIDTH}
-            open={open}
-            onBack={() => setOpenIn(null)}
-            backLabel={tab[0].toUpperCase() + tab.slice(1)}
-            first={
-              <div className="flex min-h-0 flex-1 flex-col">
-                {/* As tall as the bar over a diff or a commit beside it: their lines meet. */}
-                <Tabs items={tabs} value={tab} onValueChange={setTab} fill label="Views" className="h-9" />
-                {left}
-              </div>
-            }
-            second={right}
+      <div className="flex min-h-0 flex-1">
+        {!compact && (
+          <Rail
+            items={tabs}
+            value={tab}
+            onChange={setTab}
+            collapsed={railFolded}
+            onCollapse={toggleRail}
+            list={sidebar}
+            onList={() => {
+              setOpenIn(null);
+              setSidebar(!sidebar);
+            }}
+            dimmed={!!repo.view}
           />
-        </div>
-      )}
+        )}
+        {repo.view ? (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col border-s border-[var(--git-line)] max-sm:border-s-0">
+            <Overlay view={repo.view} />
+          </div>
+        ) : (
+          <div className="flex min-h-0 min-w-0 flex-1 border-s border-[var(--git-line)] max-sm:border-s-0">
+            <ListDetail
+              id="side"
+              initial={300}
+              min={220}
+              minOther={320}
+              collapsed={!sidebar}
+              below={COMPACT_WIDTH}
+              open={open}
+              onBack={() => setOpenIn(null)}
+              backLabel={tab[0].toUpperCase() + tab.slice(1)}
+              first={<div className="flex min-h-0 flex-1 flex-col">{left}</div>}
+              second={right}
+            />
+          </div>
+        )}
+      </div>
+      {compact && !alone && !repo.view && <BottomNav items={tabs} value={tab} onChange={setTab} />}
     </div>
   );
 }
 
-const TABS_ORDER: Tab[] = ['changes', 'history', 'branches', 'stashes', 'tags'];
+/** The branch as the window's subtitle says it: main ↑2 ↓1, detached at
+ * abc1234, or no commits yet. */
+function branchLine(status: Repo['status']): string {
+  if (status.detached || !status.branch) return status.head ? `detached at ${shortSha(status.head)}` : 'no commits yet';
+  if (status.unborn) return `${status.branch}, no commits yet`;
+  const far = !!status.upstream && !status.upstreamGone ? [status.ahead > 0 && `↑${status.ahead}`, status.behind > 0 && `↓${status.behind}`].filter(Boolean) : [];
+  return [status.branch, ...far].join(' ');
+}

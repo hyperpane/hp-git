@@ -2,7 +2,7 @@
 // them.
 
 import { keys as keyLabel } from '@hyperpane/sdk/client';
-import { NodeButton } from '@hyperpane/ui';
+import { Button, Kbd } from '../../ui/parts.tsx';
 import { plural } from '../../lib/format.ts';
 import type { LineActions } from './DiffView.tsx';
 
@@ -20,21 +20,21 @@ export function PickedBar({
   onClear(): void;
 }) {
   return (
-    <div className="rounded-surface shadow-popover absolute bottom-3 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-2 border border-[var(--border)] bg-[var(--popover)] p-1 ps-3 text-xs whitespace-nowrap motion-safe:animate-[ax-fade-in_150ms_ease-out]">
-      <span className="text-[var(--node-muted)]">{plural(n, 'line')} picked</span>
+    <div className="shadow-popover absolute bottom-4 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--popover)] p-1 ps-3.5 text-xs whitespace-nowrap motion-safe:animate-[git-pop_150ms_ease-out]">
+      <span className="me-1 font-medium tabular-nums">{plural(n, 'line')} picked</span>
       {actions.primary && (
-        <NodeButton disabled={busy} variant="primary" onClick={() => onRun(actions.primary)}>
-          {actions.primary.label} {plural(n, 'line')} <kbd className="font-sans opacity-70">Space</kbd>
-        </NodeButton>
+        <Button disabled={busy} variant="primary" className="rounded-full" onClick={() => onRun(actions.primary)}>
+          {actions.primary.label} {plural(n, 'line')} <Kbd>Space</Kbd>
+        </Button>
       )}
       {actions.discard && (
-        <NodeButton disabled={busy} variant="danger" onClick={() => onRun(actions.discard)}>
+        <Button disabled={busy} variant="danger" className="rounded-full" onClick={() => onRun(actions.discard)}>
           {actions.discard.label}
-        </NodeButton>
+        </Button>
       )}
-      <NodeButton variant="ghost" onClick={onClear} title={`Clear (${keyLabel('⎋')})`}>
+      <Button variant="ghost" className="rounded-full" onClick={onClear} title={`Clear (${keyLabel('⎋')})`}>
         Clear
-      </NodeButton>
+      </Button>
     </div>
   );
 }

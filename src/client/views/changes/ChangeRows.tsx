@@ -4,7 +4,7 @@
 // and deleted, and its letter.
 
 import type { Dispatch, MouseEvent as ReactMouseEvent, SetStateAction } from 'react';
-import { FolderTree, TriangleAlert } from 'lucide-react';
+import { Folder, TriangleAlert } from '@hyperpane/icons';
 import { Checkbox, fileIcon } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
 import { PathLabel } from '../../components/PathLabel.tsx';
@@ -13,7 +13,8 @@ import { StatusLetter } from '../../components/StatusLetter.tsx';
 import type { Item } from '../../lib/changeRows.ts';
 import { basenameOf } from '../../lib/paths.ts';
 import { SIDE_LABEL, type Side, letterFor } from '../../lib/picks.ts';
-import { rowClass } from '../../lib/rows.ts';
+import { ROW_INSET, rowClass } from '../../lib/rows.ts';
+import { Stat } from '../../ui/parts.tsx';
 
 type Click = (it: Item, e: { shiftKey: boolean; metaKey: boolean; ctrlKey: boolean }) => void;
 type Menu = (e: ReactMouseEvent, it: Item) => void;
@@ -23,6 +24,11 @@ const stop = (e: { stopPropagation(): void }) => e.stopPropagation();
 /** A checkbox in a row: out of the tab order (the list has the keys), and
  * its presses and double-clicks don't pick or open the row. */
 export const inRow = { hideLabel: true, tabIndex: -1, onPointerDown: stop, onDoubleClick: stop } as const;
+/** A row's checkbox: in the accent when checked, as a diff's hunk and line
+ * boxes are, so a list of them reads as one quiet column, not a stack of
+ * bright tiles; unchecked, a soft outline. */
+export const ROW_CHECK =
+  'data-[state=checked]:border-[var(--node-accent)] data-[state=checked]:bg-[var(--node-accent)] data-[state=checked]:text-white data-[state=indeterminate]:border-[var(--node-accent)] data-[state=indeterminate]:bg-[var(--node-accent)] data-[state=indeterminate]:text-white data-[state=unchecked]:border-[color-mix(in_srgb,var(--node-fg)_28%,transparent)]';
 
 export function SectionRow({
   it,
@@ -40,15 +46,15 @@ export function SectionRow({
   unstage(files: FileStatus[]): unknown;
 }) {
   return (
-    <div className="h-full px-1" onContextMenu={(e) => e.preventDefault()}>
+    <div className="h-full px-1.5" onContextMenu={(e) => e.preventDefault()}>
       <SectionHeader label={SIDE_LABEL[it.side]} count={it.count} open={open} onToggle={() => click(it, { shiftKey: false, metaKey: false, ctrlKey: false })}>
         {it.side === 'conflict' ? (
-          <TriangleAlert className="size-3.5 text-[var(--ansi-9)]" />
+          <TriangleAlert className="size-3.5 text-[var(--git-conflicted)]" />
         ) : it.side === 'changes' ? null : (
           <button
             type="button"
             tabIndex={-1}
-            className="rounded-chip h-5 px-1.5 text-2xs font-medium transition-colors duration-100 touch:h-8 touch:px-2 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+            className="rounded-chip h-5 px-1.5 text-[11px] font-medium tracking-normal normal-case transition-colors duration-100 touch:h-8 touch:px-2 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)]"
             onClick={() => (it.side === 'staged' ? unstage(files) : stage(files))}
           >
             {it.side === 'staged' ? 'Unstage all' : 'Stage all'}
@@ -77,7 +83,7 @@ export function DirRow({
   setClosed: Dispatch<SetStateAction<Set<string>>>;
 }) {
   return (
-    <div className="group/list h-full px-1">
+    <div className={ROW_INSET}>
       <div
         className={rowClass(false)}
         style={{ paddingLeft: 8 + it.depth * 12 }}
@@ -86,7 +92,7 @@ export function DirRow({
         onContextMenu={(e) => menu(e, it)}
       >
         {it.side !== 'conflict' && (
-          <Checkbox {...inRow} checked={checked} label={folderLabel(it.side, checked)} onCheckedChange={() => toggle(it.side, it.files)} />
+          <Checkbox {...inRow} checked={checked} label={folderLabel(it.side, checked)} onCheckedChange={() => toggle(it.side, it.files)} className={ROW_CHECK} />
         )}
         <button
           type="button"
@@ -97,10 +103,10 @@ export function DirRow({
             setClosed((c) => (open ? new Set([...c, `${it.side}:${it.path}`]) : new Set([...c].filter((x) => x !== `${it.side}:${it.path}`))));
           }}
         >
-          <FolderTree className="size-3.5 flex-none" />
+          <Folder variant="outline" className="size-3.5 flex-none" />
           <span className="truncate">{it.name}</span>
         </button>
-        <span className="text-2xs text-[var(--node-muted)] tabular-nums">{it.files.length}</span>
+        <span className="text-xs text-[var(--node-muted)] tabular-nums">{it.files.length}</span>
       </div>
     </div>
   );
@@ -126,22 +132,17 @@ export function FileRow({
   const f = it.file;
   const Icon = fileIcon(basenameOf(f.path));
   return (
-    <div className="h-full px-1" data-file={f.path} data-side={it.side}>
+    <div className={ROW_INSET} data-file={f.path} data-side={it.side}>
       <div className={rowClass(isPicked)} style={{ paddingLeft: 8 + it.depth * 12 }} onClick={(e) => click(it, e)} onContextMenu={(e) => menu(e, it)}>
-        <Checkbox {...inRow} checked={checked} label={fileLabel(it.side, checked, f.path)} onCheckedChange={() => toggle(it.side, [f])} />
+        <Checkbox {...inRow} checked={checked} label={fileLabel(it.side, checked, f.path)} onCheckedChange={() => toggle(it.side, [f])} className={ROW_CHECK} />
         {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
         {tree ? (
           <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span>
         ) : (
           <PathLabel path={f.path} from={it.side === 'unstaged' || it.side === 'untracked' ? undefined : f.from} />
         )}
-        {(f.additions || f.deletions) && it.side !== 'conflict' ? (
-          <span className="flex-none text-2xs tabular-nums">
-            {!!f.additions && <span className="text-[var(--ansi-2)]">+{f.additions}</span>}{' '}
-            {!!f.deletions && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
-          </span>
-        ) : null}
-        <StatusLetter letter={letterFor(it.side, f)} title={it.side === 'conflict' ? `Conflict: ${f.conflict}` : undefined} />
+        {it.side !== 'conflict' && <Stat added={f.additions ?? 0} removed={f.deletions ?? 0} className="opacity-80" />}
+        <StatusLetter plain letter={letterFor(it.side, f)} title={it.side === 'conflict' ? `Conflict: ${f.conflict}` : undefined} />
       </div>
     </div>
   );

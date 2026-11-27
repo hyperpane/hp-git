@@ -1,8 +1,8 @@
 // No local changes: what's next, as GitHub Desktop suggests it.
 
-import { CheckCheck } from 'lucide-react';
-import { NodeButton } from '@hyperpane/ui';
+import { CheckCheck } from '@hyperpane/icons';
 import { useRepo } from '../../app/repo.ts';
+import { Button } from '../../ui/parts.tsx';
 import { Blank } from '../../components/Blank.tsx';
 import { plural } from '../../lib/format.ts';
 
@@ -24,12 +24,12 @@ export function NoChanges() {
       actions={
         <>
           {next && (
-            <NodeButton variant="primary" disabled={!!repo.sync} onClick={next.run}>
+            <Button variant="primary" disabled={!!repo.sync} onClick={next.run}>
               {next.label}
-            </NodeButton>
+            </Button>
           )}
-          <NodeButton onClick={() => repo.setTab('history')}>Show History</NodeButton>
-          <NodeButton onClick={() => repo.terminal()}>Open Terminal</NodeButton>
+          <Button onClick={() => repo.setTab('history')}>Show History</Button>
+          <Button onClick={() => repo.terminal()}>Open Terminal</Button>
         </>
       }
     >

@@ -6,9 +6,9 @@
 // the draft while you look elsewhere, and offers to undo the last commit.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { UserPlus } from 'lucide-react';
+import { PenNib, Pencil, UserPlus } from '@hyperpane/icons';
 import { keys, mod } from '@hyperpane/sdk/client';
-import { NodeButton, menuItems, type MenuEntry } from '@hyperpane/ui';
+import { cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
 import type { Author } from '../../../shared/index.ts';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -17,7 +17,9 @@ import { plural, shortSha } from '../../lib/format.ts';
 import { afterCommit, checkedFiles, selection } from '../../lib/include.ts';
 import { local } from '../../lib/local.ts';
 import { sideFiles } from '../../lib/picks.ts';
-import { Chip, CoAuthorList, IdentityButton, LastCommit, SummaryField } from './CommitBoxParts.tsx';
+import { card } from '../../ui/classes.ts';
+import { Button, Kbd } from '../../ui/parts.tsx';
+import { CoAuthorList, IdentityButton, LastCommit, SummaryField, Toggle } from './CommitBoxParts.tsx';
 
 export function CommitBox() {
   const repo = useRepo();
@@ -176,62 +178,72 @@ export function CommitBox() {
         ? `Commit ${plural(staged, 'file')} to ${branch}`
         : `Commit to ${branch}`;
 
+  const buttonLabel = busy ? 'Committing' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label;
   return (
-    <div className="flex flex-none flex-col gap-2 border-t border-[var(--node-border)] p-3 max-sm:p-2" onKeyDown={keyDown}>
+    <div className="flex flex-none flex-col gap-2 px-2.5 pt-1 pb-2.5" onKeyDown={keyDown}>
       {last && <LastCommit last={last} onUndo={undo} onDismiss={() => setLast(null)} />}
-      <IdentityButton identity={status.identity} onClick={editIdentity} />
-      <SummaryField
-        inputRef={summaryRef}
-        summary={draft.summary}
-        placeholder={draft.amend ? 'Summary (empty: keep the message)' : merging ? 'Merge summary' : 'Summary (required)'}
-        onChange={(summary) => setDraft({ summary })}
-      />
-      <textarea
-        value={draft.description}
-        spellCheck
-        placeholder="Description"
-        rows={draft.description.split('\n').length > 2 ? 5 : 3}
-        onChange={(e) => setDraft({ description: e.target.value })}
-        aria-label="Description"
-        // The kit's field, filled (it has no text area of its own for a window).
-        className="rounded-control git-scroll w-full resize-none border border-transparent bg-[color-mix(in_srgb,var(--node-fg)_6%,transparent)] px-2 py-1.5 text-xs leading-relaxed text-[var(--node-fg)] outline-none transition-[border-color,box-shadow] duration-100 placeholder:text-[var(--node-muted)] hover:bg-[color-mix(in_srgb,var(--node-fg)_9%,transparent)] focus:border-[var(--node-accent)] focus:bg-transparent focus:shadow-[0_0_0_2px_color-mix(in_srgb,var(--node-accent)_22%,transparent)] touch:text-sm"
-      />
-      {draft.coAuthors.length > 0 && (
-        <CoAuthorList coAuthors={draft.coAuthors} onRemove={(c) => setDraft({ coAuthors: draft.coAuthors.filter((x) => x !== c) })} />
-      )}
-      <div className="flex items-center gap-1">
-        <Chip
-          on={draft.amend}
-          disabled={!status.head || merging}
-          onClick={() => setDraft({ amend: !draft.amend, ...(draft.amend ? { summary: '', description: '' } : {}) })}
-          title="Change the last commit instead of making a new one"
-        >
-          Amend
-        </Chip>
-        <Chip on={signoff} onClick={() => setDraft({ signoff: !signoff })} title="Add a Signed-off-by line">
-          Sign off
-        </Chip>
-        <span className="flex-1" />
-        <NodeButton
-          variant="ghost"
-          title="Add a co-author"
-          aria-label="Add a co-author"
-          className="px-2 font-normal text-[var(--node-muted)] hover:text-[var(--node-fg)]"
-          onClick={pickCoAuthor}
-        >
-          <UserPlus />
-          Co-author
-        </NodeButton>
+      <div
+        className={cn(
+          card,
+          'flex flex-col transition-[box-shadow,background-color] duration-150 focus-within:bg-[var(--node-bg)] focus-within:ring-[color-mix(in_srgb,var(--node-accent)_55%,transparent)]',
+        )}
+      >
+        <SummaryField
+          inputRef={summaryRef}
+          summary={draft.summary}
+          placeholder={draft.amend ? 'Summary (empty: keep the message)' : merging ? 'Merge summary' : 'Summary'}
+          onChange={(summary) => setDraft({ summary })}
+        />
+        <textarea
+          value={draft.description}
+          spellCheck
+          placeholder="Description"
+          rows={draft.description.split('\n').length > 2 ? 5 : 2}
+          onChange={(e) => setDraft({ description: e.target.value })}
+          aria-label="Description"
+          className="git-scroll w-full resize-none bg-transparent px-3 pb-2 text-xs leading-[18px] text-[var(--node-fg)] outline-none placeholder:text-[var(--node-muted)] touch:text-sm"
+        />
+        {draft.coAuthors.length > 0 && (
+          <CoAuthorList coAuthors={draft.coAuthors} onRemove={(c) => setDraft({ coAuthors: draft.coAuthors.filter((x) => x !== c) })} />
+        )}
+        <div className="flex items-center gap-0.5 px-1.5 pb-1.5">
+          <Toggle
+            on={draft.amend}
+            disabled={!status.head || merging}
+            onClick={() => setDraft({ amend: !draft.amend, ...(draft.amend ? { summary: '', description: '' } : {}) })}
+            title="Change the last commit instead of making a new one"
+            icon={Pencil}
+          >
+            Amend
+          </Toggle>
+          <Toggle on={signoff} onClick={() => setDraft({ signoff: !signoff })} title="Add a Signed-off-by line" icon={PenNib}>
+            Sign off
+          </Toggle>
+          <span className="flex-1" />
+          <button
+            type="button"
+            title="Add a co-author"
+            aria-label="Add a co-author"
+            className={cn(
+              'flex size-6 flex-none items-center justify-center rounded-full text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:size-9',
+              styles.focusRing,
+            )}
+            onClick={pickCoAuthor}
+          >
+            <UserPlus variant="outline" className="size-3.5" />
+          </button>
+          <IdentityButton identity={status.identity} onClick={editIdentity} />
+        </div>
       </div>
       {draft.amend && amending && (
-        <div className="truncate text-2xs text-[var(--ansi-3)]" title={amending.subject}>
+        <div className="truncate px-1 text-xs text-[var(--git-modified)]" title={amending.subject}>
           Amending <span className="font-mono">{shortSha(amending.sha)}</span> {amending.subject}
           {status.ahead === 0 && status.upstream ? ' — it was pushed: pushing again will need a force push.' : ''}
         </div>
       )}
-      {conflicts > 0 && <div className="text-2xs text-[var(--ansi-9)]">Resolve {plural(conflicts, 'conflict')} before committing.</div>}
+      {conflicts > 0 && <div className="px-1 text-xs text-[var(--git-conflicted)]">Resolve {plural(conflicts, 'conflict')} before committing.</div>}
       {nothing && !conflicts && status.files.length > 0 && including && (
-        <div className="text-2xs text-[var(--node-muted)]">
+        <div className="px-1 text-xs text-[var(--node-muted)]">
           No file is checked.{' '}
           <button type="button" className="text-[var(--node-accent)] hover:underline" onClick={() => fileActions(repo).allIn()}>
             Check all {plural(status.files.length, 'change')}
@@ -240,7 +252,7 @@ export function CommitBox() {
         </div>
       )}
       {nothing && !conflicts && status.files.length > 0 && !including && (
-        <div className="text-2xs text-[var(--node-muted)]">
+        <div className="px-1 text-xs text-[var(--node-muted)]">
           Nothing is staged.{' '}
           <button type="button" className="text-[var(--node-accent)] hover:underline" onClick={() => fileActions(repo).allIn()}>
             Stage all {plural(status.files.length, 'change')}
@@ -248,9 +260,10 @@ export function CommitBox() {
           , or commit them all ({keys('⌘↵')}).
         </div>
       )}
-      <NodeButton variant="primary" className="h-8 w-full min-w-0 touch:h-10" disabled={!ready} onClick={() => commit()} title={`${label} (${keys('⌘↵')})`}>
-        <span className="truncate">{busy ? 'Committing' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label}</span>
-      </NodeButton>
+      <Button variant="primary" lg className="w-full min-w-0 touch:h-10" disabled={!ready} onClick={() => commit()} title={`${label} (${keys('⌘↵')})`}>
+        <span className="min-w-0 truncate">{buttonLabel}</span>
+        {!busy && <Kbd className="ms-0.5">{keys('⌘↵')}</Kbd>}
+      </Button>
     </div>
   );
 }

@@ -4,6 +4,8 @@
 // with what was entered, or null.
 
 import { cn } from '@hyperpane/ui';
+import { useGitStyles } from '../../hooks/useGitStyles.ts';
+import { GIT_TOKENS_CSS } from '../../ui/tokens.ts';
 import { Clone } from './Clone.tsx';
 import { Credentials } from './Credentials.tsx';
 import { Identity } from './Identity.tsx';
@@ -16,6 +18,7 @@ import { NewTag } from './NewTag.tsx';
 type Data<C extends (props: { data: never }) => unknown> = Parameters<C>[0]['data'];
 
 export function DialogView({ view, data }: { view: string; data: unknown }) {
+  useGitStyles(GIT_TOKENS_CSS);
   const content =
     view === 'credentials' ? (
       <Credentials data={data as Data<typeof Credentials>} />

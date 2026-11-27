@@ -3,11 +3,13 @@
 // it is, and a way out.
 
 import type { ReactNode } from 'react';
-import { ArrowLeft, ArrowRight, ChevronRight, FileClock, GitCommitHorizontal, GitCompareArrows, ScanSearch, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronRight, FileClock, GitCommitHorizontal, GitCompareArrows, ScanSearch, X } from '@hyperpane/icons';
 import { keys } from '@hyperpane/sdk/client';
-import { NodeButton, ToolButton, cn } from '@hyperpane/ui';
+import { ToolButton, cn } from '@hyperpane/ui';
 import { type View, useRepo } from '../app/repo.ts';
 import { shortSha } from '../lib/format.ts';
+import { header } from '../ui/classes.ts';
+import { Button } from '../ui/parts.tsx';
 import { BlameView } from './Blame.tsx';
 import { CompareView } from './branches/CompareView.tsx';
 import { CommitDetails } from './commit/CommitDetails.tsx';
@@ -37,30 +39,36 @@ export function Overlay({ view }: { view: View }) {
   const path = view.kind === 'fileHistory' || view.kind === 'blame' ? view.path : null;
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-view={view.kind}>
-      <div className="flex h-10 flex-none items-center gap-1 border-b border-[var(--node-border)] bg-[var(--node-header)] px-2.5 touch:h-12">
+      <div className={cn(header.base, 'gap-0.5')}>
         <ToolButton label={`Back (${keys('⌘[')})`} icon={ArrowLeft} onClick={repo.back} />
         <ToolButton label={`Forward (${keys('⌘]')})`} icon={ArrowRight} disabled={!repo.canForward} onClick={repo.forward} />
-        <nav className="ms-1 flex min-w-0 flex-1 items-center gap-1.5 text-xs" aria-label="Where you are">
+        <nav className="ms-1.5 flex min-w-0 flex-1 items-center gap-1" aria-label="Where you are">
           <button
             type="button"
-            className="rounded-control h-7 flex-none px-1.5 text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9"
+            className="rounded-control h-7 flex-none px-2 text-[13px] text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9"
             onClick={() => repo.setTab(repo.tab)}
           >
             {tabLabel}
           </button>
-          <ChevronRight className="size-3 flex-none text-[var(--node-muted)] opacity-60" />
-          <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />
-          <span className="truncate font-medium">{viewTitle(view)}</span>
+          <ChevronRight className="size-3.5 flex-none text-[var(--node-muted)] opacity-50" />
+          <span className="flex min-w-0 items-center gap-2 ps-1.5">
+            <span className="grid size-6 flex-none place-items-center rounded-control bg-[var(--git-accent-soft)] text-[var(--node-accent)]">
+              <Icon className="size-3.5" />
+            </span>
+            <span className={header.title}>{viewTitle(view)}</span>
+          </span>
         </nav>
         {path && view.kind === 'fileHistory' && (
-          <NodeButton variant="ghost" onClick={() => repo.open({ kind: 'blame', path })}>
+          <Button variant="ghost" className="me-1" onClick={() => repo.open({ kind: 'blame', path })}>
+            <ScanSearch variant="outline" />
             Blame
-          </NodeButton>
+          </Button>
         )}
         {path && view.kind === 'blame' && (
-          <NodeButton variant="ghost" onClick={() => repo.open({ kind: 'fileHistory', path })}>
+          <Button variant="ghost" className="me-1" onClick={() => repo.open({ kind: 'fileHistory', path })}>
+            <FileClock variant="outline" />
             History
-          </NodeButton>
+          </Button>
         )}
         <ToolButton label={`Close (${keys('⎋')})`} icon={X} onClick={() => repo.setTab(repo.tab)} />
       </div>

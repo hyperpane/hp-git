@@ -8,13 +8,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type Host, useData, useProject, useServerPart, useWindow } from '@hyperpane/sdk/client';
 import { codeHighlightCss } from '@hyperpane/code';
-import { NodeButton, NodeMessage } from '@hyperpane/ui';
-import { FolderX } from 'lucide-react';
+import { NodeMessage } from '@hyperpane/ui';
+import { Button } from '../ui/parts.tsx';
+import { FolderX } from '@hyperpane/icons';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
 import { DIFF_CSS } from '../components/diff/styles.ts';
 import { useGitStyles } from '../hooks/useGitStyles.ts';
-import { basenameOf } from '../lib/paths.ts';
+import { GIT_TOKENS_CSS } from '../ui/tokens.ts';
+import { basenameOf, tildify } from '../lib/paths.ts';
 import { Welcome } from '../views/Welcome.tsx';
 import { gitTools } from './api.ts';
 import { RepoWindow } from './RepoWindow.tsx';
@@ -28,7 +30,7 @@ function startFolder(host: Host, data: Record<string, string>): string {
 }
 
 export function GitWindow({ host }: { host: Host }) {
-  useGitStyles(`${codeHighlightCss}\n${DIFF_CSS}`);
+  useGitStyles(`${GIT_TOKENS_CSS}\n${codeHighlightCss}\n${DIFF_CSS}`);
   const data = useData();
   const win = useWindow();
   useProject();
@@ -111,7 +113,10 @@ export function GitWindow({ host }: { host: Host }) {
 
   const f = found.for === folder ? found.f : undefined;
   useEffect(() => {
-    if (f && !f.root) host.win.setTitle(`Git · ${basenameOf(folder) || folder}`);
+    if (f && !f.root) {
+      host.win.setTitle(`Git · ${basenameOf(folder) || folder}`);
+      host.win.setDescription(`Not a repository · ${tildify(folder, f.home)}`);
+    }
   }, [f, folder, host]);
 
   if (found.for === folder && found.error)
@@ -122,10 +127,10 @@ export function GitWindow({ host }: { host: Host }) {
         title="Git can’t open this folder"
         actions={
           <>
-            <NodeButton variant="primary" onClick={() => setAttempt((n) => n + 1)}>
+            <Button variant="primary" onClick={() => setAttempt((n) => n + 1)}>
               Try Again
-            </NodeButton>
-            <NodeButton onClick={chooseFolder}>Open Another Folder</NodeButton>
+            </Button>
+            <Button onClick={chooseFolder}>Open Another Folder</Button>
           </>
         }
       >

@@ -6,7 +6,7 @@
 // alone with the way back to them.
 
 import { type ReactNode, useEffect, useState } from 'react';
-import { FileDiff, TriangleAlert } from 'lucide-react';
+import { FileDiff, TriangleAlert } from '@hyperpane/icons';
 import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { ChangedFile, CommitDetail } from '../../../shared/index.ts';
 import type { DiffRequest, Pending } from '../../app/api.ts';

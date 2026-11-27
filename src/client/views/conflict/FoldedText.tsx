@@ -1,7 +1,7 @@
 // The text between conflicts: a few lines on each side of them, the rest
 // folded, to open.
 
-import { ChevronsUpDown } from 'lucide-react';
+import { ChevronsUpDown } from '@hyperpane/icons';
 import { plural } from '../../lib/format.ts';
 import { Code } from './Code.tsx';
 
@@ -17,8 +17,8 @@ export function FoldedText({ lines, first, last, open, onOpen }: { lines: string
       {long && (
         <button
           type="button"
-          className="rounded-chip my-0.5 flex h-5 w-full items-center touch:h-9 gap-1 px-2 font-sans text-2xs text-[var(--node-muted)] hover:bg-[var(--node-hover)]"
-          style={{ background: 'color-mix(in srgb, var(--node-fg) 3%, transparent)' }}
+          className="rounded-control my-1 flex h-6 w-full items-center gap-1.5 px-2.5 font-sans text-xs text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:h-9"
+          style={{ background: 'var(--git-diff-bar)' }}
           onClick={onOpen}
         >
           <ChevronsUpDown className="size-3" /> {plural(lines.length - head.length - tail.length, 'unchanged line')}

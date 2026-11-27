@@ -5,18 +5,20 @@
 // take one side for the whole file, or open it in the Editor.
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Binary, Check, TriangleAlert } from 'lucide-react';
+import { Binary, Check, TriangleAlert } from '@hyperpane/icons';
 import { MONO } from '@hyperpane/code';
-import { NodeButton, NodeMessage } from '@hyperpane/ui';
+import { NodeMessage } from '@hyperpane/ui';
 import type { FileStatus } from '../../../shared/index.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { type Choice, KIND, merged, parseConflicts } from '../../lib/conflicts.ts';
 import { plural } from '../../lib/format.ts';
 import { basenameOf } from '../../lib/paths.ts';
+import { Button, Dot } from '../../ui/parts.tsx';
 import { ConflictBar } from './ConflictBar.tsx';
 import { ConflictBlock } from './ConflictBlock.tsx';
 import { FoldedText } from './FoldedText.tsx';
+import { ROW } from '../../components/diff/theme.ts';
 
 export function ConflictView({ file }: { file: FileStatus }) {
   const repo = useRepo();
@@ -98,30 +100,30 @@ export function ConflictView({ file }: { file: FileStatus }) {
         <NodeMessage>Loading</NodeMessage>
       ) : (
         <>
-          <div className="flex h-10 flex-none items-center gap-2 border-b border-[var(--node-border)] ps-3 pe-2.5 text-2xs touch:h-12">
-            <span className="text-[var(--node-muted)]">
+          <div className="flex h-11 flex-none items-center gap-3 border-b border-[var(--git-line)] ps-3.5 pe-2 text-xs touch:h-12">
+            <span className="font-medium text-[var(--node-muted)] tabular-nums">
               {conflicts.length ? `${chosen} of ${plural(conflicts.length, 'conflict')} chosen` : 'No conflict markers are left'}
             </span>
             <span className="flex-1" />
             <span className="flex items-center gap-1 text-[var(--node-muted)]">
-              <span className="size-2 rounded-full bg-[var(--ansi-4)]" /> Ours: {ours}
+              <Dot color="var(--git-ours)" className="size-2" /> Ours: {ours}
             </span>
             <span className="flex items-center gap-1 text-[var(--node-muted)]">
-              <span className="size-2 rounded-full bg-[var(--ansi-5)]" /> Theirs: {theirs}
+              <Dot color="var(--git-theirs)" className="size-2" /> Theirs: {theirs}
             </span>
-            <NodeButton variant="ghost" disabled={saving || !chosen} onClick={() => save(false)}>
+            <Button variant="ghost" disabled={saving || !chosen} onClick={() => save(false)}>
               Save
-            </NodeButton>
-            <NodeButton
+            </Button>
+            <Button
               disabled={saving || chosen < conflicts.length}
               variant="primary"
               onClick={() => (conflicts.length ? save(true) : repo.run(() => api.resolve(file.path, 'mark')))}
             >
               <Check />
               {conflicts.length ? 'Save and Mark Resolved' : 'Mark Resolved'}
-            </NodeButton>
+            </Button>
           </div>
-          <div className="git-scroll min-h-0 flex-1 overflow-auto p-2" style={{ fontFamily: MONO, fontSize: 12, lineHeight: '18px' }}>
+          <div className="git-scroll min-h-0 flex-1 overflow-auto px-3 py-2" style={{ fontFamily: MONO, fontSize: 12, lineHeight: `${ROW}px` }}>
             {blocks.map((b, k) => {
               if (b.t === 'text')
                 return (

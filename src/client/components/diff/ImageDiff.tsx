@@ -31,8 +31,8 @@ export function ImageDiff({ diff }: { diff: Diff }) {
     setDims((d) => ({ ...d, [side]: `${img.naturalWidth} × ${img.naturalHeight}` }));
   };
   const caption = (label: string, b: Blob | null, d?: string, color?: string) => (
-    <div className="flex items-center gap-2 text-2xs text-[var(--node-muted)]">
-      <span className="font-semibold" style={{ color }}>
+    <div className="flex items-center gap-2 text-xs text-[var(--node-muted)]">
+      <span className="font-medium" style={{ color }}>
         {label}
       </span>
       {b && <span>{formatSize(b.size)}</span>}
@@ -41,11 +41,11 @@ export function ImageDiff({ diff }: { diff: Diff }) {
     </div>
   );
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-3">
+    <div className="git-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-auto p-5">
       {both && (
         <div className="flex justify-center">
           <SegmentedControl
-            size="xs"
+            size="sm"
             label="How to compare"
             value={mode}
             onValueChange={(v) => setMode(v as Mode)}
@@ -62,29 +62,29 @@ export function ImageDiff({ diff }: { diff: Diff }) {
           {(before || image.before) && (
             <figure className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
               <div
-                className="rounded-control flex max-h-full items-center justify-center overflow-hidden border-2 border-[color-mix(in_srgb,var(--ansi-1)_60%,transparent)]"
+                className="rounded-surface flex max-h-full items-center justify-center overflow-hidden ring-2 ring-[color-mix(in_srgb,var(--git-deleted)_45%,transparent)]"
                 style={CHECKER}
               >
                 {before && <img src={before} alt="Before" onLoad={size('before')} className="max-h-[60vh] max-w-full object-contain" />}
               </div>
-              {caption('Before', image.before, dims.before, 'var(--ansi-1)')}
+              {caption('Before', image.before, dims.before, 'var(--git-deleted)')}
             </figure>
           )}
           {(after || image.after) && (
             <figure className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
               <div
-                className="rounded-control flex max-h-full items-center justify-center overflow-hidden border-2 border-[color-mix(in_srgb,var(--ansi-2)_60%,transparent)]"
+                className="rounded-surface flex max-h-full items-center justify-center overflow-hidden ring-2 ring-[color-mix(in_srgb,var(--git-added)_45%,transparent)]"
                 style={CHECKER}
               >
                 {after && <img src={after} alt="After" onLoad={size('after')} className="max-h-[60vh] max-w-full object-contain" />}
               </div>
-              {caption('After', image.after, dims.after, 'var(--ansi-2)')}
+              {caption('After', image.after, dims.after, 'var(--git-added)')}
             </figure>
           )}
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="rounded-control relative inline-block overflow-hidden" style={CHECKER}>
+          <div className="rounded-surface relative inline-block overflow-hidden ring-1 ring-[var(--git-line)]" style={CHECKER}>
             <img src={after!} alt="After" className="block max-h-[56vh] max-w-full object-contain" />
             <img
               src={before!}
@@ -101,11 +101,11 @@ export function ImageDiff({ diff }: { diff: Diff }) {
             value={at}
             onChange={(e) => setAt(Number(e.target.value))}
             aria-label={mode === 'swipe' ? 'Where to divide' : 'How much of the old image'}
-            className="w-60 accent-[var(--node-accent)]"
+            className="w-64 accent-[var(--node-accent)]"
           />
           <div className="flex gap-6">
-            {caption('Before', image.before, dims.before, 'var(--ansi-1)')}
-            {caption('After', image.after, dims.after, 'var(--ansi-2)')}
+            {caption('Before', image.before, dims.before, 'var(--git-deleted)')}
+            {caption('After', image.after, dims.after, 'var(--git-added)')}
           </div>
         </div>
       )}

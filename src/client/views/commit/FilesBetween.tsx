@@ -2,7 +2,7 @@
 // and the picked one's diff beside them (or alone, in a narrow window).
 
 import { useEffect, useState } from 'react';
-import { FileDiff, TriangleAlert } from 'lucide-react';
+import { FileDiff, TriangleAlert } from '@hyperpane/icons';
 import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
 import type { ChangedFile } from '../../../shared/index.ts';
 import { useRepo } from '../../app/repo.ts';

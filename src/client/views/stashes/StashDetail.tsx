@@ -1,13 +1,15 @@
 // The picked stash: its files and diffs (its untracked files too), and
 // Apply, Pop and Drop.
 
-import { Archive } from 'lucide-react';
-import { NodeButton } from '@hyperpane/ui';
+import { Archive } from '@hyperpane/icons';
+import { cn } from '@hyperpane/ui';
 import type { Stash } from '../../../shared/index.ts';
 import { stashActions } from '../../app/actions/stashes.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { ago } from '../../lib/format.ts';
+import { header } from '../../ui/classes.ts';
+import { Button } from '../../ui/parts.tsx';
 import { CommitDetails } from '../commit/CommitDetails.tsx';
 
 export function StashDetail({ stash }: { stash: Stash | null }) {
@@ -29,16 +31,17 @@ export function StashDetail({ stash }: { stash: Stash | null }) {
       diffOf={(f) => ({ path: f.path, oldPath: f.from, commit: f.untracked ? `${ref}^3` : ref })}
       rev={() => ref}
       top={() => (
-        <div className="flex h-10 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-3 pe-2.5 touch:h-12">
-          <Archive className="size-3.5 text-[var(--node-muted)]" />
-          <span className="min-w-0 flex-1 truncate text-2xs text-[var(--node-muted)]">
-            {ref}
-            {stash.branch ? ` on ${stash.branch}` : ''} · {ago(stash.date)}
+        <div className={cn(header.base, 'gap-2 ps-3.5 pe-2')}>
+          <Archive className="size-4 flex-none text-[var(--git-stash)]" />
+          <span className={header.title}>{ref}</span>
+          <span className={cn(header.meta, 'flex-1')}>
+            {stash.branch ? `on ${stash.branch} · ` : ''}
+            {ago(stash.date)}
           </span>
           {actions.map((a) => (
-            <NodeButton key={a.label} onClick={a.run} variant={a.danger ? 'danger' : 'default'}>
+            <Button key={a.label} onClick={a.run} variant={a.danger ? 'danger' : a.label === 'Pop' ? 'primary' : 'secondary'}>
               {a.label}
-            </NodeButton>
+            </Button>
           ))}
         </div>
       )}

@@ -1,13 +1,15 @@
 // The picked tag: its commit, with who tagged it and its message, and
 // what can be done with it.
 
-import { Tag as TagIcon } from 'lucide-react';
-import { NodeButton } from '@hyperpane/ui';
+import { Tag as TagIcon } from '@hyperpane/icons';
+import { cn } from '@hyperpane/ui';
 import type { Tag } from '../../../shared/index.ts';
 import { tagActions } from '../../app/actions/tags.ts';
 import { useRepo } from '../../app/repo.ts';
 import { Blank } from '../../components/Blank.tsx';
 import { ago } from '../../lib/format.ts';
+import { header } from '../../ui/classes.ts';
+import { Button } from '../../ui/parts.tsx';
 import { CommitDetails } from '../commit/CommitDetails.tsx';
 
 export function TagDetail({ tag }: { tag: Tag | null }) {
@@ -26,27 +28,28 @@ export function TagDetail({ tag }: { tag: Tag | null }) {
       place="tag"
       load={() => repo.api.show(tag.sha)}
       top={() => (
-        <div className="flex flex-none flex-col gap-2 border-b border-[var(--node-border)] p-3">
-          <div className="flex items-center gap-2 max-sm:flex-wrap">
-            <TagIcon className="size-3.5 text-[var(--ansi-3)]" />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold max-sm:basis-[calc(100%-1.5rem)]">{tag.name}</span>
+        <>
+          <div className={cn(header.base, 'gap-2 ps-3.5 pe-2 max-sm:h-auto max-sm:flex-wrap max-sm:py-2')}>
+            <TagIcon className="size-4 flex-none text-[var(--git-tag)]" />
+            <span className={cn(header.title, 'max-sm:basis-[calc(100%-1.5rem)]')}>{tag.name}</span>
+            <span className={cn(header.meta, 'flex-1')}>
+              {tag.annotated ? `${tag.tagger ? `Tagged by ${tag.tagger} ` : 'Tagged '}${ago(tag.date)}` : 'Lightweight'}
+            </span>
             {actions.slice(0, 2).map((a) => (
-              <NodeButton key={a.label} disabled={a.disabled} onClick={a.run}>
+              <Button key={a.label} disabled={a.disabled} onClick={a.run}>
                 {a.label}
-              </NodeButton>
+              </Button>
             ))}
-            <NodeButton variant="danger" onClick={actions[3].run}>
+            <Button variant="danger" onClick={actions[3].run}>
               Delete
-            </NodeButton>
+            </Button>
           </div>
-          {tag.annotated && (
-            <div className="text-2xs text-[var(--node-muted)]">
-              {tag.tagger ? `Tagged by ${tag.tagger} ` : 'Tagged '}
-              {ago(tag.date)}
-              {tag.message ? <pre className="mt-1 font-sans text-xs whitespace-pre-wrap text-[var(--node-fg)]">{tag.message}</pre> : null}
-            </div>
-          )}
-        </div>
+          {tag.annotated && tag.message ? (
+            <pre className="flex-none border-b border-[var(--git-line)] px-3.5 py-3 font-sans text-[13px] leading-5 whitespace-pre-wrap text-[var(--node-fg)] opacity-85 select-text">
+              {tag.message}
+            </pre>
+          ) : null}
+        </>
       )}
     />
   );

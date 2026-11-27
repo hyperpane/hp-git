@@ -5,9 +5,9 @@
 // that commit. On a phone the label is narrower: who and the summary.
 
 import { type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { TriangleAlert } from 'lucide-react';
+import { TriangleAlert } from '@hyperpane/icons';
 import { MONO } from '@hyperpane/code';
-import { NodeMessage, PHONE_WIDTH, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
+import { NodeMessage, PHONE_WIDTH, cn, menuItems, type MenuEntry, useCompact } from '@hyperpane/ui';
 import { Blank } from '../components/Blank.tsx';
 import type { Blame as BlameData } from '../../shared/index.ts';
 import { useRepo } from '../app/repo.ts';
@@ -18,8 +18,9 @@ import { type Span, highlightLines } from '../lib/diff/highlight.ts';
 import { paint } from '../lib/diff/paint.tsx';
 import { ago, longDate, shortSha } from '../lib/format.ts';
 import { basenameOf } from '../lib/paths.ts';
+import { header } from '../ui/classes.ts';
+import { ROW } from '../components/diff/theme.ts';
 
-const ROW = 20;
 const NONE = /^0+$/;
 
 export function BlameView({ path, rev, line }: { path: string; rev?: string; line?: number }) {
@@ -106,15 +107,15 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-blame={path}>
-      <div className="flex h-9 flex-none items-center gap-2 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
+      <div className={cn(header.base, 'h-10 gap-3 px-3.5 text-xs text-[var(--node-muted)] touch:h-11')}>
         <span className="min-w-0 flex-1 truncate">
           {b.lines.length.toLocaleString('en-US')} lines · {Object.keys(b.commits).length} commits{rev ? ` · at ${shortSha(rev)}` : ' · the working tree'}
           {b.truncated ? ' · cut short (the file is big)' : ''}
         </span>
-        <span className="flex items-center gap-1">
+        <span className="flex flex-none items-center gap-2">
           older
           <span
-            className="h-2 w-16 rounded-full"
+            className="h-1.5 w-20 rounded-full"
             style={{ background: 'linear-gradient(to right, color-mix(in srgb, var(--node-accent) 22%, transparent), var(--node-accent))' }}
           />
           newer
@@ -143,23 +144,23 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
               onContextMenu={(e) => menu(e, l.sha)}
             >
               <div
-                className="sticky left-0 z-[1] flex h-full flex-none items-center gap-1.5 overflow-hidden border-e border-[var(--node-border)] ps-2 pe-1 font-sans text-2xs"
+                className="sticky left-0 z-[1] flex h-full flex-none cursor-pointer items-center gap-2 overflow-hidden ps-3 pe-2 font-sans text-xs"
                 style={{
                   width: label,
                   background: lit ? 'linear-gradient(var(--node-hover), var(--node-hover)), var(--node-bg)' : 'var(--node-bg)',
-                  borderTop: first && n ? '1px solid var(--node-border)' : undefined,
+                  borderTop: first && n ? '1px solid var(--git-line)' : undefined,
                 }}
                 onClick={() => !uncommitted && repo.open({ kind: 'commit', sha: l.sha })}
                 title={c ? `${c.summary}\n${c.author} <${c.email}> · ${longDate(c.date)}\n${l.sha}` : l.sha}
               >
                 {first &&
                   (uncommitted ? (
-                    <span className="truncate text-[var(--ansi-3)]">Not committed yet</span>
+                    <span className="truncate text-[var(--git-modified)]">Not committed yet</span>
                   ) : c ? (
                     <>
-                      <Avatar name={c.author} email={c.email} size={14} />
-                      {!narrow && <span className="w-14 flex-none truncate text-[var(--node-muted)]">{ago(c.date)}</span>}
-                      <span className="min-w-0 flex-1 cursor-pointer truncate hover:underline">{c.summary}</span>
+                      <Avatar name={c.author} email={c.email} size={16} />
+                      <span className="min-w-0 flex-1 truncate hover:underline">{c.summary}</span>
+                      {!narrow && <span className="flex-none text-[11px] text-[var(--node-muted)] tabular-nums">{ago(c.date)}</span>}
                     </>
                   ) : (
                     <span className="font-mono">{shortSha(l.sha)}</span>
@@ -167,9 +168,9 @@ export function BlameView({ path, rev, line }: { path: string; rev?: string; lin
               </div>
               <span
                 className="sticky z-[1] h-full w-[3px] flex-none"
-                style={{ left: label, background: c && !uncommitted ? shade(c.date) : 'var(--ansi-3)' }}
+                style={{ left: label, background: c && !uncommitted ? shade(c.date) : 'var(--git-modified)' }}
               />
-              <span className="flex-none pe-2 ps-2 text-right text-[var(--node-muted)] tabular-nums select-none" style={{ width: `${digits + 2}ch` }}>
+              <span className="flex-none pe-2 ps-2 text-right text-[var(--node-muted)] tabular-nums opacity-75 select-none" style={{ width: `${digits + 2}ch` }}>
                 {n + 1}
               </span>
               <span className="pe-6 whitespace-pre">{paint(l.text.endsWith('\r') ? l.text.slice(0, -1) : l.text, spans?.[n], null, '')}</span>

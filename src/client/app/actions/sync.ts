@@ -2,36 +2,41 @@
 // remote, publish, pull, push or fetch), and the rest in a menu (fetch
 // every remote, force push, remotes added and removed).
 
-import { ArrowDown, ArrowUp, CloudUpload, RefreshCw, type LucideIcon } from 'lucide-react';
+import { ArrowDown, ArrowUp, CloudUpload, RefreshCw, type Icon as IconComponent } from '@hyperpane/icons';
 import type { MenuEntry } from '@hyperpane/ui';
 import { ago } from '../../lib/format.ts';
 import type { Repo } from '../repo.ts';
 
 /** What the sync button does now. */
-export function syncChoice(repo: Repo): { label: string; sub: string; icon: LucideIcon; run?: () => void } {
+/** What kind of sync it is: the top bar styles each its own way. */
+export type SyncKind = 'remote' | 'fetch' | 'publish' | 'pull' | 'push';
+
+export function syncChoice(repo: Repo): { kind: SyncKind; label: string; sub: string; icon: IconComponent; run?: () => void } {
   const s = repo.status;
   const fetched = s.fetched ? `Last fetched ${ago(s.fetched)}` : 'Never fetched';
   if (!s.remote)
     return {
+      kind: 'remote',
       label: 'Add a remote',
       sub: 'To publish this repository',
       icon: CloudUpload,
       run: () => addRemote(repo),
     };
   if (s.unborn)
-    return { label: `Fetch ${s.remote}`, sub: 'Commit first to publish', icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
-  if (s.detached) return { label: `Fetch ${s.remote}`, sub: fetched, icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
+    return { kind: 'fetch', label: `Fetch ${s.remote}`, sub: 'Commit first to publish', icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
+  if (s.detached) return { kind: 'fetch', label: `Fetch ${s.remote}`, sub: fetched, icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
   if (!s.upstream || s.upstreamGone)
-    return { label: 'Publish branch', sub: `Push ${s.branch} to ${s.remote}`, icon: CloudUpload, run: () => repo.startSync('publish', {}, 'Publishing') };
+    return { kind: 'publish', label: 'Publish branch', sub: `Push ${s.branch} to ${s.remote}`, icon: CloudUpload, run: () => repo.startSync('publish', {}, 'Publishing') };
   if (s.behind > 0)
     return {
+      kind: 'pull',
       label: `Pull ${s.remote}`,
       sub: fetched,
       icon: ArrowDown,
       run: async () => repo.outcome(await repo.startSync('pull', {}, `Pulling ${s.remote}`), 'Pulling'),
     };
-  if (s.ahead > 0) return { label: `Push ${s.remote}`, sub: fetched, icon: ArrowUp, run: () => repo.startSync('push', {}, `Pushing to ${s.remote}`) };
-  return { label: `Fetch ${s.remote}`, sub: fetched, icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
+  if (s.ahead > 0) return { kind: 'push', label: `Push ${s.remote}`, sub: fetched, icon: ArrowUp, run: () => repo.startSync('push', {}, `Pushing to ${s.remote}`) };
+  return { kind: 'fetch', label: `Fetch ${s.remote}`, sub: fetched, icon: RefreshCw, run: () => repo.startSync('fetch', {}, `Fetching ${s.remote}`) };
 }
 
 async function addRemote(repo: Repo) {

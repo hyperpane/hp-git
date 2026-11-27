@@ -47,16 +47,18 @@ git does, and your repository stays a plain repository.
 ## How to use
 
 1. Open it: right-click the canvas and choose **New Git**. It shows the
-   repository of the project's folder; the repository button in the
-   toolbar switches to another one or opens another folder.
+   repository of the project's folder; the repository pill in the top
+   bar switches to another one or opens another folder.
 2. A folder that isn't a repository yet offers **Initialize Repository**
    or **Clone…**, and lists the repositories it finds inside.
 3. In **Changes**, check what goes in, write a summary, and press
    **Commit** (⌘↵, Ctrl+Enter on Windows and Linux).
-4. Push, pull or fetch with the sync button at the right of the toolbar.
+4. Push, pull or fetch with the sync button at the right of the top bar.
 
 Keys: Ctrl+1 to Ctrl+5 switch between Changes, History, Branches, Stashes
-and Tags; ⌘F (Ctrl+F) filters the list; ⌘[ and ⌘] (Ctrl+[ and Ctrl+]) go
+and Tags (the rail on the left); ⌘\ (Ctrl+\) folds the rail to its icons
+and opens it again; ⇧⌘\ (Ctrl+Shift+\) hides the list and shows it again;
+⌘F (Ctrl+F) filters the list; ⌘[ and ⌘] (Ctrl+[ and Ctrl+]) go
 back and forward, as do Alt+← and Alt+→ and the mouse's side buttons;
 Escape closes a view opened over the tabs.
 

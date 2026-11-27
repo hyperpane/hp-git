@@ -1,29 +1,31 @@
 // The commit box's pieces: the commit just made (to undo), who commits,
 // the summary with what's left of its 72 characters, the co-authors, and
-// the chips that turn amend and sign-off on.
+// the toggles that turn amend and sign-off on.
 
-import type { RefObject } from 'react';
-import { Undo2, X } from 'lucide-react';
-import { NodeButton, NodeInput, cn, styles } from '@hyperpane/ui';
+import type { ReactNode, RefObject } from 'react';
+import { CircleCheck, type Icon as IconComponent, Undo2, X } from '@hyperpane/icons';
+import { cn, styles } from '@hyperpane/ui';
 import type { Identity } from '../../../shared/index.ts';
 import { Avatar } from '../../components/Avatar.tsx';
 import { shortSha } from '../../lib/format.ts';
+import { Button } from '../../ui/parts.tsx';
 
 export function LastCommit({ last, onUndo, onDismiss }: { last: { sha: string; summary: string }; onUndo(): void; onDismiss(): void }) {
   return (
-    <div className="rounded-control flex h-8 items-center gap-2 bg-[var(--node-hover)] ps-2.5 pe-1 text-2xs touch:h-11">
+    <div className="rounded-control flex h-9 items-center gap-2 bg-[color-mix(in_srgb,var(--git-added)_10%,transparent)] ps-2.5 pe-1 text-xs motion-safe:animate-[git-pop_150ms_ease-out] touch:h-11">
+      <CircleCheck className="size-3.5 flex-none text-[var(--git-added)]" />
       <span className="min-w-0 flex-1 truncate">
-        Committed <span className="font-mono">{shortSha(last.sha)}</span> {last.summary}
+        Committed <span className="font-mono text-[var(--node-muted)]">{shortSha(last.sha)}</span> {last.summary}
       </span>
-      <NodeButton variant="ghost" className="h-6 px-2" onClick={onUndo} title="Take the commit back; its changes stay staged">
+      <Button variant="ghost" className="h-6 px-2 text-xs [&_svg]:size-3.5" onClick={onUndo} title="Take the commit back; its changes stay staged">
         <Undo2 />
         Undo
-      </NodeButton>
+      </Button>
       <button
         type="button"
         aria-label="Dismiss"
         className={cn(
-          'rounded-chip flex size-6 items-center justify-center text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:size-9',
+          'rounded-chip flex size-6 items-center justify-center text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:size-9',
           styles.focusRing,
         )}
         onClick={onDismiss}
@@ -34,29 +36,31 @@ export function LastCommit({ last, onUndo, onDismiss }: { last: { sha: string; s
   );
 }
 
+/** Who commits: their avatar in the composer's foot (a click changes it);
+ * no name or email yet, a warning that says so. */
 export function IdentityButton({ identity, onClick }: { identity: Identity; onClick(): void }) {
+  const set = !!identity.name && !!identity.email;
   return (
     <button
       type="button"
       className={cn(
-        'rounded-chip -mx-0.5 flex min-w-0 items-center gap-2 self-start px-0.5 text-2xs text-[var(--node-muted)] transition-colors duration-100 hover:text-[var(--node-fg)]',
+        'rounded-full flex flex-none items-center gap-1.5 transition-[opacity,background-color,color] duration-100',
+        set
+          ? 'size-6 justify-center opacity-90 hover:opacity-100 hover:bg-[var(--git-fill-hover)]'
+          : 'h-6 px-2 text-xs text-[var(--git-modified)] bg-[color-mix(in_srgb,var(--git-modified)_12%,transparent)] hover:bg-[color-mix(in_srgb,var(--git-modified)_18%,transparent)]',
         styles.focusRing,
       )}
-      title="Who commits here: click to change"
+      title={set ? `Committing as ${identity.name} <${identity.email}>: click to change` : 'Who commits here: click to set'}
+      aria-label={set ? `Committing as ${identity.name}` : 'Set your name and email to commit'}
       onClick={onClick}
     >
-      <Avatar name={identity.name ?? '?'} email={identity.email ?? ''} size={16} />
-      {identity.name && identity.email ? (
-        <span className="truncate">
-          {identity.name} <span className="opacity-70">&lt;{identity.email}&gt;</span>
-        </span>
-      ) : (
-        <span className="text-[var(--ansi-3)]">Set your name and email to commit</span>
-      )}
+      {set ? <Avatar name={identity.name!} email={identity.email!} size={20} /> : 'Set your name and email to commit'}
     </button>
   );
 }
 
+/** The summary: the composer's first line, its title; past 50 characters
+ * a count of what's left of 72 (amber, then red). */
 export function SummaryField({
   inputRef,
   summary,
@@ -70,19 +74,22 @@ export function SummaryField({
 }) {
   const remaining = 72 - summary.length;
   return (
-    <div className="relative">
-      <NodeInput
+    <div className="relative flex items-center">
+      <input
         ref={inputRef}
         value={summary}
         spellCheck
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         aria-label="Summary"
-        className="h-8 w-full pe-8 touch:h-10"
+        className="h-10 w-full min-w-0 bg-transparent ps-3 pe-10 text-[13px] font-medium text-[var(--node-fg)] outline-none placeholder:font-normal placeholder:text-[var(--node-muted)] touch:h-11"
       />
-      {summary.length > 50 && (
+      {summary.length > 0 && (
         <span
-          className={cn('absolute top-1/2 right-2 -translate-y-1/2 text-2xs tabular-nums', remaining < 0 ? 'text-[var(--ansi-1)]' : 'text-[var(--ansi-3)]')}
+          className={cn(
+            'pointer-events-none absolute right-3 text-[11px] tabular-nums transition-colors duration-150',
+            remaining < 0 ? 'font-medium text-[var(--git-deleted)]' : summary.length > 50 ? 'text-[var(--git-modified)]' : 'text-[var(--node-muted)] opacity-70',
+          )}
           title="Summaries read best under 50 characters, and are cut past 72"
         >
           {remaining}
@@ -94,19 +101,19 @@ export function SummaryField({
 
 export function CoAuthorList({ coAuthors, onRemove }: { coAuthors: { name: string; email: string }[]; onRemove(c: { name: string; email: string }): void }) {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-1 px-2.5 pb-1">
       {coAuthors.map((c) => (
         <span
           key={c.email}
-          className="rounded-chip flex h-6 items-center gap-1.5 bg-[var(--node-hover)] ps-1 pe-0.5 text-2xs touch:h-8"
+          className="flex h-6 items-center gap-1.5 rounded-full bg-[var(--git-fill)] ps-0.5 pe-0.5 text-xs touch:h-8"
           title={`Co-authored-by: ${c.name} <${c.email}>`}
         >
-          <Avatar name={c.name} email={c.email} size={14} />
+          <Avatar name={c.name} email={c.email} size={20} />
           <span className="max-w-32 truncate">{c.name}</span>
           <button
             type="button"
             aria-label={`Remove ${c.name}`}
-            className="rounded-chip flex size-5 items-center justify-center text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:size-7"
+            className="flex size-5 items-center justify-center rounded-full text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:size-7"
             onClick={() => onRemove(c)}
           >
             <X className="size-3" />
@@ -117,18 +124,23 @@ export function CoAuthorList({ coAuthors, onRemove }: { coAuthors: { name: strin
   );
 }
 
-export function Chip({
+/** A toggle in the composer's foot: a small pill with its icon, quiet
+ * (muted, no fill) off, in the accent's tint on. Not a radio dot: these
+ * are two independent switches, not a choice between them. */
+export function Toggle({
   on,
   onClick,
   children,
   title,
   disabled,
+  icon: Icon,
 }: {
   on: boolean;
   onClick(): void;
-  children: React.ReactNode;
+  children: ReactNode;
   title: string;
   disabled?: boolean;
+  icon: IconComponent;
 }) {
   return (
     <button
@@ -138,15 +150,14 @@ export function Chip({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        // The kit's toggle look: quiet off, the accent's tint on.
-        'rounded-control flex h-7 items-center gap-1.5 px-2 text-xs touch:h-9 touch:px-3 transition-colors duration-100 disabled:pointer-events-none disabled:opacity-40',
+        'flex h-6 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40 touch:h-9 touch:px-3',
         on
-          ? 'bg-[color-mix(in_srgb,var(--node-accent)_18%,transparent)] text-[var(--node-fg)] hover:bg-[color-mix(in_srgb,var(--node-accent)_26%,transparent)]'
-          : 'text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]',
+          ? 'bg-[var(--git-accent-soft)] text-[var(--node-fg)] hover:bg-[var(--git-selected-hover)]'
+          : 'text-[var(--node-muted)] hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)]',
         styles.focusRing,
       )}
     >
-      <span className={cn('size-1.5 rounded-full', on ? 'bg-[var(--node-accent)]' : 'bg-[color-mix(in_srgb,var(--node-fg)_30%,transparent)]')} />
+      <Icon aria-hidden variant={on ? undefined : 'outline'} className={cn('size-3.5 flex-none transition-colors duration-150', on && 'text-[var(--node-accent)]')} />
       {children}
     </button>
   );

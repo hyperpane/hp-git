@@ -3,8 +3,8 @@
 // commit's change to it beside them (or alone, in a narrow window).
 
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { FileClock, GitCommitHorizontal, TriangleAlert } from 'lucide-react';
-import { NodeMessage, PHONE_WIDTH } from '@hyperpane/ui';
+import { FileClock, GitCommitHorizontal, TriangleAlert } from '@hyperpane/icons';
+import { NodeMessage, PHONE_WIDTH, cn } from '@hyperpane/ui';
 import type { FileCommit } from '../../shared/index.ts';
 import { commitMenu } from '../app/actions/commits.ts';
 import { useRepo } from '../app/repo.ts';
@@ -14,10 +14,11 @@ import { DiffPane } from '../components/diff/DiffPane.tsx';
 import { ListDetail } from '../components/ListDetail.tsx';
 import { StatusLetter } from '../components/StatusLetter.tsx';
 import { type VirtualHandle, VirtualList } from '../components/VirtualList.tsx';
-import { ago, longDate, shortSha } from '../lib/format.ts';
+import { ago, longDate, plural, shortSha } from '../lib/format.ts';
 import { listKey } from '../lib/listKey.ts';
 import { authorNames } from '../lib/people.ts';
-import { rowClass } from '../lib/rows.ts';
+import { ROW_H_TALL, ROW_INSET_TALL, rowClass } from '../lib/rows.ts';
+import { header } from '../ui/classes.ts';
 
 const PAGE = 200;
 
@@ -100,17 +101,16 @@ export function FileHistory({ path }: { path: string }) {
       title={c ? c.subject : undefined}
       first={
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex h-9 flex-none items-center gap-1.5 border-b border-[var(--node-border)] px-3 text-2xs text-[var(--node-muted)]">
-            <FileClock className="size-3.5" />
-            {commits.length}
-            {more ? '+' : ''} commits
+          <div className={cn(header.base, 'ps-3.5 text-xs font-medium text-[var(--node-muted)] tabular-nums')}>
+            {plural(commits.length, 'commit')}
+            {more ? '+' : ''}
           </div>
           <VirtualList
             ref={list}
             count={commits.length}
-            rowHeight={40}
+            rowHeight={ROW_H_TALL}
             onEnd={() => more && !loading && load(latest.current.length)}
-            className="group/list git-scroll py-1"
+            className="group/list git-scroll py-1.5"
             tabIndex={0}
             role="listbox"
             ariaLabel={`Commits that touched ${path}`}
@@ -118,9 +118,9 @@ export function FileHistory({ path }: { path: string }) {
             row={(n) => {
               const x = commits[n];
               return (
-                <div className="h-full px-1 py-px" data-sha={x.sha}>
+                <div className={ROW_INSET_TALL} data-sha={x.sha}>
                   <div
-                    className={rowClass(x.sha === picked)}
+                    className={cn(rowClass(x.sha === picked), 'gap-2.5 px-2.5')}
                     onClick={() => {
                       setPicked(x.sha);
                       setOpen(true);
@@ -133,10 +133,10 @@ export function FileHistory({ path }: { path: string }) {
                     }}
                     title={`${x.subject}\n${authorNames(x)} · ${longDate(x.date)}\n${x.path}`}
                   >
-                    <Authors commit={x} size={20} max={2} />
-                    <div className="flex min-w-0 flex-1 flex-col leading-tight">
-                      <span className="truncate">{x.subject}</span>
-                      <span className="flex min-w-0 items-center gap-1 text-2xs text-[var(--node-muted)]">
+                    <Authors commit={x} size={24} max={2} />
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="truncate leading-4">{x.subject}</span>
+                      <span className="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-[var(--node-muted)]">
                         <span className="font-mono">{shortSha(x.sha)}</span>
                         <span className="truncate">
                           {authorNames(x)} · {ago(x.date)}
@@ -144,7 +144,7 @@ export function FileHistory({ path }: { path: string }) {
                         </span>
                       </span>
                     </div>
-                    <StatusLetter letter={x.status} />
+                    <StatusLetter plain letter={x.status} />
                   </div>
                 </div>
               );

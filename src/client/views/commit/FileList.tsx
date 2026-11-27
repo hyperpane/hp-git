@@ -3,8 +3,8 @@
 // its history or blame, copies its path, opens it.
 
 import { type KeyboardEvent, useMemo, useRef, useState } from 'react';
-import { FolderTree, List } from 'lucide-react';
-import { ToolButton, fileIcon, menuItems, type MenuEntry } from '@hyperpane/ui';
+import { Folder, FolderTree, List } from '@hyperpane/icons';
+import { ToolButton, cn, fileIcon, menuItems, type MenuEntry } from '@hyperpane/ui';
 import type { ChangedFile } from '../../../shared/index.ts';
 import { useRepo } from '../../app/repo.ts';
 import { PathLabel } from '../../components/PathLabel.tsx';
@@ -15,7 +15,9 @@ import { plural } from '../../lib/format.ts';
 import { listKey } from '../../lib/listKey.ts';
 import { local } from '../../lib/local.ts';
 import { basenameOf } from '../../lib/paths.ts';
-import { rowClass, useRowHeight } from '../../lib/rows.ts';
+import { ROW_H, ROW_INSET, rowClass, useRowHeight } from '../../lib/rows.ts';
+import { header } from '../../ui/classes.ts';
+import { Stat } from '../../ui/parts.tsx';
 
 /** The files a commit changed, flat or by folder, with their counts. */
 export function FileList({
@@ -37,7 +39,7 @@ export function FileList({
   const repo = useRepo();
   const [tree, setTreeState] = useState(() => local.get('commitTree', false));
   const list = useRef<VirtualHandle>(null);
-  const rowHeight = useRowHeight(28);
+  const rowHeight = useRowHeight(ROW_H);
   const sorted = useMemo(() => (tree ? [...files].sort((a, b) => a.path.localeCompare(b.path)) : files), [files, tree]);
   const rows = useMemo(() => {
     if (!tree) return sorted.map((f) => ({ f, depth: 0, dir: null as string | null }));
@@ -98,12 +100,13 @@ export function FileList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col" data-commit-files>
-      <div className="flex h-9 flex-none items-center gap-1.5 border-b border-[var(--node-border)] ps-3 pe-1 text-2xs text-[var(--node-muted)] touch:h-11">
-        <span className="min-w-0 flex-1 truncate">
+      <div className={cn(header.base, 'gap-2 ps-3.5')}>
+        <span className="truncate text-xs font-medium text-[var(--node-muted)]">
           {plural(files.length, 'file')}
-          {truncated ? '+' : ''} <span className="text-[var(--ansi-2)]">+{additions.toLocaleString('en-US')}</span>{' '}
-          <span className="text-[var(--ansi-1)]">−{deletions.toLocaleString('en-US')}</span>
+          {truncated ? '+' : ''}
         </span>
+        <Stat added={additions} removed={deletions} />
+        <span className="flex-1" />
         <ToolButton
           label={tree ? 'Show as a list' : 'Group by folder'}
           icon={tree ? List : FolderTree}
@@ -117,7 +120,7 @@ export function FileList({
         ref={list}
         count={rows.length}
         rowHeight={rowHeight}
-        className="group/list git-scroll py-1"
+        className="group/list git-scroll py-1.5"
         tabIndex={0}
         role="listbox"
         ariaLabel="Changed files"
@@ -126,15 +129,15 @@ export function FileList({
           const r = rows[n];
           if (!r.f)
             return (
-              <div className="flex h-full items-center gap-2 px-3 text-[var(--node-muted)]" style={{ paddingLeft: 12 + r.depth * 12 }}>
-                <FolderTree className="size-3.5 flex-none" />
+              <div className="flex h-full items-center gap-2 px-3.5 text-[var(--node-muted)]" style={{ paddingLeft: 14 + r.depth * 12 }}>
+                <Folder variant="outline" className="size-3.5 flex-none" />
                 <span className="truncate">{r.dir}</span>
               </div>
             );
           const f = r.f;
           const Icon = fileIcon(basenameOf(f.path));
           return (
-            <div className="h-full px-1">
+            <div className={ROW_INSET}>
               <div
                 className={rowClass(f.path === picked)}
                 style={{ paddingLeft: 8 + r.depth * 12 }}
@@ -147,15 +150,8 @@ export function FileList({
               >
                 {tree && <Icon className="size-3.5 flex-none text-[var(--node-muted)]" />}
                 {tree ? <span className="min-w-0 flex-1 truncate">{basenameOf(f.path)}</span> : <PathLabel path={f.path} from={f.from} />}
-                {f.binary ? (
-                  <span className="text-2xs text-[var(--node-muted)]">bin</span>
-                ) : (
-                  <span className="flex-none text-2xs tabular-nums">
-                    {f.additions > 0 && <span className="text-[var(--ansi-2)]">+{f.additions}</span>}{' '}
-                    {f.deletions > 0 && <span className="text-[var(--ansi-1)]">−{f.deletions}</span>}
-                  </span>
-                )}
-                <StatusLetter letter={f.untracked ? '?' : f.status} />
+                {f.binary ? <span className="text-xs text-[var(--node-muted)]">bin</span> : <Stat added={f.additions} removed={f.deletions} />}
+                <StatusLetter plain letter={f.untracked ? '?' : f.status} />
               </div>
             </div>
           );

@@ -8,6 +8,8 @@ export interface Found {
   gitDir: string | null;
   bare: boolean;
   repos: { root: string; kind: 'main' | 'nested' | 'submodule'; name: string }[];
+  /** The server's home folder (the window writes ~ for it). */
+  home?: string;
 }
 
 export interface GitVersion {
