@@ -21,6 +21,7 @@ import { COMPACT_WIDTH, useCompact } from '@hyperpane/ui';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
 import { ListDetail } from '../components/ListDetail.tsx';
+import { useWayBack } from '../components/WayBack.tsx';
 import { useBranches } from '../hooks/useBranches.ts';
 import { useStashes } from '../hooks/useStashes.ts';
 import { useTags } from '../hooks/useTags.ts';
@@ -98,6 +99,9 @@ export function Main({ repo, found, onChooseFolder }: { repo: Repo; found: Found
   }, [host, where, repo.root, found.home]);
 
   useWindowMenu(host, repo, onChooseFolder);
+  // A view over the tabs: the header's back button goes where its bar's
+  // does (the view before, or the tabs).
+  useWayBack(!!repo.view, repo.back);
 
   // Its output (linked in nodes mode): the one changed file picked, once
   // the pick rests (not every row arrowed past).

@@ -42,7 +42,7 @@ export const section = {
 
 /** The top bar's switcher: one pill in two halves (the repository, the
  * branch), each its own button with its own hover, clipped to the pill, and
- * a hairline between them. */
+ * a hairline between them, top to bottom. */
 export const switcher = {
   base: 'inline-flex h-7 max-w-[min(36rem,100%)] min-w-0 shrink items-stretch overflow-hidden rounded-full bg-[var(--git-fill)] touch:h-9',
   half: cxs(
@@ -50,13 +50,13 @@ export const switcher = {
     styles.focusRingInset,
   ),
   open: 'bg-[var(--git-fill-hover)] hover:bg-[var(--git-fill-hover)]',
-  hairline: 'my-1.5 w-px flex-none bg-[color-mix(in_srgb,var(--node-fg)_12%,transparent)]',
+  hairline: 'w-px flex-none self-stretch bg-[color-mix(in_srgb,var(--node-fg)_12%,transparent)]',
 } as const;
 
-/** A chip: a small tinted label (a ref, a count, a state). 20px, 6px corner.
+/** A chip: a small tinted label (a ref, a count, a state). 20px, a pill.
  * Its colour comes from `--chip` (style={{ '--chip': 'var(--git-added)' }}). */
 export const chip = {
-  base: 'inline-flex h-5 flex-none items-center gap-1 rounded-chip px-1.5 text-[11px] leading-none font-medium tabular-nums whitespace-nowrap',
+  base: 'inline-flex h-5 flex-none items-center gap-1 rounded-full px-2 text-[11px] leading-none font-medium tabular-nums whitespace-nowrap',
   tinted: 'bg-[color-mix(in_srgb,var(--chip,var(--node-fg))_14%,transparent)] text-[var(--chip,var(--node-muted))]',
   neutral: 'bg-[var(--git-fill)] text-[var(--node-muted)]',
 } as const;
@@ -64,7 +64,7 @@ export const chip = {
 /** Buttons: primary (the accent, one per place), secondary (a soft fill),
  * ghost (nothing until hovered), danger. 28px; `lg` 32px. */
 const buttonBase = cxs(
-  'inline-flex h-7 flex-none items-center justify-center gap-1.5 rounded-control px-3 text-[13px] font-medium whitespace-nowrap transition-[background-color,color,filter,scale] duration-100 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 touch:h-9 [&_svg]:size-4 [&_svg]:flex-none',
+  'inline-flex h-7 flex-none items-center justify-center gap-1.5 rounded-full px-3 text-[13px] font-medium whitespace-nowrap transition-[background-color,color,filter,scale] duration-100 active:scale-[0.98] disabled:cursor-default disabled:opacity-50 touch:h-9 [&_svg]:size-4 [&_svg]:flex-none',
   styles.focusRing,
 );
 export const button = {
@@ -73,7 +73,7 @@ export const button = {
   icon: 'w-7 px-0 touch:w-9',
   /** Disabled, it greys to a quiet fill rather than a dim accent. */
   primary:
-    'bg-[var(--node-accent)] text-white shadow-[0_1px_0_0_color-mix(in_srgb,white_18%,transparent)_inset,0_1px_2px_0_color-mix(in_srgb,black_25%,transparent)] hover:brightness-110 active:brightness-95 disabled:bg-[var(--git-fill)] disabled:text-[var(--node-muted)] disabled:shadow-none disabled:opacity-100',
+    'bg-[var(--node-accent)] text-white hover:brightness-110 active:brightness-95 disabled:bg-[var(--git-fill)] disabled:text-[var(--node-muted)] disabled:shadow-none disabled:opacity-100',
   secondary: 'bg-[var(--git-fill)] text-[var(--node-fg)] hover:bg-[var(--git-fill-hover)] active:bg-[var(--git-fill-active)]',
   ghost: 'text-[var(--node-muted)] hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] active:bg-[var(--node-active)]',
   danger: 'bg-[color-mix(in_srgb,var(--git-deleted)_14%,transparent)] text-[var(--git-deleted)] hover:bg-[color-mix(in_srgb,var(--git-deleted)_22%,transparent)]',
@@ -93,8 +93,8 @@ export const footer = 'flex h-8 flex-none items-center gap-1.5 px-3.5 text-xs te
 /** A key's hint (⌘↵) in a button or a field: small, in the text's colour, faded. */
 export const kbd = 'font-sans text-[11px] font-medium tracking-wide opacity-60';
 
-/** A card: a raised surface with a hairline, 12px corners. */
-export const card = 'rounded-surface bg-[var(--git-raised)] ring-1 ring-[var(--git-line)] ring-inset';
+/** A card: a raised surface, 12px corners; its fill sets it apart, no line. */
+export const card = 'rounded-surface bg-[var(--git-raised)]';
 
 /** A hairline, for the few places spacing can't separate. */
 export const divider = {
@@ -104,7 +104,7 @@ export const divider = {
 
 /** A field: 28px, a soft fill, the accent's ring while it has the keys. */
 export const field =
-  'h-7 min-w-0 rounded-control bg-[var(--git-fill)] px-2.5 text-[13px] text-[var(--node-fg)] outline-none placeholder:text-[var(--node-muted)] transition-[background-color,box-shadow] duration-100 hover:bg-[var(--git-fill-hover)] focus:bg-transparent focus:shadow-[0_0_0_1.5px_var(--node-accent)] touch:h-9';
+  'h-7 min-w-0 rounded-full bg-[var(--git-fill)] px-2.5 text-[13px] text-[var(--node-fg)] outline-none placeholder:text-[var(--node-muted)] transition-[background-color,box-shadow] duration-100 hover:bg-[var(--git-fill-hover)] focus:bg-transparent focus:shadow-[0_0_0_1.5px_var(--node-accent)] touch:h-9';
 
 function cxs(...parts: string[]) {
   return parts.join(' ');

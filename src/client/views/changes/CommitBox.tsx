@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { PenNib, Pencil, UserPlus } from '@hyperpane/icons';
 import { keys, mod } from '@hyperpane/sdk/client';
-import { cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
+import { cn, menuItems, type MenuEntry, styles, isComposing } from '@hyperpane/ui';
 import type { Author } from '../../../shared/index.ts';
 import { fileActions } from '../../app/actions/files.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -17,7 +17,7 @@ import { plural, shortSha } from '../../lib/format.ts';
 import { afterCommit, checkedFiles, selection } from '../../lib/include.ts';
 import { local } from '../../lib/local.ts';
 import { sideFiles } from '../../lib/picks.ts';
-import { card } from '../../ui/classes.ts';
+import { card, divider } from '../../ui/classes.ts';
 import { Button, Kbd } from '../../ui/parts.tsx';
 import { CoAuthorList, IdentityButton, LastCommit, SummaryField, Toggle } from './CommitBoxParts.tsx';
 
@@ -160,7 +160,7 @@ export function CommitBox() {
   };
 
   const keyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && mod(e)) {
+    if (e.key === 'Enter' && !isComposing(e) && mod(e)) {
       e.preventDefault();
       e.stopPropagation();
       commit();
@@ -180,12 +180,12 @@ export function CommitBox() {
 
   const buttonLabel = busy ? 'Committing' : commitAll ? `Commit all ${plural(status.files.length, 'change')}` : label;
   return (
-    <div className="flex flex-none flex-col gap-2 px-2.5 pt-1 pb-2.5" onKeyDown={keyDown}>
+    <div className="flex flex-none flex-col gap-2 px-1.5 pt-1 pb-1.5" onKeyDown={keyDown}>
       {last && <LastCommit last={last} onUndo={undo} onDismiss={() => setLast(null)} />}
       <div
         className={cn(
           card,
-          'flex flex-col transition-[box-shadow,background-color] duration-150 focus-within:bg-[var(--node-bg)] focus-within:ring-[color-mix(in_srgb,var(--node-accent)_55%,transparent)]',
+          'flex flex-col transition-[box-shadow,background-color] duration-150 focus-within:bg-[var(--node-bg)] focus-within:ring-1 focus-within:ring-inset focus-within:ring-[color-mix(in_srgb,var(--node-accent)_55%,transparent)]',
         )}
       >
         <SummaryField
@@ -194,6 +194,8 @@ export function CommitBox() {
           placeholder={draft.amend ? 'Summary (empty: keep the message)' : merging ? 'Merge summary' : 'Summary'}
           onChange={(summary) => setDraft({ summary })}
         />
+        {/* Summary and description apart: a line the box's full width. */}
+        <div aria-hidden className={divider.x} />
         <textarea
           value={draft.description}
           spellCheck
@@ -201,7 +203,7 @@ export function CommitBox() {
           rows={draft.description.split('\n').length > 2 ? 5 : 2}
           onChange={(e) => setDraft({ description: e.target.value })}
           aria-label="Description"
-          className="git-scroll w-full resize-none bg-transparent px-3 pb-2 text-xs leading-[18px] text-[var(--node-fg)] outline-none placeholder:text-[var(--node-muted)] touch:text-sm"
+          className="git-scroll w-full resize-none bg-transparent px-3 pt-2 pb-2 text-xs leading-[18px] text-[var(--node-fg)] outline-none placeholder:text-[var(--node-muted)] touch:text-sm"
         />
         {draft.coAuthors.length > 0 && (
           <CoAuthorList coAuthors={draft.coAuthors} onRemove={(c) => setDraft({ coAuthors: draft.coAuthors.filter((x) => x !== c) })} />

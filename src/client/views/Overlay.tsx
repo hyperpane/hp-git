@@ -45,7 +45,7 @@ export function Overlay({ view }: { view: View }) {
         <nav className="ms-1.5 flex min-w-0 flex-1 items-center gap-1" aria-label="Where you are">
           <button
             type="button"
-            className="rounded-control h-7 flex-none px-2 text-[13px] text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9"
+            className="rounded-full h-7 flex-none px-2 text-[13px] text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9"
             onClick={() => repo.setTab(repo.tab)}
           >
             {tabLabel}

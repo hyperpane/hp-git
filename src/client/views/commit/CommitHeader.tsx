@@ -33,7 +33,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
     <button
       type="button"
       title="Copy the SHA"
-      className="group/sha rounded-chip flex h-6 flex-none items-center gap-1.5 bg-[var(--git-fill)] px-2 font-mono text-xs text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:h-8"
+      className="group/sha rounded-full flex h-6 flex-none items-center gap-1.5 bg-[var(--git-fill)] px-2 font-mono text-xs text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:h-8"
       onClick={() => copy(c.sha, repo.toast)}
     >
       {shortSha(c.sha)}
@@ -46,7 +46,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
       title={shown ? 'Hide the message, for more of the diff' : 'Show the message'}
       aria-label={shown ? 'Hide the message' : 'Show the message'}
       aria-expanded={shown}
-      className="rounded-control flex size-6 flex-none items-center justify-center text-[var(--node-muted)] transition-colors duration-100 touch:size-8 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
+      className="rounded-full flex size-6 flex-none items-center justify-center text-[var(--node-muted)] transition-colors duration-100 touch:size-8 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)]"
       onClick={() => setShown(!shown)}
     >
       <ChevronRight className={cn('size-3.5 transition-transform duration-150', shown && 'rotate-90')} />
@@ -128,7 +128,7 @@ export function CommitHeader({ c }: { c: CommitDetail }) {
               <button
                 key={p}
                 type="button"
-                className="rounded-chip flex h-5 items-center bg-[var(--git-fill)] px-1.5 font-mono text-[11px] text-[var(--node-fg)] transition-colors duration-100 hover:bg-[var(--git-accent-soft)] hover:text-[var(--node-accent)]"
+                className="rounded-full flex h-5 items-center bg-[var(--git-fill)] px-2 font-mono text-[11px] text-[var(--node-fg)] transition-colors duration-100 hover:bg-[var(--git-accent-soft)] hover:text-[var(--node-accent)]"
                 title={`Open ${p}`}
                 onClick={() => repo.open({ kind: 'commit', sha: p })}
               >

@@ -7,6 +7,7 @@ import { Button } from '../ui/parts.tsx';
 import { TriangleAlert } from '@hyperpane/icons';
 import type { Found } from '../../shared/index.ts';
 import { Blank } from '../components/Blank.tsx';
+import { WayBackRoot } from '../components/WayBack.tsx';
 import { basenameOf } from '../lib/paths.ts';
 import { Main } from './Main.tsx';
 import { RepoProvider } from './repo.ts';
@@ -25,7 +26,9 @@ export function RepoWindow({ host, root, server, found, onChooseFolder }: { host
     );
   return (
     <RepoProvider value={repo}>
-      <Main repo={repo} found={found} onChooseFolder={onChooseFolder} />
+      <WayBackRoot>
+        <Main repo={repo} found={found} onChooseFolder={onChooseFolder} />
+      </WayBackRoot>
     </RepoProvider>
   );
 }

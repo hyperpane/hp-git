@@ -5,7 +5,7 @@
 import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, GitBranch, Plus, Search } from '@hyperpane/icons';
 import { keys } from '@hyperpane/sdk/client';
-import { cn } from '@hyperpane/ui';
+import { cn, isComposing } from '@hyperpane/ui';
 import { field } from '../../ui/classes.ts';
 import { Button } from '../../ui/parts.tsx';
 import type { Branches } from '../../../shared/index.ts';
@@ -68,7 +68,7 @@ export function BranchPicker({ branches, onClose }: { branches: Branches | null;
   const onKey = (e: KeyboardEvent) => {
     if (e.key === 'ArrowDown') setAt((a) => Math.min(choices.length - 1, a + 1));
     else if (e.key === 'ArrowUp') setAt((a) => Math.max(0, a - 1));
-    else if (e.key === 'Enter') {
+    else if (e.key === 'Enter' && !isComposing(e)) {
       if (sel >= 0) choose(rows[sel]);
       else if (q.trim()) create();
     } else if (e.key === 'Escape') onClose();

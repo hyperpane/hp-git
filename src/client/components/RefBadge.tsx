@@ -1,5 +1,6 @@
 // A ref on a commit (a branch, a remote branch, a tag, a stash, HEAD) as a
-// small chip tinted in its colour; the checked-out one ringed.
+// small chip tinted in its colour; the checked-out one in a stronger fill
+// (flat: no ring).
 
 import { Cloud, GitBranch, Tag } from '@hyperpane/icons';
 import { cn } from '@hyperpane/ui';
@@ -24,10 +25,9 @@ export function RefBadge({ refName, className }: { refName: Ref; className?: str
   return (
     <span
       title={`${refName.kind === 'remote' ? 'Remote branch' : refName.kind === 'tag' ? 'Tag' : refName.kind === 'head' ? 'HEAD' : refName.kind === 'stash' ? 'Stash' : 'Branch'} ${refName.name}${refName.current ? ' (checked out)' : ''}`}
-      className={cn(chip.base, chip.tinted, 'max-w-40 gap-1 px-1.5', current && 'ring-1 ring-inset', className)}
+      className={cn(chip.base, chip.tinted, 'max-w-40 gap-1', current && 'bg-[color-mix(in_srgb,var(--chip)_24%,transparent)]', className)}
       style={{
         '--chip': color,
-        '--tw-ring-color': `color-mix(in srgb, ${color} 45%, transparent)`,
       } as React.CSSProperties}
     >
       {Icon && <Icon variant="outline" aria-hidden className="size-3 flex-none opacity-80" />}

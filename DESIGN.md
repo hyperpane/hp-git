@@ -21,7 +21,7 @@ in `src/client/ui/parts.tsx` (`Button`, `Chip`, `Dot`, `CountText`,
 | Top bar | 44px, controls 28px | |
 | Icons | 16px; 14px in dense rows and small buttons | `icon.base`, `icon.dense` |
 | Spacing | 4 / 8 / 12 / 16 / 24 | `1`, `2`, `3`, `4`, `6` |
-| Radii | 6 chips, 8 controls and rows, 12 cards and popovers; full for pills | `rounded-chip`, `rounded-control`, `rounded-surface`, `rounded-full` |
+| Radii | full for every one-line control (buttons, fields, chips, segmented controls); 8 rows; 12 cards and popovers | `rounded-full`, `rounded-control`, `rounded-surface` |
 | Motion | 100ms hover/press, 150ms appear, 220ms move (`--git-move`, `--git-ease`) | off under reduced motion |
 
 A list sits 6px in from its pane's edges (`row.list`: `px-1.5`), rows 8px
@@ -78,9 +78,9 @@ Only theme variables, so every theme works, light and dark:
   bottom bar for the views. Not tabs with an underline.
 - **Field**: `field` (28px, soft fill, accent ring on focus); with an icon,
   `ps-8` and the icon at `left-2.5`.
-- **Empty state**: `components/Blank.tsx`: a 44px tile with a 20px icon,
+- **Empty state**: `components/Blank.tsx`: the kit's 44px `IconTile` with a 20px icon,
   a 13px title, a 12px muted line, then actions (one primary at most).
-- **Card**: `card`, raised surface, hairline ring, 12px corners: a commit's
+- **Card**: `card`, raised surface, no line (its fill sets it apart), 12px corners: a commit's
   header, a conflict block, a banner.
 - **Banner**: like `views/OperationBar.tsx`: a card tinted in a status
   colour, a round icon tile, title and a muted line, actions at the end.

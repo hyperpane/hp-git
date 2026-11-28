@@ -2,7 +2,7 @@
   "manifest": 1,
   "id": "git",
   "name": "Git",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "publisher": "hyperpane",
   "description": "Commit, branch and sync from a fresh, compact window: changes checked by file, hunk or line, history with a graph, branches, stashes, tags, blame, conflicts, and fetch, pull and push.",
   "icon": "icon.svg",

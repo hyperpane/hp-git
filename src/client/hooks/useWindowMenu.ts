@@ -10,12 +10,12 @@ export function useWindowMenu(host: Host, repo: Repo, onChooseFolder: () => void
   actions.current = repo;
   useEffect(() => {
     host.win.setMenu([
-      { id: 'fetch', label: 'Fetch' },
-      { id: 'pull', label: 'Pull' },
-      { id: 'push', label: 'Push' },
+      { id: 'fetch', label: 'Fetch', icon: 'Download' },
+      { id: 'pull', label: 'Pull', icon: 'ArrowDownToLine' },
+      { id: 'push', label: 'Push', icon: 'ArrowUpFromLine' },
       { id: 'sep', label: '', separator: true },
-      { id: 'refresh', label: 'Refresh' },
-      { id: 'folder', label: 'Open Another Folder' },
+      { id: 'refresh', label: 'Refresh', icon: 'RefreshCw' },
+      { id: 'folder', label: 'Open Another Folder', icon: 'FolderOpen' },
     ]);
     const off = host.on('menu', ({ id }: { id: string }) => {
       const r = actions.current;

@@ -78,7 +78,7 @@ export function Welcome({ folder, found, onDone, onChoose }: { folder: string; f
 
   return (
     <div className="git-scroll flex h-full flex-col items-center justify-center gap-5 overflow-auto p-6 text-center text-[13px]" data-welcome>
-      <div className="rounded-surface grid size-12 place-items-center bg-[var(--git-accent-soft)] text-[var(--node-accent)] ring-1 ring-[color-mix(in_srgb,var(--node-accent)_22%,transparent)] ring-inset">
+      <div className="rounded-surface grid size-12 place-items-center bg-[var(--git-accent-soft)] text-[var(--node-accent)]">
         <FolderGit2 aria-hidden className="size-6" />
       </div>
       <div className="flex max-w-md flex-col gap-1.5">

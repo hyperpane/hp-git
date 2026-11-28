@@ -25,7 +25,7 @@ export function LastCommit({ last, onUndo, onDismiss }: { last: { sha: string; s
         type="button"
         aria-label="Dismiss"
         className={cn(
-          'rounded-chip flex size-6 items-center justify-center text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:size-9',
+          'rounded-full flex size-6 items-center justify-center text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)] touch:size-9',
           styles.focusRing,
         )}
         onClick={onDismiss}
@@ -150,7 +150,7 @@ export function Toggle({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        'flex h-6 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-40 touch:h-9 touch:px-3',
+        'flex h-6 items-center gap-1.5 rounded-full px-2 text-xs font-medium transition-colors duration-150 disabled:cursor-default disabled:opacity-40 touch:h-9 touch:px-3',
         on
           ? 'bg-[var(--git-accent-soft)] text-[var(--node-fg)] hover:bg-[var(--git-selected-hover)]'
           : 'text-[var(--node-muted)] hover:bg-[var(--git-fill-hover)] hover:text-[var(--node-fg)]',

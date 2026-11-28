@@ -3,10 +3,12 @@
 // the way back to it. A row clicked or tapped opens what it picks (`open`);
 // a pick made by the keys or by itself (the first row) doesn't. What's
 // over the two (`top`, a commit's header) makes room for what's picked
-// when it's shown alone.
+// when it's shown alone. Shown alone, what's picked has the header's back
+// button too (components/WayBack.tsx).
 
 import { type ReactNode, useRef } from 'react';
 import { PaneBar, SplitPane, type SplitPaneProps, useCompact, useSplitCompact } from '@hyperpane/ui';
+import { WayBackScope, useWayBack } from './WayBack.tsx';
 
 type ListDetailProps = Omit<SplitPaneProps, 'compactBelow' | 'show'> & {
   /** Narrower than this (px), one at a time. */
@@ -20,11 +22,13 @@ type ListDetailProps = Omit<SplitPaneProps, 'compactBelow' | 'show'> & {
   top?: ReactNode;
 };
 
-export function ListDetail({ below, open, onBack, backLabel, title, top, second, ...split }: ListDetailProps) {
+export function ListDetail({ below, open, onBack, backLabel, title, top, first, second, ...split }: ListDetailProps) {
   const box = useRef<HTMLDivElement>(null);
   const frameNarrow = useCompact(below);
   const ownNarrow = useCompact(below, box);
-  const alone = (frameNarrow || ownNarrow) && open;
+  const narrow = frameNarrow || ownNarrow;
+  const alone = narrow && open;
+  useWayBack(alone, onBack, 1);
   return (
     <div ref={box} className="flex min-h-0 min-w-0 flex-1 flex-col">
       {!alone && top}
@@ -32,10 +36,13 @@ export function ListDetail({ below, open, onBack, backLabel, title, top, second,
         {...split}
         compactBelow={below}
         show={open ? 'second' : 'first'}
+        first={<WayBackScope shown={!alone}>{first}</WayBackScope>}
         second={
-          <Detail onBack={onBack} backLabel={backLabel} title={title}>
-            {second}
-          </Detail>
+          <WayBackScope shown={!narrow || open}>
+            <Detail onBack={onBack} backLabel={backLabel} title={title}>
+              {second}
+            </Detail>
+          </WayBackScope>
         }
       />
     </div>

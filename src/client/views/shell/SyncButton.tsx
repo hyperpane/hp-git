@@ -33,7 +33,7 @@ export function SyncButton({ choice, onMenu }: { choice: Choice; onMenu(el: HTML
     <div
       className={cn(
         'flex h-7 min-w-0 flex-none items-stretch overflow-hidden rounded-full touch:h-9',
-        loud ? 'bg-[var(--node-accent)] shadow-[0_1px_0_0_color-mix(in_srgb,white_18%,transparent)_inset]' : sync && 'bg-[var(--git-fill)]',
+        loud ? 'bg-[var(--node-accent)]' : sync && 'bg-[var(--git-fill)]',
       )}
       data-sync={sync ? 'busy' : choice.kind}
     >

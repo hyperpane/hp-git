@@ -55,10 +55,9 @@ export function OperationBar() {
     <div className="flex-none px-2 pt-2" data-operation={op.kind}>
       <div
         role="status"
-        className="rounded-surface flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 py-1.5 ps-2 pe-1.5 ring-1 ring-inset"
+        className="rounded-surface flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1.5 py-1.5 ps-2 pe-1.5"
         style={{
           background: `color-mix(in srgb, ${tone} 11%, var(--node-bg))`,
-          '--tw-ring-color': `color-mix(in srgb, ${tone} 28%, transparent)`,
         } as React.CSSProperties}
       >
         <span className="grid size-7 flex-none place-items-center rounded-full" style={{ background: `color-mix(in srgb, ${tone} 20%, transparent)`, color: tone }}>

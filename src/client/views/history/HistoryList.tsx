@@ -6,7 +6,7 @@
 import { type KeyboardEvent, type MouseEvent as ReactMouseEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpFromLine, ChevronDown, GitBranch, History, Search, TriangleAlert } from '@hyperpane/icons';
 import { keys, mod } from '@hyperpane/sdk/client';
-import { ToolButton, cn, menuItems, type MenuEntry, styles } from '@hyperpane/ui';
+import { ToolButton, cn, menuItems, type MenuEntry, styles, isComposing } from '@hyperpane/ui';
 import { commitMenu } from '../../app/actions/commits.ts';
 import type { LogRequest } from '../../app/api.ts';
 import { useRepo } from '../../app/repo.ts';
@@ -167,7 +167,7 @@ export function HistoryList({
         <button
           type="button"
           className={cn(
-            'flex h-7 flex-none items-center gap-1 rounded-control ps-2 pe-1.5 text-[13px] text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9',
+            'flex h-7 flex-none items-center gap-1 rounded-full ps-2 pe-1.5 text-[13px] text-[var(--node-muted)] transition-colors duration-100 hover:bg-[var(--node-hover)] hover:text-[var(--node-fg)] touch:h-9',
             styles.focusRing,
           )}
           title="What to search, and which branches"
@@ -189,7 +189,7 @@ export function HistoryList({
             if (e.key === 'Escape') {
               setText('');
               list.current?.element?.focus();
-            } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+            } else if (e.key === 'ArrowDown' || e.key === 'Enter' && !isComposing(e)) {
               list.current?.element?.focus();
               e.preventDefault();
             }

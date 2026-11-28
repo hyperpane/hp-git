@@ -25,7 +25,7 @@ export function ConflictBlock({
 }) {
   return (
     <div
-      className="rounded-surface my-3 overflow-hidden bg-[var(--git-raised)] font-sans ring-1 ring-[color-mix(in_srgb,var(--git-conflicted)_35%,transparent)] ring-inset"
+      className="rounded-surface my-3 overflow-hidden bg-[color-mix(in_srgb,var(--git-conflicted)_7%,var(--git-raised))] font-sans"
       data-block={number}
     >
       <div className="flex h-10 items-center gap-1.5 ps-3 pe-1.5 text-xs touch:h-11 max-sm:h-auto max-sm:min-h-10 max-sm:flex-wrap max-sm:py-1.5">
@@ -33,7 +33,7 @@ export function ConflictBlock({
         <span className="font-medium">Conflict {number}</span>
         <span className="text-[var(--node-muted)]">line {b.at}</span>
         <span className="flex-1" />
-        <span className="flex items-center gap-0.5 rounded-control bg-[var(--git-fill)] p-0.5">
+        <span className="flex items-center gap-0.5 rounded-full bg-[var(--git-fill)] p-0.5">
         <Pick on={choice === 'ours'} onClick={() => onChoose('ours')}>
           Ours
         </Pick>
@@ -105,9 +105,9 @@ function Pick({ on, onClick, children }: { on: boolean; onClick(): void; childre
       aria-pressed={on}
       onClick={onClick}
       className={cn(
-        'h-6 rounded-[6px] px-2 text-xs font-medium transition-[background-color,color,box-shadow] duration-150 touch:h-8 touch:px-2.5',
+        'h-6 rounded-full px-2.5 text-xs font-medium transition-[background-color,color,box-shadow] duration-150 touch:h-8 touch:px-2.5',
         on
-          ? 'bg-[var(--node-bg)] text-[var(--node-accent)] shadow-[0_1px_2px_0_color-mix(in_srgb,black_25%,transparent)]'
+          ? 'bg-[var(--node-bg)] text-[var(--node-accent)]'
           : 'text-[var(--node-muted)] hover:text-[var(--node-fg)]',
       )}
     >
